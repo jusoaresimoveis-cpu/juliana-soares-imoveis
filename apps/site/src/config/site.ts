@@ -38,10 +38,13 @@ export const SITE = {
 } as const;
 
 /**
- * Só a produção entra no Google.
+ * Só a produção JÁ LANÇADA entra no Google.
  *
- * Toda pré-visualização da Vercel tem URL pública. Sem essa trava, o Google
- * indexa a versão de teste, e ela passa a competir com o site de verdade pelo
- * mesmo conteúdo.
+ * Toda pré-visualização da Vercel tem URL pública, e até o lançamento a
+ * produção também vive num `.vercel.app`. Sem essa trava, o Google indexa uma
+ * dessas versões, e ela passa a competir com o domínio oficial pelo mesmo
+ * conteúdo. No dia do lançamento: `SITE_NO_AR=sim` nas variáveis de produção da
+ * Vercel, junto com o domínio apontado.
  */
-export const SITE_INDEXAVEL = process.env.VERCEL_ENV === 'production';
+export const SITE_INDEXAVEL =
+  process.env.VERCEL_ENV === 'production' && process.env.SITE_NO_AR === 'sim';

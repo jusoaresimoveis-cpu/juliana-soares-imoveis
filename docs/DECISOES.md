@@ -9,6 +9,10 @@ com a data. Não apague: o motivo antigo explica código que ainda pode existir.
   aceito no banco só porque vem do CRM de origem.
 - **Só a Juliana.** Ela atua junto à imobiliária SSI, mas o site e o CRM são
   dela: nada integra com a SSI. Depois do fechamento, ela resolve por fora.
+- **Ela também faz gestão de locação**, não só intermediação (confirmado em
+  24/09). O site pode oferecer "gestão e intermediação de aluguel". Se o CRM vai
+  ter módulo de administração (contratos, cobrança, repasse ao proprietário) é
+  escopo a definir na fase do CRM.
 - **Cidades:** Itapema e Porto Belo, iguais à área de atendimento do Perfil da
   Empresa no Google.
 
@@ -48,13 +52,49 @@ com a data. Não apague: o motivo antigo explica código que ainda pode existir.
 - **Imóvel alugado ou vendido:** a página continua no ar, com aviso, `noindex`
   e os parecidos. O link pode estar num grupo de WhatsApp; um 404 ali é lead
   perdido.
-- **Só produção indexa** (`VERCEL_ENV === 'production'`). Pré-visualização da
-  Vercel tem URL pública e competiria com o site de verdade.
+- **Só a produção lançada indexa**: `VERCEL_ENV === 'production'` E
+  `SITE_NO_AR=sim`. Pré-visualização da Vercel tem URL pública, e até o
+  lançamento a produção vive num `.vercel.app`: indexada, competiria com o
+  domínio oficial.
 - **Nome, endereço e telefone** iguais aos do Perfil da Empresa no Google. Existe
   uma "Juliana Imóveis" na mesma cidade, sem relação com ela; o nome completo e o
   CRECI em todo lugar são o que separa as duas.
 - **Nada inventado no site:** imóvel, depoimento, número de anos de experiência,
   promessa de serviço. Texto de marketing só com o que a Juliana confirmou.
+
+## Briefing do site (24/09/2026)
+
+Referência em `docs/referencia/`. O visual segue o modelo. O que mudou em
+relação ao briefing, já combinado:
+
+- **Nenhum imóvel fictício publicado.** O lançamento é com os imóveis reais que
+  a Juliana tem autorização para anunciar (material em `conteudo/imoveis`).
+  Anúncio de imóvel inexistente é infração no CRECI, propaganda enganosa e
+  motivo de reprovação no Google Ads.
+- **Nenhum depoimento inventado.** Os depoimentos vêm das avaliações reais do
+  Google (nota 5,0). Para puxar TODAS é preciso a API do Perfil da Empresa
+  (acesso sob aprovação do Google). A API do Places devolve só 5. Sem marcação
+  de estrelas no schema: o Google não mostra estrela de avaliação que a própria
+  empresa publica sobre si.
+- **Regiões: só Itapema e Porto Belo** (o modelo mostrava também Balneário
+  Camboriú e Bombinhas).
+- **A área administrativa é o CRM.** Cadastro de imóvel, leads, dashboard,
+  aprovação da captação e depoimentos: tudo no CRM. O site só lê.
+- **Supabase (PostgreSQL), sem Prisma.** O Prisma brigaria com as migrations e
+  o RLS do CRM.
+- **Captação (proprietário cadastra o imóvel):**
+  - consentimento LGPD;
+  - arquivos em bucket privado;
+  - documentos só depois da visita, não no formulário;
+  - vídeo com limite e envio direto ao Storage;
+  - anti-spam (Cloudflare Turnstile).
+  - O envio vira lead de captação no CRM, com notificação para a Juliana.
+- **Performance acima de 90 no celular:**
+  - um único GTM, carregado depois da interação;
+  - mapa que só carrega ao tocar;
+  - foto do hero otimizada;
+  - favoritos no próprio aparelho, sem login.
+- **CRECI real** (53396-F) no lugar do "00000" do modelo.
 
 ## Leads e WhatsApp
 
@@ -92,8 +132,13 @@ com a data. Não apague: o motivo antigo explica código que ainda pode existir.
 
 ## Pendências
 
-- [ ] Identidade visual: logo, cores, fonte, foto profissional (tokens em
-      `globals.css`).
+- [ ] Logo (o usuário vai criar) e fotos profissionais da Juliana, em
+      `conteudo/marca` e `conteudo/fotos-juliana`.
+- [ ] Imóveis iniciais reais em `conteudo/imoveis`.
+- [ ] Visual do modelo: fontes, paleta, cabeçalho, barra inferior no celular,
+      seções da home, filtros da listagem e detalhe do imóvel.
+- [ ] Páginas Cadastrar Imóvel, Sobre e Contato.
+- [ ] Depoimentos do Google: pedir acesso à API do Perfil da Empresa.
 - [ ] CEP exato do escritório (`config/site.ts`).
 - [ ] Endereço no Perfil da Empresa: hoje está "sem local físico". Decidir se
       mostra a sala da Rua 143.
@@ -102,5 +147,6 @@ com a data. Não apague: o motivo antigo explica código que ainda pode existir.
 - [ ] Link rastreado `/w/<código>` e captura completa de UTMs e click IDs.
 - [ ] Política de privacidade (LGPD), exigida antes de ligar Google Ads.
 - [ ] Página "Sobre", com a bio que a Juliana escrever.
-- [ ] Domínio na Vercel (Pro) e registros no Cloudflare. **Não apagar** o TXT
+- [ ] **Lançamento:** domínio na Vercel, registros no Cloudflare e
+      `SITE_NO_AR=sim` nas variáveis de produção. **Não apagar** o TXT
       `google-site-verification`.

@@ -14,6 +14,12 @@ build/
 !.env.example
 .secrets/
 
+# material bruto (fotos em resolução cheia): só o README e o modelo de ficha vão para o Git
+/conteudo/**
+!/conteudo/**/
+!/conteudo/README.md
+!/conteudo/imoveis/_MODELO/**
+
 # ferramentas
 .claude/
 .vercel/
