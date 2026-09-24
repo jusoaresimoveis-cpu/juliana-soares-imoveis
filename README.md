@@ -38,6 +38,15 @@ npm run build:site
 No `next dev` o site mostra imóveis **de exemplo** (marcados com `[EXEMPLO]`).
 Em build de produção eles nunca aparecem: sem banco, o site sai sem imóveis.
 
+## Deploy
+
+Vercel, na conta da Juliana: projeto `juliana-soares-site`, Root Directory
+`apps/site`. Todo push na `main` publica em produção:
+https://juliana-soares-site.vercel.app (fora do Google até o lançamento; veja
+`SITE_NO_AR` em `docs/DECISOES.md`).
+
+Para saber qual commit está no ar: `/versao`.
+
 ## Onde mexer
 
 | Quero mudar... | Arquivo |

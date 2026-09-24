@@ -12,8 +12,9 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      // `/w/` é o redirecionamento rastreado para o WhatsApp: não é página.
-      disallow: ['/w/', '/api/'],
+      // `/w/` é o redirecionamento rastreado para o WhatsApp e `/versao` é
+      // diagnóstico de deploy: nenhum dos dois é página.
+      disallow: ['/w/', '/api/', '/versao'],
     },
     sitemap: `${SITE.url}/sitemap.xml`,
   };
