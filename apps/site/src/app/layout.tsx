@@ -15,6 +15,9 @@ import './globals.css';
 const titulo = Playfair_Display({
   variable: '--font-titulo',
   subsets: ['latin'],
+  // Só o peso normal: é o único que os títulos usam. A versão variável traz
+  // todos os pesos e pesava o dobro, disputando banda com a foto do topo no 4G.
+  weight: '400',
   display: 'swap',
 });
 

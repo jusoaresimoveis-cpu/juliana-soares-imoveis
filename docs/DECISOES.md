@@ -154,7 +154,25 @@ relação ao briefing, já combinado:
   - favoritos no aparelho;
   - páginas Cadastrar Imóvel, Sobre, Contato e Favoritos.
   - Lighthouse no celular: desempenho 92 a 97, acessibilidade 100, boas práticas 100.
-- [ ] Fotos no visual: preencher `apps/site/src/config/midia.ts` quando elas chegarem.
+- [x] Fotos do topo (24/09): fundo da sala com vista para o mar e a Juliana
+      recortada. A página /sobre usa a mesma foto.
+  - Home no celular: desempenho de 90 a 92 no Lighthouse local; desktop: 99.
+  - O que segurou a nota:
+    - fundo com `preload`;
+    - foto da Juliana sem prioridade alta;
+    - fonte dos títulos só no peso 400;
+    - sem desfoque provisório no fundo e sem backdrop-blur no cabeçalho.
+  - Cuidado ao medir localmente: no Windows, o Chrome headless limita a
+    produção de quadros (VSync) e atrasa a primeira pintura da home em uns
+    2 s. Não é o site. Para medir aqui, usar
+    `--chrome-flags="--headless=new --disable-gpu-vsync --disable-frame-rate-limit"`,
+    ou medir o site publicado no PageSpeed Insights.
+- [ ] Fotos que ainda faltam (`config/midia.ts`):
+  - um segundo retrato da Juliana para a seção Sobre da home (hoje ela usa o
+    monograma, para não repetir a foto do topo);
+  - o fundo de "Regiões atendidas";
+  - o fundo da chamada de captação;
+  - a assinatura dela (elemento do modelo, ao lado da foto do topo).
 - [ ] Listagem: filtros de quartos e banheiros, e ordenação.
 - [ ] Detalhe do imóvel no desenho do modelo: galeria grande, mapa, formulário
       de interesse, botões fixos de WhatsApp e visita.

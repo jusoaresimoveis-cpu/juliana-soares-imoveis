@@ -16,9 +16,10 @@ import { urlDaListagem } from '@/lib/imoveis/listagem';
  * Celular: a foto vem primeiro, numa faixa com o fundo atrás, e o texto logo
  * abaixo, sobre o grafite. O preto da blusa se funde com o fundo escuro.
  *
- * As duas fotos carregam com prioridade alta, mas SEM `preload`: dependendo da
- * tela, a maior coisa visível é uma ou a outra, e o Next 16 recomenda `preload`
- * só quando a maior imagem é sempre a mesma.
+ * O fundo é o maior elemento da tela tanto no celular (a faixa da foto) quanto
+ * no desktop (o topo inteiro): é o caso de `preload`, que começa o download já
+ * no <head>. A foto da Juliana, menor que ele nas duas telas, carrega logo mas
+ * com prioridade normal, para não disputar banda com o fundo no 4G.
  */
 export function Hero() {
   const { julianaHero, fundoHero } = MIDIA;
@@ -34,8 +35,7 @@ export function Hero() {
             alt=""
             fill
             sizes="100vw"
-            loading="eager"
-            fetchPriority="high"
+            preload
             // Sem `placeholder="blur"`: o desfoque provisório é um filtro SVG,
             // caro de desenhar no celular, e atrasava a primeira pintura. O
             // grafite de fundo já faz o papel de espera.
@@ -58,7 +58,6 @@ export function Hero() {
               fill
               sizes="(min-width: 1024px) 420px, 260px"
               loading="eager"
-              fetchPriority="high"
               className="object-contain object-bottom lg:object-[70%_100%]"
             />
           </div>
