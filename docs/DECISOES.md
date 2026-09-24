@@ -167,6 +167,11 @@ relação ao briefing, já combinado:
     2 s. Não é o site. Para medir aqui, usar
     `--chrome-flags="--headless=new --disable-gpu-vsync --disable-frame-rate-limit"`,
     ou medir o site publicado no PageSpeed Insights.
+- [x] Fundo do topo panorâmico e recorte novo do cabelo da Juliana (24/09).
+  - O fundo usa direção de arte (`<picture>` com `getImageProps`): a
+    panorâmica inteira no desktop e, abaixo de 1024px, o corte da janela com
+    o mar. Cada tela baixa só uma: 42 KB no celular, 68 KB no desktop.
+  - Lighthouse: celular 92, desktop 100.
 - [x] Retrato da seção Sobre (24/09): a Juliana sentada no sofá, na home
       (quadrado no desktop, sem corte) e na página /sobre.
 - [ ] Fotos que ainda faltam (`config/midia.ts`):

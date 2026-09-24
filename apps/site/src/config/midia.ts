@@ -1,5 +1,6 @@
 import type { StaticImageData } from 'next/image';
 
+import fundoHeroCelular from '@/assets/fotos/fundo-hero-celular.webp';
 import fundoHero from '@/assets/fotos/fundo-hero.webp';
 import julianaSentada from '@/assets/fotos/juliana-sentada.webp';
 import juliana from '@/assets/fotos/juliana.webp';
@@ -26,6 +27,12 @@ export interface Foto {
    * cortaria o rosto numa delas.
    */
   enquadramento?: string;
+  /**
+   * Corte próprio para telas estreitas (direção de arte). Uma foto panorâmica
+   * numa caixa quase quadrada mostra só uma fatia dela: sem o corte, o celular
+   * baixaria a foto inteira (larga) para exibir essa fatia.
+   */
+  celular?: StaticImageData;
 }
 
 const JULIANA: Foto = {
@@ -58,7 +65,8 @@ export const MIDIA: {
     // pouco para ele nunca sair do quadro, mesmo nas caixas mais baixas.
     enquadramento: '45% 30%',
   },
-  fundoHero: { src: fundoHero, alt: '' },
+  // Panorâmica (2092x752). No celular, o corte da janela com o mar e a cidade.
+  fundoHero: { src: fundoHero, alt: '', celular: fundoHeroCelular },
   fundoRegioes: null,
   fundoCaptacao: null,
 };

@@ -1,10 +1,50 @@
 import { House, KeyRound } from 'lucide-react';
-import Image from 'next/image';
+import Image, { getImageProps } from 'next/image';
 
 import { BotaoWhatsApp } from '@/components/BotaoWhatsApp';
 import { Botao } from '@/components/ui/Botao';
-import { MIDIA } from '@/config/midia';
+import { MIDIA, type Foto } from '@/config/midia';
 import { urlDaListagem } from '@/lib/imoveis/listagem';
+
+/*
+ * A largura em que o fundo é DESENHADO, que é o que o navegador precisa para
+ * escolher o arquivo. Com `object-cover`, a foto é escalada pela altura e fica
+ * mais larga que a própria caixa:
+ *  - celular (<640px): faixa de 320px × 1,64 (proporção do corte) ≈ 525px;
+ *  - de 640px a 1023px: a largura da tela vence;
+ *  - desktop: topo de ~680px × 2,78 (panorâmica) ≈ 1900px, ou a tela, se maior.
+ */
+const TAMANHOS_CELULAR = '(min-width: 640px) 100vw, 530px';
+const TAMANHOS_DESKTOP = '(min-width: 1900px) 100vw, 1900px';
+const TELA_DESKTOP = '(min-width: 1024px)';
+
+/**
+ * Fundo com direção de arte: a panorâmica inteira no desktop e, abaixo dele, o
+ * corte da janela com o mar. O `<picture>` faz o navegador baixar só UMA das
+ * duas. É o caminho que a documentação do Next indica (`getImageProps`), e o
+ * `<img>` sai com o mesmo srcset otimizado do componente `Image`.
+ */
+function FundoDoHero({ foto }: { foto: Foto }) {
+  const comum = { alt: '', fill: true } as const;
+  const {
+    props: { srcSet: srcSetDesktop },
+  } = getImageProps({ ...comum, src: foto.src, sizes: TAMANHOS_DESKTOP });
+  const { props } = getImageProps({
+    ...comum,
+    src: foto.celular ?? foto.src,
+    sizes: TAMANHOS_CELULAR,
+    // É o maior elemento da tela no celular e no desktop.
+    loading: 'eager',
+    fetchPriority: 'high',
+  });
+
+  return (
+    <picture>
+      <source media={TELA_DESKTOP} srcSet={srcSetDesktop} sizes={TAMANHOS_DESKTOP} />
+      <img {...props} alt="" className="object-cover object-[65%_50%] lg:object-[55%_50%]" />
+    </picture>
+  );
+}
 
 /**
  * O topo da home, no desenho do modelo.
@@ -17,9 +57,9 @@ import { urlDaListagem } from '@/lib/imoveis/listagem';
  * abaixo, sobre o grafite. O preto da blusa se funde com o fundo escuro.
  *
  * O fundo é o maior elemento da tela tanto no celular (a faixa da foto) quanto
- * no desktop (o topo inteiro): é o caso de `preload`, que começa o download já
- * no <head>. A foto da Juliana, menor que ele nas duas telas, carrega logo mas
- * com prioridade normal, para não disputar banda com o fundo no 4G.
+ * no desktop (o topo inteiro): carrega na frente, com prioridade alta. A foto
+ * da Juliana, menor que ele nas duas telas, carrega logo mas com prioridade
+ * normal, para não disputar banda com o fundo no 4G.
  */
 export function Hero() {
   const { julianaHero, fundoHero } = MIDIA;
@@ -29,19 +69,10 @@ export function Hero() {
   return (
     <section className="relative isolate overflow-hidden bg-grafite text-white">
       {fundoHero && (
+        // Sem desfoque provisório (`placeholder="blur"`): ele é um filtro SVG,
+        // caro de desenhar no celular. O grafite de fundo faz o papel de espera.
         <div aria-hidden className={`absolute inset-x-0 top-0 -z-20 lg:bottom-0 ${faixaDaFoto}`}>
-          <Image
-            src={fundoHero.src}
-            alt=""
-            fill
-            sizes="100vw"
-            preload
-            // Sem `placeholder="blur"`: o desfoque provisório é um filtro SVG,
-            // caro de desenhar no celular, e atrasava a primeira pintura. O
-            // grafite de fundo já faz o papel de espera.
-            // No celular a faixa é estreita: mostra a janela e o mar, não o sofá.
-            className="object-cover object-[72%_40%] lg:object-center"
-          />
+          <FundoDoHero foto={fundoHero} />
         </div>
       )}
       <div
