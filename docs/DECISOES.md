@@ -64,17 +64,15 @@ com a data. Não apague: o motivo antigo explica código que ainda pode existir.
 
 ## Deploy (24/09/2026)
 
-- **A Vercel fica na conta da Juliana**, no plano Pro: o Hobby não permite uso
-  comercial.
-- **Quem publica é o GitHub Actions, com token da conta dela.** A integração
-  Git da Vercel bloqueou o primeiro commit feito daqui ("Git author gutobuyno
-  must have access to the project"). Colocar o autor como membro do time custa
-  um assento. Assinar os commits como se fossem da Juliana (o arranjo do CRM do
-  Igor) falseia o histórico e já quebrou uma vez. Pelo Actions, qualquer commit
-  publica, e só depois de passar nos testes.
-- **O token tem validade.** Quando vencer, o passo "Publicar na Vercel" do
-  Actions falha: criar outro token na conta dela e trocar o segredo
-  `VERCEL_TOKEN`.
+- **Plano gratuito na Vercel e no Supabase por enquanto** (decisão do usuário,
+  24/09). Os riscos estão em `docs/DEPLOY.md`: o Hobby é não comercial pelos
+  termos da Vercel, e o Supabase gratuito não tem backup.
+- **Commits com a identidade da conta dona** (`jusoaresimoveis-cpu`, e-mail
+  noreply do GitHub), igual ao CRM do Igor. O Hobby bloqueia o deploy de commit
+  de colaborador em repositório privado.
+- **Publicar pelo GitHub Actions com token NÃO contorna isso.** Foi testado: a
+  CLI envia o autor do commit e a Vercel bloqueia igual. O Actions ficou só
+  com os testes (`verificar.yml`), e quem publica é a integração Git da Vercel.
 
 ## Briefing do site (24/09/2026)
 

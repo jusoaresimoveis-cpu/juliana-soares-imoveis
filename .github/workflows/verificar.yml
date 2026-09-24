@@ -1,0 +1,35 @@
+# Testes, tipos e lint a cada push e pull request.
+#
+# Quem publica o site é a integração Git da própria Vercel (ver docs/DEPLOY.md).
+# Isto aqui não bloqueia o deploy: avisa, com um X vermelho no commit, que
+# alguma coisa quebrou.
+
+name: Verificar
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verificar-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    name: Testes, tipos e lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run lint

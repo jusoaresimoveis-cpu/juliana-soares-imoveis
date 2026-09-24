@@ -7,11 +7,10 @@ const nextConfig: NextConfig = {
 
   poweredByHeader: false,
 
-  // Gravado no build para o `/versao`. Quem publica é o GitHub Actions
-  // (`.github/workflows/publicar.yml`), e num build pré-montado as variáveis de
-  // sistema da Vercel não chegam ao runtime: o commit vem do GITHUB_SHA.
+  // Gravado no build para o `/versao`: é o jeito de conferir qual commit está
+  // no ar sem abrir o painel da Vercel (que fica na conta da Juliana).
   env: {
-    COMMIT_DO_BUILD: (process.env.GITHUB_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? 'local').slice(0, 7),
+    COMMIT_DO_BUILD: (process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GITHUB_SHA ?? 'local').slice(0, 7),
     AMBIENTE_DO_BUILD: process.env.VERCEL_ENV ?? 'local',
   },
 

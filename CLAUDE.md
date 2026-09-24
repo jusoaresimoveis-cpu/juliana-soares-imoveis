@@ -21,6 +21,9 @@ aluguel anual em Itapema e Porto Belo (SC). Leia `README.md` e
 - **Nome, endereço e telefone** vêm de `apps/site/src/config/site.ts` e têm que
   bater com o Perfil da Empresa no Google.
 - **O CRM do Igor (`F:\Projetos Claude\SelectusConnect2.0\crm`) é só leitura.**
+- **Commit sai com a identidade da conta dona** (`git config --local`, ver
+  `docs/DEPLOY.md`), senão a Vercel Hobby bloqueia o deploy. Confira com
+  `git config --local user.email` antes de commitar.
 - **Dado de cliente não entra em migration.**
 
 ## Comandos
