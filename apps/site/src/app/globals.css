@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+/*
+ * Tokens PROVISÓRIOS.
+ *
+ * A identidade da Juliana (logo, cores, fonte) ainda não chegou. Os componentes
+ * só usam estes nomes (`bg-marca`, `text-suave`...), nunca uma cor solta, para
+ * que a troca seja aqui e em nenhum outro lugar.
+ */
+@theme {
+  --color-marca: #1f3a5f;
+  --color-marca-escura: #152a45;
+  --color-destaque: #b7832f;
+  --color-tinta: #1c1917;
+  --color-suave: #57534e;
+  --color-linha: #e7e5e4;
+  --color-fundo: #fafaf9;
+  /* Mais escuro que o verde oficial do WhatsApp: com texto branco, o oficial
+     não passa no contraste mínimo de leitura (4,5:1). Este dá 5,4:1. */
+  --color-whatsapp: #167a42;
+
+  --font-sans: var(--font-texto), ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-fundo);
+  color: var(--color-tinta);
+}

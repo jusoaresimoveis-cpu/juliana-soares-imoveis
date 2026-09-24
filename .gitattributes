@@ -1,0 +1,7 @@
+# Quebra de linha LF no repositório, qualquer que seja o sistema de quem edita.
+* text=auto eol=lf
+*.ico binary
+*.png binary
+*.jpg binary
+*.webp binary
+*.avif binary

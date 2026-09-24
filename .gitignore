@@ -1,0 +1,27 @@
+# dependências
+node_modules/
+
+# builds
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# ambiente — chave e senha nunca entram no repositório
+.env
+.env.*
+!.env.example
+.secrets/
+
+# ferramentas
+.claude/
+.vercel/
+.supabase/
+supabase/.temp/
+coverage/
+
+# sistema
+.DS_Store
+Thumbs.db
+*.log
