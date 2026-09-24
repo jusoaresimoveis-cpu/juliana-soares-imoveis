@@ -52,7 +52,9 @@ export function CartaoDeImovel({ imovel, finalidade, prioridade = false }: Props
             fill
             sizes="(min-width: 1280px) 300px, (min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
             className="object-cover transition duration-500 group-hover:scale-[1.03]"
-            priority={prioridade}
+            // `priority` foi descontinuado no Next 16. Numa grade, qual cartão é
+            // o maior elemento da tela muda com a largura: nada de `preload`.
+            loading={prioridade ? 'eager' : 'lazy'}
           />
         ) : (
           <div className="flex h-full items-center justify-center text-suave">

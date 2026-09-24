@@ -7,25 +7,66 @@ import { MIDIA } from '@/config/midia';
 import { urlDaListagem } from '@/lib/imoveis/listagem';
 
 /**
- * O topo da home: frase, os três botões do modelo e, quando chegar, a foto da
- * Juliana ocupando a direita. Sem a foto, o texto fica sozinho, sem coluna
- * vazia.
+ * O topo da home, no desenho do modelo.
+ *
+ * Desktop: o fundo cobre tudo, escurecido à esquerda (onde está o texto), e a
+ * Juliana fica à direita, apoiada na base: a caixa de busca sobe por cima da
+ * cintura dela.
+ *
+ * Celular: a foto vem primeiro, numa faixa com o fundo atrás, e o texto logo
+ * abaixo, sobre o grafite. O preto da blusa se funde com o fundo escuro.
+ *
+ * As duas fotos carregam com prioridade alta, mas SEM `preload`: dependendo da
+ * tela, a maior coisa visível é uma ou a outra, e o Next 16 recomenda `preload`
+ * só quando a maior imagem é sempre a mesma.
  */
 export function Hero() {
   const { julianaHero, fundoHero } = MIDIA;
+  // Mesma altura para a faixa da foto e para o fundo no celular.
+  const faixaDaFoto = 'h-80 sm:h-96 lg:h-auto';
 
   return (
     <section className="relative isolate overflow-hidden bg-grafite text-white">
       {fundoHero && (
-        <Image src={fundoHero.src} alt="" fill priority sizes="100vw" className="-z-20 object-cover" />
+        <div aria-hidden className={`absolute inset-x-0 top-0 -z-20 lg:bottom-0 ${faixaDaFoto}`}>
+          <Image
+            src={fundoHero.src}
+            alt=""
+            fill
+            sizes="100vw"
+            loading="eager"
+            fetchPriority="high"
+            // Sem `placeholder="blur"`: o desfoque provisório é um filtro SVG,
+            // caro de desenhar no celular, e atrasava a primeira pintura. O
+            // grafite de fundo já faz o papel de espera.
+            // No celular a faixa é estreita: mostra a janela e o mar, não o sofá.
+            className="object-cover object-[72%_40%] lg:object-center"
+          />
+        </div>
       )}
-      {/* Escurece o fundo à esquerda, onde está o texto: a leitura vem antes da foto. */}
-      <div aria-hidden className="absolute inset-0 -z-10 bg-linear-to-r from-grafite via-grafite/90 to-grafite/50" />
-
       <div
-        className={`mx-auto grid max-w-7xl items-end gap-8 px-4 pt-12 pb-28 sm:pt-16 lg:px-8 lg:pb-36 ${julianaHero ? 'lg:grid-cols-2' : ''}`}
-      >
-        <div className="max-w-2xl space-y-6">
+        aria-hidden
+        className={`absolute inset-x-0 top-0 -z-10 bg-linear-to-b from-grafite/10 via-grafite/35 to-grafite lg:bottom-0 lg:bg-linear-to-r lg:from-grafite lg:from-25% lg:via-grafite/80 lg:to-grafite/15 ${faixaDaFoto}`}
+      />
+
+      <div className={`mx-auto grid max-w-7xl px-4 lg:px-8 ${julianaHero ? 'lg:grid-cols-[1.15fr_0.85fr]' : ''}`}>
+        {julianaHero && (
+          <div className={`relative lg:order-2 ${faixaDaFoto}`}>
+            <Image
+              src={julianaHero.src}
+              alt={julianaHero.alt}
+              fill
+              sizes="(min-width: 1024px) 420px, 260px"
+              loading="eager"
+              fetchPriority="high"
+              className="object-contain object-bottom lg:object-[70%_100%]"
+            />
+          </div>
+        )}
+
+        <div
+          className={`max-w-2xl space-y-6 pb-28 lg:order-1 lg:pb-40 ${julianaHero ? 'pt-6 lg:pt-20' : 'pt-12 sm:pt-16 lg:pt-20'}`}
+        >
           <p className="text-xs font-medium tracking-[0.3em] text-caramelo uppercase">Corretora de Imóveis</p>
           <h1 className="font-serif text-4xl leading-[1.12] sm:text-5xl lg:text-[3.5rem]">
             Encontre o imóvel ideal com atendimento direto e personalizado.
@@ -47,19 +88,6 @@ export function Hero() {
             <BotaoWhatsApp mensagem="Olá, Juliana! Vim pelo site." />
           </div>
         </div>
-
-        {julianaHero && (
-          <div className="relative mx-auto aspect-[4/5] w-full max-w-md lg:max-w-none">
-            <Image
-              src={julianaHero.src}
-              alt={julianaHero.alt}
-              fill
-              priority
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              className="object-contain object-bottom"
-            />
-          </div>
-        )}
       </div>
     </section>
   );

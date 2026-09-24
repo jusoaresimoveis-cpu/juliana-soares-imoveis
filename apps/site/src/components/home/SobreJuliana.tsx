@@ -2,7 +2,7 @@ import { ArrowRight, FileText, Handshake, MapPinned, UserRound } from 'lucide-re
 import Image from 'next/image';
 
 import { Botao } from '@/components/ui/Botao';
-import { MIDIA } from '@/config/midia';
+import { MIDIA, type Foto } from '@/config/midia';
 import { SITE } from '@/config/site';
 
 /** Os diferenciais do briefing, na ordem do modelo. */
@@ -14,15 +14,27 @@ export const DIFERENCIAIS = [
 ] as const;
 
 /**
- * Sem o retrato, fica o monograma num bloco de areia: é marca, não é um buraco
- * de foto. Some sozinho quando `MIDIA.julianaRetrato` for preenchido.
+ * Sem foto, fica o monograma num bloco de areia: é marca, não é um buraco de
+ * foto. Foto recortada (fundo transparente) vai inteira, apoiada embaixo, sobre
+ * a areia, como retrato de estúdio; foto comum preenche o bloco.
  */
-export function RetratoDaJuliana({ className = '' }: { className?: string }) {
-  const retrato = MIDIA.julianaRetrato;
+export function RetratoDaJuliana({
+  foto = MIDIA.julianaRetrato,
+  className = '',
+}: {
+  foto?: Foto | null;
+  className?: string;
+}) {
   return (
     <div className={`relative overflow-hidden rounded-lg bg-areia ${className}`}>
-      {retrato ? (
-        <Image src={retrato.src} alt={retrato.alt} fill sizes="(min-width: 1024px) 420px, 100vw" className="object-cover" />
+      {foto ? (
+        <Image
+          src={foto.src}
+          alt={foto.alt}
+          fill
+          sizes="(min-width: 1024px) 420px, 100vw"
+          className={foto.recortada ? 'object-contain object-bottom pt-6' : 'object-cover'}
+        />
       ) : (
         <div aria-hidden className="flex h-full flex-col items-center justify-center gap-3 text-bronze">
           <span className="font-serif text-8xl leading-none tracking-tighter">

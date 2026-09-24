@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { BotaoWhatsApp } from '@/components/BotaoWhatsApp';
 import { DIFERENCIAIS, RetratoDaJuliana } from '@/components/home/SobreJuliana';
 import { Migalhas } from '@/components/Migalhas';
+import { MIDIA } from '@/config/midia';
 import { SITE } from '@/config/site';
 
 export const metadata: Metadata = {
@@ -22,7 +23,8 @@ export default function Page() {
       <Migalhas itens={[{ nome: 'Sobre Juliana', caminho: '/sobre' }]} />
 
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-16">
-        <RetratoDaJuliana className="aspect-[4/5] w-full" />
+        {/* Aqui não há topo com foto: vale a mesma foto do topo da home enquanto não chega um retrato próprio. */}
+        <RetratoDaJuliana foto={MIDIA.julianaRetrato ?? MIDIA.julianaHero} className="aspect-[4/5] w-full" />
 
         <div className="space-y-6">
           <p className="text-xs font-semibold tracking-[0.3em] text-bronze uppercase">Sobre Juliana</p>

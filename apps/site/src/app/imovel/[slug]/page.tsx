@@ -93,7 +93,8 @@ export default async function Page(props: PageProps<'/imovel/[slug]'>) {
       <div className="space-y-2">
         <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-areia sm:aspect-[16/9]">
           {capa ? (
-            <Image src={capa.url} alt={capa.alt} fill priority sizes="(min-width: 1152px) 1152px, 100vw" className="object-cover" />
+            // A capa é sempre o maior elemento desta página: é o caso de `preload`.
+            <Image src={capa.url} alt={capa.alt} fill preload sizes="(min-width: 1280px) 1216px, 100vw" className="object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center text-suave">Sem foto</div>
           )}
