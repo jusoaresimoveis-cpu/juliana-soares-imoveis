@@ -167,9 +167,9 @@ relação ao briefing, já combinado:
     2 s. Não é o site. Para medir aqui, usar
     `--chrome-flags="--headless=new --disable-gpu-vsync --disable-frame-rate-limit"`,
     ou medir o site publicado no PageSpeed Insights.
+- [x] Retrato da seção Sobre (24/09): a Juliana sentada no sofá, na home
+      (quadrado no desktop, sem corte) e na página /sobre.
 - [ ] Fotos que ainda faltam (`config/midia.ts`):
-  - um segundo retrato da Juliana para a seção Sobre da home (hoje ela usa o
-    monograma, para não repetir a foto do topo);
   - o fundo de "Regiões atendidas";
   - o fundo da chamada de captação;
   - a assinatura dela (elemento do modelo, ao lado da foto do topo).

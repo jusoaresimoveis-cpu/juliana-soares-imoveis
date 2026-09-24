@@ -23,8 +23,8 @@ export default function Page() {
       <Migalhas itens={[{ nome: 'Sobre Juliana', caminho: '/sobre' }]} />
 
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-16">
-        {/* Aqui não há topo com foto: vale a mesma foto do topo da home enquanto não chega um retrato próprio. */}
-        <RetratoDaJuliana foto={MIDIA.julianaRetrato ?? MIDIA.julianaHero} className="aspect-[4/5] w-full" />
+        {/* Sem retrato próprio, vale a foto do topo da home: aqui não há outra foto dela na página. */}
+        <RetratoDaJuliana foto={MIDIA.julianaRetrato ?? MIDIA.julianaHero} className="aspect-[4/5] w-full" preload />
 
         <div className="space-y-6">
           <p className="text-xs font-semibold tracking-[0.3em] text-bronze uppercase">Sobre Juliana</p>

@@ -1,6 +1,7 @@
 import type { StaticImageData } from 'next/image';
 
 import fundoHero from '@/assets/fotos/fundo-hero.webp';
+import julianaSentada from '@/assets/fotos/juliana-sentada.webp';
 import juliana from '@/assets/fotos/juliana.webp';
 
 /**
@@ -18,6 +19,13 @@ export interface Foto {
   alt: string;
   /** Recortada com fundo transparente: vai inteira, apoiada embaixo, sem corte. */
   recortada?: boolean;
+  /**
+   * Ponto da foto que nunca pode sair do quadro quando a caixa corta a imagem
+   * (`object-position`). A mesma foto aparece em caixas de proporções
+   * diferentes (4:3 no celular, 5:4 e 4:5 no desktop), e o corte central
+   * cortaria o rosto numa delas.
+   */
+  enquadramento?: string;
 }
 
 const JULIANA: Foto = {
@@ -30,9 +38,9 @@ export const MIDIA: {
   /** Juliana em destaque no topo da home. */
   julianaHero: Foto | null;
   /**
-   * Retrato da seção "Sobre Juliana" na home. Fica vazio (monograma) enquanto
-   * só existe UMA foto dela: a mesma foto duas vezes na mesma rolagem fica
-   * repetitivo. A página /sobre usa a do topo quando esta falta.
+   * Retrato da seção "Sobre Juliana" na home e da página /sobre. Precisa ser
+   * uma foto DIFERENTE da do topo: a mesma foto duas vezes na mesma rolagem
+   * fica repetitivo. Sem ela, a home mostra o monograma e a /sobre usa a do topo.
    */
   julianaRetrato: Foto | null;
   /** Fundo escurecido do topo da home. */
@@ -43,7 +51,13 @@ export const MIDIA: {
   fundoCaptacao: Foto | null;
 } = {
   julianaHero: JULIANA,
-  julianaRetrato: null,
+  julianaRetrato: {
+    src: julianaSentada,
+    alt: 'Juliana Soares sentada num sofá, sorrindo',
+    // O rosto fica a 45% da largura e 23% da altura da foto: o corte sobe um
+    // pouco para ele nunca sair do quadro, mesmo nas caixas mais baixas.
+    enquadramento: '45% 30%',
+  },
   fundoHero: { src: fundoHero, alt: '' },
   fundoRegioes: null,
   fundoCaptacao: null,

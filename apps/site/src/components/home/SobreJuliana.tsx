@@ -16,14 +16,18 @@ export const DIFERENCIAIS = [
 /**
  * Sem foto, fica o monograma num bloco de areia: é marca, não é um buraco de
  * foto. Foto recortada (fundo transparente) vai inteira, apoiada embaixo, sobre
- * a areia, como retrato de estúdio; foto comum preenche o bloco.
+ * a areia, como retrato de estúdio; foto comum preenche o bloco, cortada em
+ * volta do `enquadramento`.
  */
 export function RetratoDaJuliana({
   foto = MIDIA.julianaRetrato,
   className = '',
+  preload = false,
 }: {
   foto?: Foto | null;
   className?: string;
+  /** Só onde o retrato é o maior elemento do topo da página (a /sobre). */
+  preload?: boolean;
 }) {
   return (
     <div className={`relative overflow-hidden rounded-lg bg-areia ${className}`}>
@@ -32,8 +36,12 @@ export function RetratoDaJuliana({
           src={foto.src}
           alt={foto.alt}
           fill
-          sizes="(min-width: 1024px) 420px, 100vw"
+          preload={preload}
+          // Numa caixa em pé (4:5), a foto quadrada é desenhada pela altura e
+          // fica mais larga que a caixa: o tamanho pedido acompanha isso.
+          sizes="(min-width: 1024px) 520px, 125vw"
           className={foto.recortada ? 'object-contain object-bottom pt-6' : 'object-cover'}
+          style={foto.enquadramento ? { objectPosition: foto.enquadramento } : undefined}
         />
       ) : (
         <div aria-hidden className="flex h-full flex-col items-center justify-center gap-3 text-bronze">
@@ -51,7 +59,8 @@ export function SobreJuliana() {
   return (
     <section aria-labelledby="titulo-sobre" className="mt-16 bg-white py-16">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-16 lg:px-8">
-        <RetratoDaJuliana className="aspect-[4/3] w-full sm:aspect-[5/4]" />
+        {/* Quadrado no desktop, como a foto: ela aparece inteira. No celular, mais baixa, para não afastar o texto. */}
+        <RetratoDaJuliana className="aspect-[4/3] w-full lg:aspect-square" />
 
         <div className="space-y-6">
           <p className="text-xs font-semibold tracking-[0.3em] text-bronze uppercase">Sobre Juliana</p>
