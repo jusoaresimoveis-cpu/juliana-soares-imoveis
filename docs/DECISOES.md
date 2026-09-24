@@ -62,6 +62,20 @@ com a data. Não apague: o motivo antigo explica código que ainda pode existir.
 - **Nada inventado no site:** imóvel, depoimento, número de anos de experiência,
   promessa de serviço. Texto de marketing só com o que a Juliana confirmou.
 
+## Deploy (24/09/2026)
+
+- **A Vercel fica na conta da Juliana**, no plano Pro: o Hobby não permite uso
+  comercial.
+- **Quem publica é o GitHub Actions, com token da conta dela.** A integração
+  Git da Vercel bloqueou o primeiro commit feito daqui ("Git author gutobuyno
+  must have access to the project"). Colocar o autor como membro do time custa
+  um assento. Assinar os commits como se fossem da Juliana (o arranjo do CRM do
+  Igor) falseia o histórico e já quebrou uma vez. Pelo Actions, qualquer commit
+  publica, e só depois de passar nos testes.
+- **O token tem validade.** Quando vencer, o passo "Publicar na Vercel" do
+  Actions falha: criar outro token na conta dela e trocar o segredo
+  `VERCEL_TOKEN`.
+
 ## Briefing do site (24/09/2026)
 
 Referência em `docs/referencia/`. O visual segue o modelo. O que mudou em

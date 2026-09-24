@@ -7,6 +7,14 @@ const nextConfig: NextConfig = {
 
   poweredByHeader: false,
 
+  // Gravado no build para o `/versao`. Quem publica é o GitHub Actions
+  // (`.github/workflows/publicar.yml`), e num build pré-montado as variáveis de
+  // sistema da Vercel não chegam ao runtime: o commit vem do GITHUB_SHA.
+  env: {
+    COMMIT_DO_BUILD: (process.env.GITHUB_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? 'local').slice(0, 7),
+    AMBIENTE_DO_BUILD: process.env.VERCEL_ENV ?? 'local',
+  },
+
   images: {
     // AVIF primeiro: foto de imóvel é o que mais pesa na página, e no 4G do
     // celular é ela que decide se a página abre rápido ou não.

@@ -1,0 +1,81 @@
+# Publica o site na Vercel da Juliana.
+#
+# Por que aqui, e não pela integração Git da própria Vercel: a Vercel bloqueia
+# deploy de commit cujo autor não é membro do time ("Git author gutobuyno must
+# have access to the project"). Publicando com o token da conta dela, quem cria
+# o deploy é a conta dela, e qualquer commit do repositório publica.
+#
+# Segredos (Settings → Secrets and variables → Actions):
+#   VERCEL_TOKEN       token criado na conta Vercel da Juliana
+#   VERCEL_PROJECT_ID  Settings → General → Project ID, no projeto juliana-soares-site
+
+name: Publicar site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publicar-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VERCEL_ORG_ID: team_nIQLRBitIiExEXZ9VVvxMBnz
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  verificar:
+    name: Testes, tipos e lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run lint
+
+  publicar:
+    name: Publicar na Vercel
+    needs: verificar
+    # PR vindo de fork não recebe os segredos; sem token não há o que publicar.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm install --global vercel@60
+
+      # Só a main vira produção. PR e execução manual em outro branch viram prévia.
+      - name: Definir ambiente
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ] && [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "ALVO=production" >> "$GITHUB_ENV"
+            echo "FLAG_PROD=--prod" >> "$GITHUB_ENV"
+          else
+            echo "ALVO=preview" >> "$GITHUB_ENV"
+            echo "FLAG_PROD=" >> "$GITHUB_ENV"
+          fi
+
+      - name: Baixar configuração e variáveis do projeto
+        run: vercel pull --yes --environment="$ALVO" --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Build
+        run: vercel build $FLAG_PROD --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Deploy
+        run: |
+          url=$(vercel deploy --prebuilt $FLAG_PROD --token="${{ secrets.VERCEL_TOKEN }}")
+          echo "Publicado ($ALVO): $url" >> "$GITHUB_STEP_SUMMARY"

@@ -41,11 +41,16 @@ Em build de produção eles nunca aparecem: sem banco, o site sai sem imóveis.
 ## Deploy
 
 Vercel, na conta da Juliana: projeto `juliana-soares-site`, Root Directory
-`apps/site`. Todo push na `main` publica em produção:
-https://juliana-soares-site.vercel.app (fora do Google até o lançamento; veja
-`SITE_NO_AR` em `docs/DECISOES.md`).
+`apps/site`. **Quem publica é o GitHub Actions** (`.github/workflows/publicar.yml`),
+com o token da conta dela. A integração Git da Vercel fica desligada
+(`apps/site/vercel.json`), porque bloqueia commit de autor que não é membro do
+time.
 
-Para saber qual commit está no ar: `/versao`.
+- Push na `main`: testes, tipos e lint; se passar, publica em produção em
+  https://juliana-soares-site.vercel.app (fora do Google até o lançamento; veja
+  `SITE_NO_AR` em `docs/DECISOES.md`).
+- Pull request: os mesmos testes, e publica uma prévia.
+- Para saber qual commit está no ar: `/versao`.
 
 ## Onde mexer
 
