@@ -14,6 +14,21 @@ import { urlDaListagem } from '@/lib/imoveis/listagem';
  *  - de 640px a 1023px: a largura da tela vence;
  *  - desktop: topo de ~680px × 2,78 (panorâmica) ≈ 1900px, ou a tela, se maior.
  */
+/*
+ * Desktop: sombra PRETA só atrás do texto, como no modelo, e a foto com a cor
+ * real da metade para a direita (a Juliana e o mar não podem ficar apagados).
+ *
+ * Os pontos do degradê são medidos a partir do MEIO da tela, e não da borda:
+ * o texto mora num contêiner centralizado, então em qualquer largura ele
+ * termina perto do meio. Medido da borda, a sombra acabaria no meio da frase
+ * numa tela larga, ou cobriria a Juliana numa tela estreita.
+ */
+const SOMBRA_DO_TEXTO =
+  'linear-gradient(90deg, rgb(0 0 0 / 0.8) 0%, rgb(0 0 0 / 0.62) calc(50% - 80px), rgb(0 0 0 / 0.28) calc(50% + 70px), rgb(0 0 0 / 0) calc(50% + 200px))';
+/* O desfoque leve do modelo acompanha a sombra e some antes dela. */
+const MASCARA_DO_DESFOQUE =
+  'linear-gradient(90deg, #000 0%, #000 calc(50% - 60px), transparent calc(50% + 140px))';
+
 const TAMANHOS_CELULAR = '(min-width: 640px) 100vw, 530px';
 const TAMANHOS_DESKTOP = '(min-width: 1900px) 100vw, 1900px';
 const TELA_DESKTOP = '(min-width: 1024px)';
@@ -53,8 +68,9 @@ function FundoDoHero({ foto }: { foto: Foto }) {
  * Juliana fica à direita, apoiada na base: a caixa de busca sobe por cima da
  * cintura dela.
  *
- * Celular: a foto vem primeiro, numa faixa com o fundo atrás, e o texto logo
- * abaixo, sobre o grafite. O preto da blusa se funde com o fundo escuro.
+ * Celular: a foto vem primeiro, numa faixa com o fundo atrás e sem nenhum
+ * escurecimento em cima; só o pé da faixa escurece, para emendar com o preto
+ * onde fica o texto. A blusa preta se funde com esse preto.
  *
  * O fundo é o maior elemento da tela tanto no celular (a faixa da foto) quanto
  * no desktop (o topo inteiro): carrega na frente, com prioridade alta. A foto
@@ -67,18 +83,27 @@ export function Hero() {
   const faixaDaFoto = 'h-80 sm:h-96 lg:h-auto';
 
   return (
-    <section className="relative isolate overflow-hidden bg-grafite text-white">
+    <section className="relative isolate overflow-hidden bg-noite text-white">
       {fundoHero && (
         // Sem desfoque provisório (`placeholder="blur"`): ele é um filtro SVG,
-        // caro de desenhar no celular. O grafite de fundo faz o papel de espera.
+        // caro de desenhar no celular. O preto de fundo faz o papel de espera.
         <div aria-hidden className={`absolute inset-x-0 top-0 -z-20 lg:bottom-0 ${faixaDaFoto}`}>
           <FundoDoHero foto={fundoHero} />
         </div>
       )}
+
+      {/* Celular: só o pé da faixa escurece, para emendar com o preto do texto. */}
       <div
         aria-hidden
-        className={`absolute inset-x-0 top-0 -z-10 bg-linear-to-b from-grafite/10 via-grafite/35 to-grafite lg:bottom-0 lg:bg-linear-to-r lg:from-grafite lg:from-25% lg:via-grafite/80 lg:to-grafite/15 ${faixaDaFoto}`}
+        className={`absolute inset-x-0 top-0 -z-10 bg-linear-to-b from-transparent from-55% to-noite lg:hidden ${faixaDaFoto}`}
       />
+      {/* Desktop: desfoque leve e sombra preta atrás do texto, sumindo até o meio. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 hidden backdrop-blur-[3px] lg:block"
+        style={{ maskImage: MASCARA_DO_DESFOQUE, WebkitMaskImage: MASCARA_DO_DESFOQUE }}
+      />
+      <div aria-hidden className="absolute inset-0 -z-10 hidden lg:block" style={{ backgroundImage: SOMBRA_DO_TEXTO }} />
 
       <div className={`mx-auto grid max-w-7xl px-4 lg:px-8 ${julianaHero ? 'lg:grid-cols-[1.15fr_0.85fr]' : ''}`}>
         {julianaHero && (
@@ -97,7 +122,10 @@ export function Hero() {
         <div
           className={`max-w-2xl space-y-6 pb-28 lg:order-1 lg:pb-40 ${julianaHero ? 'pt-6 lg:pt-20' : 'pt-12 sm:pt-16 lg:pt-20'}`}
         >
-          <p className="text-xs font-medium tracking-[0.3em] text-caramelo uppercase">Corretora de Imóveis</p>
+          {/* Sobre a foto (desktop), o caramelo não tem contraste para letra desse tamanho: fica branco, como no modelo. */}
+          <p className="text-xs font-medium tracking-[0.3em] text-caramelo uppercase lg:text-white/90">
+            Corretora de Imóveis
+          </p>
           <h1 className="font-serif text-4xl leading-[1.12] sm:text-5xl lg:text-[3.5rem]">
             Encontre o imóvel ideal com atendimento direto e personalizado.
           </h1>

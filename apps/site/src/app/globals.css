@@ -19,6 +19,9 @@
   --color-tinta: #1e2229;
   --color-grafite: #23272f;
   --color-grafite-claro: #2f3440;
+  /* O preto do topo da home: a sombra atrás do texto e o fundo do texto no
+     celular. Mais escuro que o grafite, que ali parecia cinza. */
+  --color-noite: #101216;
   --color-suave: #5f5a52;
   --color-bronze: #8b6a40;
   --color-bronze-escuro: #735732;

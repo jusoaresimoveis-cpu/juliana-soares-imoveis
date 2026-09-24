@@ -15,10 +15,11 @@ export function Cabecalho() {
         <Marca />
 
         <nav aria-label="Principal" className="hidden lg:block">
-          <ul className="flex items-center gap-7 text-sm">
+          {/* De 1024px a 1279px os seis itens, o logo e o botão cabem só com espaço menor e sem quebrar nome. */}
+          <ul className="flex items-center gap-5 text-sm xl:gap-7">
             {MENU.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="py-2 transition-colors hover:text-bronze">
+                <Link href={item.href} className="py-2 whitespace-nowrap transition-colors hover:text-bronze">
                   {item.rotulo}
                 </Link>
               </li>
@@ -28,7 +29,15 @@ export function Cabecalho() {
 
         {/* No celular o WhatsApp fica na barra inferior; aqui ele só espremeria o logo. */}
         <div className="hidden lg:block">
-          <BotaoWhatsApp mensagem="Olá, Juliana! Vim pelo site." />
+          <BotaoWhatsApp
+            mensagem="Olá, Juliana! Vim pelo site."
+            rotulo={
+              <>
+                <span className="xl:hidden">WhatsApp</span>
+                <span className="hidden xl:inline">Falar no WhatsApp</span>
+              </>
+            }
+          />
         </div>
         <MenuMobile />
       </div>

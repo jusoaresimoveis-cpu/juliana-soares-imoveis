@@ -1,4 +1,5 @@
 import { MessageCircle } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import { linkDoWhatsApp } from '@/lib/whatsapp';
 
@@ -6,7 +7,8 @@ import { Botao } from './ui/Botao';
 
 interface Props {
   mensagem?: string;
-  rotulo?: string;
+  /** Texto ou marcação (por exemplo, um rótulo curto e outro longo conforme a largura). */
+  rotulo?: ReactNode;
   className?: string;
 }
 
