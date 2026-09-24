@@ -69,7 +69,8 @@ export function SobreJuliana() {
             investir.
           </h2>
 
-          <ul className="grid grid-cols-2 gap-5 sm:grid-cols-4 sm:gap-0 sm:divide-x sm:divide-linha">
+          {/* Uma coluna abaixo de 360px: em duas, "Acompanhamento" não cabe e empurrava a página para o lado. */}
+          <ul className="grid grid-cols-1 gap-5 min-[360px]:grid-cols-2 sm:grid-cols-4 sm:gap-0 sm:divide-x sm:divide-linha">
             {DIFERENCIAIS.map(({ Icone, texto }) => (
               <li key={texto} className="flex items-center gap-3 sm:flex-col sm:items-start sm:px-4 sm:first:pl-0">
                 <Icone aria-hidden className="size-7 shrink-0 text-caramelo" strokeWidth={1.5} />

@@ -7,14 +7,6 @@ import { MIDIA, type Foto } from '@/config/midia';
 import { urlDaListagem } from '@/lib/imoveis/listagem';
 
 /*
- * A largura em que o fundo é DESENHADO, que é o que o navegador precisa para
- * escolher o arquivo. Com `object-cover`, a foto é escalada pela altura e fica
- * mais larga que a própria caixa:
- *  - celular (<640px): faixa de 320px × 1,64 (proporção do corte) ≈ 525px;
- *  - de 640px a 1023px: a largura da tela vence;
- *  - desktop: topo de ~680px × 2,78 (panorâmica) ≈ 1900px, ou a tela, se maior.
- */
-/*
  * Desktop: sombra PRETA só atrás do texto, como no modelo, e a foto com a cor
  * real da metade para a direita (a Juliana e o mar não podem ficar apagados).
  *
@@ -29,21 +21,32 @@ const SOMBRA_DO_TEXTO =
 const MASCARA_DO_DESFOQUE =
   'linear-gradient(90deg, #000 0%, #000 calc(50% - 60px), transparent calc(50% + 140px))';
 
-const TAMANHOS_CELULAR = '(min-width: 640px) 100vw, 530px';
+/*
+ * A largura em que o fundo é DESENHADO, que é o que o navegador precisa para
+ * escolher o arquivo. Com `object-cover`, a foto mais "larga" que a caixa é
+ * escalada pela altura e fica mais larga que a tela:
+ *  - celular (<640px): faixa de 384px × 1,10 (corte quase quadrado) ≈ 424px,
+ *    ou a tela, se maior;
+ *  - tablet (640px a 1023px): faixa de 448px × 1,64 (corte largo) ≈ 734px,
+ *    ou a tela, se maior;
+ *  - desktop: topo de ~680px × 2,78 (panorâmica) ≈ 1900px, ou a tela, se maior.
+ */
+const TAMANHOS_CELULAR = '(min-width: 425px) 100vw, 424px';
+const TAMANHOS_TABLET = '(min-width: 734px) 100vw, 734px';
 const TAMANHOS_DESKTOP = '(min-width: 1900px) 100vw, 1900px';
+const TELA_TABLET = '(min-width: 640px)';
 const TELA_DESKTOP = '(min-width: 1024px)';
 
 /**
- * Fundo com direção de arte: a panorâmica inteira no desktop e, abaixo dele, o
- * corte da janela com o mar. O `<picture>` faz o navegador baixar só UMA das
- * duas. É o caminho que a documentação do Next indica (`getImageProps`), e o
- * `<img>` sai com o mesmo srcset otimizado do componente `Image`.
+ * Fundo com direção de arte: um corte por tamanho de tela, cada um na
+ * proporção da caixa em que aparece (panorâmica no desktop, corte largo da
+ * janela no tablet, corte quase quadrado no celular). O `<picture>` faz o
+ * navegador baixar só UM deles. É o caminho que a documentação do Next indica
+ * (`getImageProps`), e o `<img>` sai com o mesmo srcset otimizado do `Image`.
  */
 function FundoDoHero({ foto }: { foto: Foto }) {
   const comum = { alt: '', fill: true } as const;
-  const {
-    props: { srcSet: srcSetDesktop },
-  } = getImageProps({ ...comum, src: foto.src, sizes: TAMANHOS_DESKTOP });
+  const srcSetDe = (src: Foto['src'], sizes: string) => getImageProps({ ...comum, src, sizes }).props.srcSet;
   const { props } = getImageProps({
     ...comum,
     src: foto.celular ?? foto.src,
@@ -55,8 +58,11 @@ function FundoDoHero({ foto }: { foto: Foto }) {
 
   return (
     <picture>
-      <source media={TELA_DESKTOP} srcSet={srcSetDesktop} sizes={TAMANHOS_DESKTOP} />
-      <img {...props} alt="" className="object-cover object-[65%_50%] lg:object-[55%_50%]" />
+      <source media={TELA_DESKTOP} srcSet={srcSetDe(foto.src, TAMANHOS_DESKTOP)} sizes={TAMANHOS_DESKTOP} />
+      {foto.tablet && (
+        <source media={TELA_TABLET} srcSet={srcSetDe(foto.tablet, TAMANHOS_TABLET)} sizes={TAMANHOS_TABLET} />
+      )}
+      <img {...props} alt="" className="object-cover object-center sm:object-[65%_50%] lg:object-[55%_50%]" />
     </picture>
   );
 }
@@ -68,9 +74,10 @@ function FundoDoHero({ foto }: { foto: Foto }) {
  * Juliana fica à direita, apoiada na base: a caixa de busca sobe por cima da
  * cintura dela.
  *
- * Celular: a foto vem primeiro, numa faixa com o fundo atrás e sem nenhum
- * escurecimento em cima; só o pé da faixa escurece, para emendar com o preto
- * onde fica o texto. A blusa preta se funde com esse preto.
+ * Celular, como no modelo: a foto vem primeiro, com a cor viva no alto, e o
+ * texto SOBE por cima da parte de baixo dela. Da metade da faixa para baixo o
+ * fundo escurece até o preto, e o corpo da Juliana também se funde nele onde o
+ * texto passa por cima (a blusa preta ajuda). Ela fica um pouco à direita.
  *
  * O fundo é o maior elemento da tela tanto no celular (a faixa da foto) quanto
  * no desktop (o topo inteiro): carrega na frente, com prioridade alta. A foto
@@ -80,7 +87,7 @@ function FundoDoHero({ foto }: { foto: Foto }) {
 export function Hero() {
   const { julianaHero, fundoHero } = MIDIA;
   // Mesma altura para a faixa da foto e para o fundo no celular.
-  const faixaDaFoto = 'h-80 sm:h-96 lg:h-auto';
+  const faixaDaFoto = 'h-96 sm:h-[28rem] lg:h-auto';
 
   return (
     <section className="relative isolate overflow-hidden bg-noite text-white">
@@ -92,10 +99,10 @@ export function Hero() {
         </div>
       )}
 
-      {/* Celular: só o pé da faixa escurece, para emendar com o preto do texto. */}
+      {/* Celular: foto viva até a metade da faixa; dali escurece até o preto, onde o texto sobe por cima. */}
       <div
         aria-hidden
-        className={`absolute inset-x-0 top-0 -z-10 bg-linear-to-b from-transparent from-55% to-noite lg:hidden ${faixaDaFoto}`}
+        className={`absolute inset-x-0 top-0 -z-10 bg-linear-to-b from-transparent from-40% to-noite lg:hidden ${faixaDaFoto}`}
       />
       {/* Desktop: desfoque leve e sombra preta atrás do texto, sumindo até o meio. */}
       <div
@@ -107,25 +114,30 @@ export function Hero() {
 
       <div className={`mx-auto grid max-w-7xl px-4 lg:px-8 ${julianaHero ? 'lg:grid-cols-[1.15fr_0.85fr]' : ''}`}>
         {julianaHero && (
-          <div className={`relative lg:order-2 ${faixaDaFoto}`}>
+          // No celular, o `after` escurece o pé da foto dela até o preto: é
+          // onde o texto sobe por cima. Ele sai da margem do contêiner
+          // (-inset-x-4) e vai de borda a borda: preso à largura do conteúdo,
+          // deixava uma linha clara nas laterais.
+          <div
+            className={`relative lg:order-2 ${faixaDaFoto} after:absolute after:-inset-x-4 after:bottom-0 after:h-1/4 after:bg-linear-to-b after:from-transparent after:to-noite lg:after:hidden`}
+          >
             <Image
               src={julianaHero.src}
               alt={julianaHero.alt}
               fill
               sizes="(min-width: 1024px) 420px, 260px"
               loading="eager"
-              className="object-contain object-bottom lg:object-[70%_100%]"
+              className="object-contain object-[80%_100%] lg:object-[70%_100%]"
             />
           </div>
         )}
 
+        {/* `relative` põe o texto por cima da foto dela quando ele sobe (margem negativa, no celular). */}
         <div
-          className={`max-w-2xl space-y-6 pb-28 lg:order-1 lg:pb-40 ${julianaHero ? 'pt-6 lg:pt-20' : 'pt-12 sm:pt-16 lg:pt-20'}`}
+          className={`relative max-w-2xl space-y-6 pb-28 lg:order-1 lg:pb-40 ${julianaHero ? '-mt-16 sm:-mt-20 lg:mt-0 lg:pt-20' : 'pt-12 sm:pt-16 lg:pt-20'}`}
         >
-          {/* Sobre a foto (desktop), o caramelo não tem contraste para letra desse tamanho: fica branco, como no modelo. */}
-          <p className="text-xs font-medium tracking-[0.3em] text-caramelo uppercase lg:text-white/90">
-            Corretora de Imóveis
-          </p>
+          {/* Sobre a foto, o caramelo não tem contraste para letra desse tamanho: fica branco, como no modelo. */}
+          <p className="text-xs font-medium tracking-[0.3em] text-white/90 uppercase">Corretora de Imóveis</p>
           <h1 className="font-serif text-4xl leading-[1.12] sm:text-5xl lg:text-[3.5rem]">
             Encontre o imóvel ideal com atendimento direto e personalizado.
           </h1>

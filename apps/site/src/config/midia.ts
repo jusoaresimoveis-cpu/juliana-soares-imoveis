@@ -1,6 +1,7 @@
 import type { StaticImageData } from 'next/image';
 
 import fundoHeroCelular from '@/assets/fotos/fundo-hero-celular.webp';
+import fundoHeroTablet from '@/assets/fotos/fundo-hero-tablet.webp';
 import fundoHero from '@/assets/fotos/fundo-hero.webp';
 import julianaSentada from '@/assets/fotos/juliana-sentada.webp';
 import juliana from '@/assets/fotos/juliana.webp';
@@ -28,11 +29,14 @@ export interface Foto {
    */
   enquadramento?: string;
   /**
-   * Corte próprio para telas estreitas (direção de arte). Uma foto panorâmica
-   * numa caixa quase quadrada mostra só uma fatia dela: sem o corte, o celular
-   * baixaria a foto inteira (larga) para exibir essa fatia.
+   * Cortes próprios por tamanho de tela (direção de arte). Uma foto panorâmica
+   * numa caixa quase quadrada mostra só uma fatia dela: sem o corte na
+   * proporção da caixa, o celular baixaria uma foto larga para exibir o meio.
+   *  - `celular`: abaixo de 640px;
+   *  - `tablet`: de 640px a 1023px.
    */
   celular?: StaticImageData;
+  tablet?: StaticImageData;
 }
 
 const JULIANA: Foto = {
@@ -65,8 +69,10 @@ export const MIDIA: {
     // pouco para ele nunca sair do quadro, mesmo nas caixas mais baixas.
     enquadramento: '45% 30%',
   },
-  // Panorâmica (2092x752). No celular, o corte da janela com o mar e a cidade.
-  fundoHero: { src: fundoHero, alt: '', celular: fundoHeroCelular },
+  // Panorâmica (2092x752) no desktop. No tablet, o corte largo da janela com o
+  // mar (1232x752); no celular, o corte quase quadrado dos prédios e do mar
+  // (830x752), na proporção da faixa da foto.
+  fundoHero: { src: fundoHero, alt: '', celular: fundoHeroCelular, tablet: fundoHeroTablet },
   fundoRegioes: null,
   fundoCaptacao: null,
 };
