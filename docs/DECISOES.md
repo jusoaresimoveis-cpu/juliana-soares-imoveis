@@ -147,9 +147,18 @@ relação ao briefing, já combinado:
 - [ ] Logo (o usuário vai criar) e fotos profissionais da Juliana, em
       `conteudo/marca` e `conteudo/fotos-juliana`.
 - [ ] Imóveis iniciais reais em `conteudo/imoveis`.
-- [ ] Visual do modelo: fontes, paleta, cabeçalho, barra inferior no celular,
-      seções da home, filtros da listagem e detalhe do imóvel.
-- [ ] Páginas Cadastrar Imóvel, Sobre e Contato.
+- [x] Visual do modelo (24/09):
+  - Playfair Display nos títulos e Inter no texto; paleta creme, grafite e bronze;
+  - cabeçalho, menu e barra inferior no celular;
+  - todas as seções da home, com busca e faixa de preço;
+  - favoritos no aparelho;
+  - páginas Cadastrar Imóvel, Sobre, Contato e Favoritos.
+  - Lighthouse no celular: desempenho 92 a 97, acessibilidade 100, boas práticas 100.
+- [ ] Fotos no visual: preencher `apps/site/src/config/midia.ts` quando elas chegarem.
+- [ ] Listagem: filtros de quartos e banheiros, e ordenação.
+- [ ] Detalhe do imóvel no desenho do modelo: galeria grande, mapa, formulário
+      de interesse, botões fixos de WhatsApp e visita.
+- [ ] Formulário de captação (Cadastrar Imóvel), depois do banco.
 - [ ] Depoimentos do Google: pedir acesso à API do Perfil da Empresa.
 - [ ] CEP exato do escritório (`config/site.ts`).
 - [ ] Endereço no Perfil da Empresa: hoje está "sem local físico". Decidir se

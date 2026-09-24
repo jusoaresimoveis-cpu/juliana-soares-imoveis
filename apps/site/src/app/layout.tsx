@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist } from 'next/font/google';
+import { Inter, Playfair_Display } from 'next/font/google';
 
-import { BotaoWhatsApp } from '@/components/BotaoWhatsApp';
+import { BarraInferior } from '@/components/BarraInferior';
 import { Cabecalho } from '@/components/Cabecalho';
 import { JsonLd } from '@/components/JsonLd';
 import { Rodape } from '@/components/Rodape';
@@ -10,9 +10,15 @@ import { schemaDaCorretora } from '@/lib/seo/schema';
 
 import './globals.css';
 
-// Fonte provisória até a identidade visual chegar. `next/font` serve o arquivo
-// do próprio domínio: sem ida ao Google Fonts, sem atraso no primeiro texto.
-const texto = Geist({
+// `next/font` serve as fontes do próprio domínio, só com os caracteres latinos:
+// sem ida ao Google Fonts e sem o texto piscando com a fonte trocada.
+const titulo = Playfair_Display({
+  variable: '--font-titulo',
+  subsets: ['latin'],
+  display: 'swap',
+});
+
+const texto = Inter({
   variable: '--font-texto',
   subsets: ['latin'],
   display: 'swap',
@@ -35,18 +41,18 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#1f3a5f',
+  themeColor: '#f8f5f0',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="pt-BR" className={`${texto.variable} h-full antialiased`}>
+    <html lang="pt-BR" className={`${titulo.variable} ${texto.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col font-sans">
         <JsonLd dados={schemaDaCorretora()} />
         <Cabecalho />
         <main className="flex-1">{children}</main>
         <Rodape />
-        <BotaoWhatsApp flutuante rotulo="WhatsApp" mensagem="Olá, Juliana! Vim pelo site." />
+        <BarraInferior />
       </body>
     </html>
   );

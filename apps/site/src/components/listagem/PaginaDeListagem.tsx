@@ -6,14 +6,18 @@ import {
   type FinalidadeDoSite,
 } from '@juliana/contracts';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 import { BotaoWhatsApp } from '@/components/BotaoWhatsApp';
 import { CartaoDeImovel } from '@/components/imoveis/CartaoDeImovel';
 import { Migalhas } from '@/components/Migalhas';
 import { SITE } from '@/config/site';
 import { bairrosDe, filtrarImoveis, urlDaListagem } from '@/lib/imoveis/listagem';
+import { precoNaFinalidade } from '@/lib/imoveis/preco';
 import { resolverListagem } from '@/lib/imoveis/resolver-listagem';
 import type { Migalha } from '@/lib/seo/schema';
+
+import { Grade, GradeComFaixa, type ItemDaGrade } from './GradeComFaixa';
 
 const NOME_DA_FINALIDADE: Record<FinalidadeDoSite, string> = {
   aluguel: 'Aluguel',
@@ -55,12 +59,18 @@ export async function PaginaDeListagem({ finalidade, segmentos }: Props) {
       )
     : [];
 
+  const itens: ItemDaGrade[] = imoveis.map((imovel, indice) => ({
+    codigo: imovel.codigo,
+    precoCents: precoNaFinalidade(imovel, finalidade),
+    cartao: <CartaoDeImovel imovel={imovel} finalidade={finalidade} prioridade={indice < 2} />,
+  }));
+
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-6">
+    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8 lg:py-10">
       <Migalhas itens={migalhas} />
 
       <header className="space-y-2">
-        <h1 className="text-2xl font-semibold leading-tight sm:text-3xl">{titulo}</h1>
+        <h1 className="font-serif text-3xl leading-tight sm:text-4xl">{titulo}</h1>
         <p className="text-suave">
           {imoveis.length === 0
             ? 'Nenhum imóvel com esse perfil no momento.'
@@ -101,15 +111,13 @@ export async function PaginaDeListagem({ finalidade, segmentos }: Props) {
       </nav>
 
       {imoveis.length > 0 ? (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {imoveis.map((imovel, indice) => (
-            <li key={imovel.codigo}>
-              <CartaoDeImovel imovel={imovel} finalidade={finalidade} prioridade={indice < 2} />
-            </li>
-          ))}
-        </ul>
+        // O HTML estático leva a grade completa (é o que o Google lê); a faixa
+        // de preço da URL é aplicada no navegador.
+        <Suspense fallback={<Grade itens={itens} />}>
+          <GradeComFaixa finalidade={finalidade} itens={itens} />
+        </Suspense>
       ) : (
-        <div className="space-y-4 rounded-xl border border-linha bg-white p-6">
+        <div className="space-y-4 rounded-lg bg-white p-6 ring-1 ring-linha">
           <p>
             Procurando {filtro.tipo ? PROPERTY_TYPE_PLURAL[filtro.tipo].label.toLowerCase() : 'imóveis'}{' '}
             {FINALIDADE_NA_FRASE[finalidade]}? Conte para a Juliana o que você precisa, e ela avisa quando
@@ -141,8 +149,8 @@ function ListaDeAtalhos({ titulo, itens }: { titulo: string; itens: Atalho[] }) 
               aria-current={item.ativo ? 'page' : undefined}
               className={
                 item.ativo
-                  ? 'block rounded-full bg-marca px-3 py-1.5 text-white'
-                  : 'block rounded-full border border-linha bg-white px-3 py-1.5 hover:border-marca'
+                  ? 'block rounded-full bg-bronze px-3 py-1.5 text-white'
+                  : 'block rounded-full border border-linha bg-white px-3 py-1.5 hover:border-bronze'
               }
             >
               {item.rotulo}

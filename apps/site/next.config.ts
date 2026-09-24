@@ -14,6 +14,13 @@ const nextConfig: NextConfig = {
     AMBIENTE_DO_BUILD: process.env.VERCEL_ENV ?? 'local',
   },
 
+  async redirects() {
+    return [
+      // Nome antigo da página de captação, antes do menu do modelo.
+      { source: '/anuncie', destination: '/cadastrar-imovel', permanent: true },
+    ];
+  },
+
   images: {
     // AVIF primeiro: foto de imóvel é o que mais pesa na página, e no 4G do
     // celular é ela que decide se a página abre rápido ou não.

@@ -1,37 +1,34 @@
 import Link from 'next/link';
 
-import { SITE } from '@/config/site';
+import { MENU } from '@/config/navegacao';
 
-const MENU = [
-  { href: '/aluguel', rotulo: 'Alugar' },
-  { href: '/venda', rotulo: 'Comprar' },
-  { href: '/anuncie', rotulo: 'Anunciar' },
-] as const;
+import { BotaoWhatsApp } from './BotaoWhatsApp';
+import { Marca } from './marca/Marca';
+import { MenuMobile } from './MenuMobile';
 
 export function Cabecalho() {
   return (
-    <header className="sticky top-0 z-30 border-b border-linha bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-        {/* Logo provisório em texto até a marca chegar. */}
-        <Link href="/" className="min-w-0 leading-tight">
-          <span className="block truncate font-semibold text-marca">{SITE.nomeCurto}</span>
-          {/* No celular o CRECI não cabe aqui sem cortar; ele aparece no topo da home e no rodapé. */}
-          <span className="block truncate text-xs text-suave">
-            Corretora de Imóveis<span className="hidden sm:inline"> · {SITE.creci}</span>
-          </span>
-        </Link>
+    <header className="sticky top-0 z-40 border-b border-linha bg-creme/95 backdrop-blur">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-3 lg:px-8">
+        <Marca />
 
-        <nav aria-label="Principal">
-          <ul className="flex items-center gap-4 text-sm font-medium">
+        <nav aria-label="Principal" className="hidden lg:block">
+          <ul className="flex items-center gap-7 text-sm">
             {MENU.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="py-2 hover:text-marca">
+                <Link href={item.href} className="py-2 transition-colors hover:text-bronze">
                   {item.rotulo}
                 </Link>
               </li>
             ))}
           </ul>
         </nav>
+
+        {/* No celular o WhatsApp fica na barra inferior; aqui ele só espremeria o logo. */}
+        <div className="hidden lg:block">
+          <BotaoWhatsApp mensagem="Olá, Juliana! Vim pelo site." />
+        </div>
+        <MenuMobile />
       </div>
     </header>
   );

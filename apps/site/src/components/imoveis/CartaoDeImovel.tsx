@@ -1,54 +1,108 @@
 import type { FinalidadeDoSite } from '@juliana/contracts';
+import { ArrowRight, Bath, BedDouble, Building2, Car, Maximize2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { plural } from '@/lib/formato';
 import type { Imovel } from '@/lib/imoveis/tipos';
 
-import { Caracteristicas } from './Caracteristicas';
+import { BotaoFavorito } from './BotaoFavorito';
 import { Preco } from './Preco';
 
 interface Props {
   imovel: Imovel;
+  /** A listagem em que o cartão aparece. Decide a etiqueta e qual preço vem primeiro. */
   finalidade?: FinalidadeDoSite;
   /** Só os primeiros cartões visíveis carregam a foto com prioridade. */
   prioridade?: boolean;
 }
 
+function Etiqueta({ imovel, finalidade }: { imovel: Imovel; finalidade?: FinalidadeDoSite }) {
+  const qual = finalidade ?? (imovel.finalidades.length > 1 ? null : imovel.finalidades[0]);
+  if (qual === 'aluguel') return <span className="bg-marinho px-2.5 py-1">Para alugar</span>;
+  if (qual === 'venda') return <span className="bg-bronze px-2.5 py-1">À venda</span>;
+  return <span className="bg-grafite px-2.5 py-1">Venda e aluguel</span>;
+}
+
+/**
+ * O cartão do modelo: foto com etiqueta e favorito, preço, lugar, quartos,
+ * banheiros, vagas, área e "Ver detalhes".
+ *
+ * O cartão inteiro é clicável pelo link do título (que se estica por cima de
+ * tudo), e o coração fica fora do link: botão dentro de link é HTML inválido e
+ * confunde leitor de tela.
+ */
 export function CartaoDeImovel({ imovel, finalidade, prioridade = false }: Props) {
   const capa = imovel.fotos[0];
-  const onde = [imovel.bairro, imovel.cidade].filter(Boolean).join(', ');
+  const onde = [imovel.cidade, imovel.bairro].filter(Boolean).join(' - ');
+
+  const itens = [
+    imovel.quartos ? { Icone: BedDouble, texto: plural(imovel.quartos, 'quarto', 'quartos') } : null,
+    imovel.banheiros ? { Icone: Bath, texto: plural(imovel.banheiros, 'banheiro', 'banheiros') } : null,
+    imovel.vagas ? { Icone: Car, texto: plural(imovel.vagas, 'vaga', 'vagas') } : null,
+  ].filter((item) => item !== null);
 
   return (
-    <article className="overflow-hidden rounded-xl border border-linha bg-white">
-      <Link href={`/imovel/${imovel.slug}`} className="block">
-        <div className="relative aspect-[4/3] bg-linha">
-          {capa ? (
-            <Image
-              src={capa.url}
-              alt={capa.alt}
-              fill
-              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-              className="object-cover"
-              priority={prioridade}
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-sm text-suave">Sem foto</div>
-          )}
-          {imovel.status === 'reservado' && (
-            <span className="absolute left-3 top-3 rounded-full bg-destaque px-3 py-1 text-xs font-semibold text-white">
-              Reservado
-            </span>
-          )}
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-linha transition hover:shadow-md">
+      <div className="relative aspect-[4/3] bg-areia">
+        {capa ? (
+          <Image
+            src={capa.url}
+            alt={capa.alt}
+            fill
+            sizes="(min-width: 1280px) 300px, (min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+            className="object-cover transition duration-500 group-hover:scale-[1.03]"
+            priority={prioridade}
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-suave">
+            <Building2 aria-hidden className="size-10 opacity-40" />
+            <span className="sr-only">Sem foto</span>
+          </div>
+        )}
+        <div className="absolute left-3 top-3 flex flex-col items-start gap-1 text-[0.6875rem] font-semibold tracking-wider text-white uppercase">
+          <Etiqueta imovel={imovel} finalidade={finalidade} />
+          {imovel.status === 'reservado' && <span className="bg-tinta/80 px-2.5 py-1">Reservado</span>}
         </div>
+        <div className="absolute right-3 top-3 z-10">
+          <BotaoFavorito codigo={imovel.codigo} titulo={imovel.titulo} />
+        </div>
+      </div>
 
-        <div className="space-y-2 p-4">
-          <Preco imovel={imovel} finalidade={finalidade} />
-          <h3 className="font-medium leading-snug">{imovel.titulo}</h3>
-          {onde && <p className="text-sm text-suave">{onde}</p>}
-          <Caracteristicas imovel={imovel} />
-          <p className="text-xs text-suave">Cód. {imovel.codigo}</p>
-        </div>
-      </Link>
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        <Preco imovel={imovel} finalidade={finalidade} />
+        {onde && <p className="text-sm text-suave">{onde}</p>}
+        <h3 className="line-clamp-2 text-sm leading-snug">
+          <Link href={`/imovel/${imovel.slug}`} className="after:absolute after:inset-0">
+            {imovel.titulo}
+          </Link>
+        </h3>
+
+        {itens.length > 0 && (
+          <ul className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-suave">
+            {itens.map(({ Icone, texto }) => (
+              <li key={texto} className="flex items-center gap-1">
+                <Icone aria-hidden className="size-3.5" />
+                {texto}
+              </li>
+            ))}
+          </ul>
+        )}
+        {imovel.areaM2 ? (
+          <p className="flex items-center gap-1 text-xs text-suave">
+            <Maximize2 aria-hidden className="size-3.5" />
+            {imovel.areaM2.toLocaleString('pt-BR')} m²
+          </p>
+        ) : null}
+
+        {/* Só aparência: quem leva ao imóvel é o link esticado do título. */}
+        <span
+          aria-hidden
+          className="mt-auto flex min-h-10 items-center justify-center gap-2 rounded-md bg-bronze text-sm font-semibold text-white transition-colors group-hover:bg-bronze-escuro"
+        >
+          Ver detalhes <ArrowRight className="size-4" />
+        </span>
+      </div>
     </article>
   );
 }

@@ -73,25 +73,25 @@ export default async function Page(props: PageProps<'/imovel/[slug]'>) {
 
   const parecidos = filtrarImoveis(todos, { finalidade, tipo: null, cidade, bairro: null })
     .filter((outro) => outro.codigo !== imovel.codigo)
-    .slice(0, 3);
+    .slice(0, 4);
 
   const [capa, ...demaisFotos] = imovel.fotos;
   const mensagem = `Olá, Juliana! Tenho interesse no imóvel cód. ${imovel.codigo}: ${SITE.url}/imovel/${imovel.slug}`;
 
   return (
-    <article className="mx-auto max-w-6xl space-y-6 px-4 py-6">
+    <article className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8 lg:py-10">
       <JsonLd dados={schemaDoImovel(imovel, `${SITE.url}/imovel/${imovel.slug}`)} />
       <Migalhas itens={migalhas} />
 
       {!naVitrine && (
-        <p role="status" className="rounded-lg bg-destaque/10 p-4 text-sm">
+        <p role="status" className="rounded-lg bg-areia p-4 text-sm">
           Este imóvel está {PROPERTY_STATUS_LABEL[imovel.status].toLowerCase()} e não está mais disponível.
           {parecidos.length > 0 && ' Veja abaixo opções parecidas.'}
         </p>
       )}
 
       <div className="space-y-2">
-        <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-linha sm:aspect-[16/9]">
+        <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-areia sm:aspect-[16/9]">
           {capa ? (
             <Image src={capa.url} alt={capa.alt} fill priority sizes="(min-width: 1152px) 1152px, 100vw" className="object-cover" />
           ) : (
@@ -110,7 +110,7 @@ export default async function Page(props: PageProps<'/imovel/[slug]'>) {
       </div>
 
       <header className="space-y-2">
-        <h1 className="text-2xl font-semibold leading-tight sm:text-3xl">{imovel.titulo}</h1>
+        <h1 className="font-serif text-3xl leading-tight sm:text-4xl">{imovel.titulo}</h1>
         <p className="text-suave">{[imovel.bairro, imovel.cidade].filter(Boolean).join(', ')}</p>
         <Caracteristicas imovel={imovel} />
       </header>
@@ -119,14 +119,14 @@ export default async function Page(props: PageProps<'/imovel/[slug]'>) {
         <div className="space-y-6">
           {imovel.descricao && (
             <section className="space-y-2">
-              <h2 className="text-lg font-semibold">Sobre o imóvel</h2>
+              <h2 className="font-serif text-2xl">Sobre o imóvel</h2>
               <p className="whitespace-pre-line leading-relaxed">{imovel.descricao}</p>
             </section>
           )}
 
           {imovel.comodidades.length > 0 && (
             <section className="space-y-2">
-              <h2 className="text-lg font-semibold">Comodidades</h2>
+              <h2 className="font-serif text-2xl">Comodidades</h2>
               <ul className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
                 {imovel.comodidades.map((comodidade) => (
                   <li key={comodidade}>{rotuloDaComodidade(comodidade)}</li>
@@ -138,8 +138,8 @@ export default async function Page(props: PageProps<'/imovel/[slug]'>) {
 
         {/* No celular, preço e botão vêm logo depois do título, antes da descrição:
             é o que decide se a pessoa chama ou vai embora. */}
-        <aside className="order-first h-fit space-y-4 rounded-xl border border-linha bg-white p-5 lg:sticky lg:top-20 lg:order-none">
-          <Preco imovel={imovel} />
+        <aside className="order-first h-fit space-y-4 rounded-lg bg-white p-5 shadow-sm ring-1 ring-linha lg:sticky lg:top-20 lg:order-none">
+          <Preco imovel={imovel} tamanho="grande" />
           <dl className="space-y-1 text-sm text-suave">
             {imovel.condominioCents ? (
               <div className="flex justify-between">
@@ -167,8 +167,8 @@ export default async function Page(props: PageProps<'/imovel/[slug]'>) {
 
       {parecidos.length > 0 && (
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold">Parecidos{cidade ? ` em ${cidade.nome}` : ''}</h2>
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <h2 className="font-serif text-2xl">Parecidos{cidade ? ` em ${cidade.nome}` : ''}</h2>
+          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {parecidos.map((outro) => (
               <li key={outro.codigo}>
                 <CartaoDeImovel imovel={outro} finalidade={finalidade} />

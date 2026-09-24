@@ -1,32 +1,54 @@
 @import "tailwindcss";
 
 /*
- * Tokens PROVISÓRIOS.
+ * Identidade do site, tirada do modelo em docs/referencia/modelo-site.webp:
+ * creme, grafite e bronze, com títulos em serifa.
  *
- * A identidade da Juliana (logo, cores, fonte) ainda não chegou. Os componentes
- * só usam estes nomes (`bg-marca`, `text-suave`...), nunca uma cor solta, para
- * que a troca seja aqui e em nenhum outro lugar.
+ * Os componentes só usam estes nomes (`bg-creme`, `text-bronze`...), nunca
+ * uma cor solta: quando a marca definitiva chegar, a troca é aqui.
+ *
+ * O caramelo do modelo, com texto branco em cima, dá 3,6:1 de contraste, e o
+ * mínimo de leitura é 4,5:1. Por isso ele se divide em dois:
+ *   - `bronze` (4,9:1) em botão, link e qualquer texto;
+ *   - `caramelo` só em enfeite (ícone, estrela, fio) ou texto sobre fundo escuro.
  */
 @theme {
-  --color-marca: #1f3a5f;
-  --color-marca-escura: #152a45;
-  --color-destaque: #b7832f;
-  --color-tinta: #1c1917;
-  --color-suave: #57534e;
-  --color-linha: #e7e5e4;
-  --color-fundo: #fafaf9;
-  /* Mais escuro que o verde oficial do WhatsApp: com texto branco, o oficial
-     não passa no contraste mínimo de leitura (4,5:1). Este dá 5,4:1. */
-  --color-whatsapp: #167a42;
+  --color-creme: #f8f5f0;
+  --color-areia: #efe8de;
+  --color-linha: #e4dcd0;
+  --color-tinta: #1e2229;
+  --color-grafite: #23272f;
+  --color-grafite-claro: #2f3440;
+  --color-suave: #5f5a52;
+  --color-bronze: #8b6a40;
+  --color-bronze-escuro: #735732;
+  --color-caramelo: #c29b66;
+  --color-marinho: #2b3a55;
+  /* Verde do WhatsApp escurecido: o oficial não passa no contraste com texto branco. */
+  --color-whatsapp: #15803d;
+  --color-whatsapp-escuro: #116932;
 
   --font-sans: var(--font-texto), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-titulo), ui-serif, Georgia, serif;
 }
 
 html {
   -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
-  background: var(--color-fundo);
+  background: var(--color-creme);
   color: var(--color-tinta);
+}
+
+/* O cabeçalho fixo não pode cobrir o topo da seção quando se chega por âncora (#busca). */
+[id] {
+  scroll-margin-top: 5rem;
 }

@@ -10,23 +10,33 @@ import type { Imovel } from '@/lib/imoveis/tipos';
  * esteja à venda: a pessoa entrou procurando aluguel. Sem valor, fica "Consulte"
  * em vez de esconder o imóvel.
  */
-export function Preco({ imovel, finalidade }: { imovel: Imovel; finalidade?: FinalidadeDoSite }) {
+export function Preco({
+  imovel,
+  finalidade,
+  tamanho = 'normal',
+}: {
+  imovel: Imovel;
+  finalidade?: FinalidadeDoSite;
+  tamanho?: 'normal' | 'grande';
+}) {
   const aluguel = imovel.finalidades.includes('aluguel') ? imovel.aluguelCents : null;
   const venda = imovel.finalidades.includes('venda') ? imovel.precoVendaCents : null;
   const aluguelPrimeiro = finalidade ? finalidade === 'aluguel' : aluguel !== null;
 
   const linhas = [
-    aluguel !== null ? { chave: 'aluguel', texto: `${reais(aluguel)}`, sufixo: '/mês' } : null,
-    venda !== null ? { chave: 'venda', texto: reais(venda), sufixo: '' } : null,
+    aluguel !== null ? { texto: reais(aluguel), sufixo: ' /mês' } : null,
+    venda !== null ? { texto: reais(venda), sufixo: '' } : null,
   ].filter((linha) => linha !== null);
 
   if (!aluguelPrimeiro) linhas.reverse();
-  if (linhas.length === 0) return <p className="text-lg font-semibold">Consulte</p>;
+
+  const classe = tamanho === 'grande' ? 'text-2xl' : 'text-lg';
+  if (linhas.length === 0) return <p className={`${classe} font-semibold`}>Consulte</p>;
 
   const [principal, secundaria] = linhas;
   return (
     <div>
-      <p className="text-lg font-semibold">
+      <p className={`${classe} font-semibold`}>
         {principal.texto}
         {principal.sufixo && <span className="text-sm font-normal text-suave">{principal.sufixo}</span>}
       </p>

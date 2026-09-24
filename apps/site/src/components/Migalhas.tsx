@@ -24,7 +24,7 @@ export function Migalhas({ itens }: { itens: readonly Migalha[] }) {
                 </span>
               ) : (
                 <>
-                  <Link href={migalha.caminho} className="hover:text-marca">
+                  <Link href={migalha.caminho} className="hover:text-bronze">
                     {migalha.nome}
                   </Link>
                   <span aria-hidden="true">›</span>

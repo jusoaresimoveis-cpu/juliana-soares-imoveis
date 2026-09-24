@@ -24,7 +24,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const fixas: MetadataRoute.Sitemap = [
     { url: SITE.url, lastModified: maisRecente(naVitrine) },
-    { url: `${SITE.url}/anuncie` },
+    { url: `${SITE.url}/cadastrar-imovel` },
+    { url: `${SITE.url}/sobre` },
+    { url: `${SITE.url}/contato` },
   ];
 
   const listagens: MetadataRoute.Sitemap = [
