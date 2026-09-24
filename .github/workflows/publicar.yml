@@ -81,11 +81,19 @@ jobs:
       # Sobe e sai sem esperar: a espera fica no passo seguinte, com limite de
       # tempo. Na primeira execução, `deploy` esperando sozinho ficou preso em
       # "Building…" até o cancelamento, sem dizer por quê.
+      # O endereço é guardado MESMO quando o deploy falha: é ele que o passo de
+      # diagnóstico usa para mostrar o erro de verdade, e não o "Your deployment
+      # failed" genérico da CLI.
       - name: Deploy
         run: |
-          url=$(vercel deploy --prebuilt $FLAG_PROD --no-wait --token="${{ secrets.VERCEL_TOKEN }}")
+          set +e
+          vercel deploy --prebuilt $FLAG_PROD --no-wait --token="${{ secrets.VERCEL_TOKEN }}" > saida.txt 2> erros.txt
+          codigo=$?
+          cat erros.txt >&2
+          url=$(grep -ohE 'https://[a-z0-9-]+\.vercel\.app' saida.txt erros.txt | tail -n 1)
           echo "DEPLOY_URL=$url" >> "$GITHUB_ENV"
-          echo "Deploy criado ($ALVO): $url" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deploy ($ALVO): $url" >> "$GITHUB_STEP_SUMMARY"
+          exit $codigo
 
       - name: Aguardar ficar pronto
         run: vercel inspect "$DEPLOY_URL" --wait --timeout=5m --token="${{ secrets.VERCEL_TOKEN }}"
