@@ -44,6 +44,7 @@ describe('imovelDaLinha', () => {
       aluguelCents: 350_000,
       precoVendaCents: null,
       areaM2: 72,
+      areaTotalM2: 90,
       slugsAntigos: [],
       fotos: [{ url: `${BANCO}/storage/v1/object/public/property-media/org/imovel/capa.webp`, alt: 'Sala', largura: 2000, altura: 1500 }],
     });

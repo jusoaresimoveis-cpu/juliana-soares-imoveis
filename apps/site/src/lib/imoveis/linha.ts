@@ -114,6 +114,7 @@ export function imovelDaLinha(linha: LinhaDoSite, urlDoBanco: string): Imovel {
     banheiros: linha.bathrooms,
     vagas: linha.parking_spots,
     areaM2: linha.area_built ?? linha.area_total,
+    areaTotalM2: linha.area_total,
     bairro: linha.neighborhood?.trim() || null,
     cidade: linha.city?.trim() || null,
     fotos,

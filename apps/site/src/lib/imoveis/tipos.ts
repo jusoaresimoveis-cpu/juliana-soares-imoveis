@@ -46,6 +46,8 @@ export interface Imovel {
   vagas: number | null;
   /** Área privativa/construída, que é a que a pessoa compara. */
   areaM2: number | null;
+  /** Área total (com as áreas comuns, ou o terreno da casa), quando cadastrada. */
+  areaTotalM2: number | null;
 
   bairro: string | null;
   /** Nome da cidade como cadastrado. */
