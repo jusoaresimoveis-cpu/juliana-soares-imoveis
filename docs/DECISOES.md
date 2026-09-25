@@ -202,6 +202,13 @@ relação ao briefing, já combinado:
   somam, qualquer corretor da organização lê e grava documento de lead que não
   é dele. Na origem o risco hoje é baixo (o app não usa o bucket `documentos`),
   mas a correção lá é um `drop policy` de cada. Aqui a base já nasce sem elas.
+- **Achado na origem (25/09):** trocar o nome público de um imóvel já
+  cadastrado não salva. O gatilho `tg_property_slug` guarda o endereço antigo
+  em `property_slug_history` com o papel de quem salvou, e a tabela só tem
+  policy de leitura ("new row violates row-level security policy"). Aqui a
+  migration `20260925000200` faz o gatilho rodar como dono da função; na
+  origem, a correção é a mesma linha. Uma varredura dos outros gatilhos não
+  achou outro com esse defeito.
 
 ## Pendências
 

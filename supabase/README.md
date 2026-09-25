@@ -28,6 +28,9 @@ supabase/
   (`property_owners`, gravado por `definir_proprietario`) e as visitas à
   página de cada imóvel no site, por dia (`property_page_views`, contadas por
   `registrar_visita`).
+- `20260925000200_historico_de_endereco.sql`: trocar o "Nome no site" de um
+  imóvel já cadastrado voltou a salvar (o gatilho que guarda o endereço antigo
+  roda como dono da função).
 
 Dado de cliente não entra em migration: fica em `seeds/`, para o mesmo schema
 servir a outro cliente sem limpeza.
