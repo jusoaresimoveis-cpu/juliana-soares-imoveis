@@ -407,7 +407,9 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
             <Campo rotulo="Área total (m²)">
               <input inputMode="decimal" value={f.area_total} onChange={(e) => set('area_total')(e.target.value)} className={inputCls} />
             </Campo>
-            <Campo rotulo="Dormitórios">
+            {/* Os quartos que NÃO são suíte: o site soma os dois (2 quartos e
+                1 suíte são 3 dormitórios) e mostra os dois lado a lado. */}
+            <Campo rotulo="Quartos (sem as suítes)">
               <input inputMode="numeric" value={f.bedrooms} onChange={(e) => set('bedrooms')(apenasDigitos(e.target.value))} className={inputCls} />
             </Campo>
             <Campo rotulo="Suítes">

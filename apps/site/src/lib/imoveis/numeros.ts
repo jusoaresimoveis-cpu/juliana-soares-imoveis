@@ -1,14 +1,12 @@
-import { plural } from '@/lib/formato';
-
 import type { Imovel } from './tipos';
 
-export type TipoDeNumero = 'area' | 'quartos' | 'banheiros' | 'vagas';
+export type TipoDeNumero = 'area' | 'quartos' | 'suites' | 'banheiros' | 'vagas';
 
 export interface NumeroDoImovel {
   tipo: TipoDeNumero;
   valor: string;
   rotulo: string;
-  /** A segunda linha, menor: as suítes embaixo dos quartos, a área total embaixo da área. */
+  /** A segunda linha, menor: a área total embaixo da área. */
   extra: string | null;
 }
 
@@ -28,16 +26,16 @@ export function numerosDoImovel(imovel: Imovel): NumeroDoImovel[] {
     numeros.push({ tipo: 'area', valor: m2(imovel.areaM2), rotulo: 'm²', extra: total ? `${m2(total)} m² total` : null });
   }
 
+  /*
+   * Quartos e suítes lado a lado, do mesmo tamanho. No cadastro da Juliana,
+   * "Dormitórios" são os quartos que NÃO são suíte: 2 quartos e 1 suíte são 3
+   * dormitórios, e a pessoa precisa ver os dois números para somar.
+   */
   if (imovel.quartos) {
-    numeros.push({
-      tipo: 'quartos',
-      valor: String(imovel.quartos),
-      rotulo: imovel.quartos === 1 ? 'quarto' : 'quartos',
-      extra: imovel.suites ? plural(imovel.suites, 'suíte', 'suítes') : null,
-    });
-  } else if (imovel.suites) {
-    // Cadastro só com as suítes: elas não podem sumir junto com os quartos.
-    numeros.push({ tipo: 'quartos', valor: String(imovel.suites), rotulo: imovel.suites === 1 ? 'suíte' : 'suítes', extra: null });
+    numeros.push({ tipo: 'quartos', valor: String(imovel.quartos), rotulo: imovel.quartos === 1 ? 'quarto' : 'quartos', extra: null });
+  }
+  if (imovel.suites) {
+    numeros.push({ tipo: 'suites', valor: String(imovel.suites), rotulo: imovel.suites === 1 ? 'suíte' : 'suítes', extra: null });
   }
 
   if (imovel.banheiros) {

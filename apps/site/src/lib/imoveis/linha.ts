@@ -72,9 +72,13 @@ const situacaoConhecida = (valor: string): valor is PropertyStatus =>
  * O título quando a Juliana não escreveu um: o que a pessoa procuraria.
  * "Apartamento com 2 quartos em Meia Praia, Itapema"
  */
-export function tituloPadrao(linha: Pick<LinhaDoSite, 'property_type' | 'bedrooms' | 'neighborhood' | 'city'>): string {
+export function tituloPadrao(
+  linha: Pick<LinhaDoSite, 'property_type' | 'bedrooms' | 'suites' | 'neighborhood' | 'city'>,
+): string {
   const tipo = tipoConhecido(linha.property_type) ? PROPERTY_TYPE_LABEL[linha.property_type] : 'Imóvel';
-  const quartos = linha.bedrooms ? ` com ${plural(linha.bedrooms, 'quarto', 'quartos')}` : '';
+  // Os quartos do cadastro não contam as suítes: 2 quartos e 1 suíte são 3.
+  const dormitorios = (linha.bedrooms ?? 0) + (linha.suites ?? 0);
+  const quartos = dormitorios ? ` com ${plural(dormitorios, 'quarto', 'quartos')}` : '';
   const onde = [linha.neighborhood?.trim(), linha.city?.trim()].filter(Boolean).join(', ');
   return `${tipo}${quartos}${onde ? ` em ${onde}` : ''}`;
 }

@@ -39,7 +39,8 @@ describe('imovelDaLinha', () => {
     const imovel = imovelDaLinha(linha(), BANCO);
     expect(imovel).toMatchObject({
       codigo: '1a2b',
-      titulo: 'Apartamento com 2 quartos em Meia Praia, Itapema',
+      // 2 quartos e 1 suíte no cadastro: são 3 dormitórios.
+      titulo: 'Apartamento com 3 quartos em Meia Praia, Itapema',
       finalidades: ['aluguel'],
       aluguelCents: 350_000,
       precoVendaCents: null,
@@ -70,7 +71,7 @@ describe('imovelDaLinha', () => {
       linha({ media: [{ storage_path: 'a/b.jpg', width: null, height: null, alt_text: null, caption: null }] }),
       BANCO,
     ).fotos;
-    expect(foto).toMatchObject({ largura: 1600, altura: 1200, alt: 'Apartamento com 2 quartos em Meia Praia, Itapema, foto 1' });
+    expect(foto).toMatchObject({ largura: 1600, altura: 1200, alt: 'Apartamento com 3 quartos em Meia Praia, Itapema, foto 1' });
   });
 
   it('valor fora do contrato não quebra a página', () => {
@@ -83,10 +84,19 @@ describe('imovelDaLinha', () => {
 
 describe('tituloPadrao', () => {
   it('usa só o que existe', () => {
-    expect(tituloPadrao({ property_type: 'terreno', bedrooms: null, neighborhood: null, city: 'Porto Belo' })).toBe(
+    expect(tituloPadrao({ property_type: 'terreno', bedrooms: null, suites: null, neighborhood: null, city: 'Porto Belo' })).toBe(
       'Terreno em Porto Belo',
     );
-    expect(tituloPadrao({ property_type: 'kitnet', bedrooms: 1, neighborhood: ' ', city: null })).toBe('Kitnet com 1 quarto');
+    expect(tituloPadrao({ property_type: 'kitnet', bedrooms: 1, suites: null, neighborhood: ' ', city: null })).toBe('Kitnet com 1 quarto');
+  });
+
+  it('conta as suítes junto com os quartos, que no cadastro não as incluem', () => {
+    expect(tituloPadrao({ property_type: 'apartamento', bedrooms: 2, suites: 1, neighborhood: null, city: 'Itapema' })).toBe(
+      'Apartamento com 3 quartos em Itapema',
+    );
+    expect(tituloPadrao({ property_type: 'apartamento', bedrooms: null, suites: 4, neighborhood: null, city: null })).toBe(
+      'Apartamento com 4 quartos',
+    );
   });
 });
 

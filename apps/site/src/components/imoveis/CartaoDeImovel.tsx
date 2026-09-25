@@ -1,12 +1,13 @@
 import type { FinalidadeDoSite } from '@juliana/contracts';
-import { ArrowRight, Bath, BedDouble, Building2, Car, Maximize2 } from 'lucide-react';
+import { ArrowRight, Building2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { plural } from '@/lib/formato';
+import { numerosDoImovel } from '@/lib/imoveis/numeros';
 import type { Imovel } from '@/lib/imoveis/tipos';
 
 import { BotaoFavorito } from './BotaoFavorito';
+import { ICONE_DO_NUMERO } from './Caracteristicas';
 import { Preco } from './Preco';
 
 interface Props {
@@ -36,15 +37,13 @@ export function CartaoDeImovel({ imovel, finalidade, prioridade = false }: Props
   const capa = imovel.fotos[0];
   const onde = [imovel.cidade, imovel.bairro].filter(Boolean).join(' - ');
 
-  const itens = [
-    imovel.quartos
-      ? { Icone: BedDouble, texto: plural(imovel.quartos, 'quarto', 'quartos') }
-      : imovel.suites
-        ? { Icone: BedDouble, texto: plural(imovel.suites, 'suíte', 'suítes') }
-        : null,
-    imovel.banheiros ? { Icone: Bath, texto: plural(imovel.banheiros, 'banheiro', 'banheiros') } : null,
-    imovel.vagas ? { Icone: Car, texto: plural(imovel.vagas, 'vaga', 'vagas') } : null,
-  ].filter((item) => item !== null);
+  // Os mesmos números da página do imóvel, na mesma ordem, com quartos e
+  // suítes lado a lado. A área entra na lista: numa linha à parte, o cartão
+  // ficava com três linhas quando a vaga não cabia na primeira.
+  const itens = numerosDoImovel(imovel).map((numero) => ({
+    Icone: ICONE_DO_NUMERO[numero.tipo],
+    texto: `${numero.valor} ${numero.rotulo}`,
+  }));
 
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-linha transition hover:shadow-md">
@@ -94,12 +93,6 @@ export function CartaoDeImovel({ imovel, finalidade, prioridade = false }: Props
             ))}
           </ul>
         )}
-        {imovel.areaM2 ? (
-          <p className="flex items-center gap-1 text-xs text-suave">
-            <Maximize2 aria-hidden className="size-3.5" />
-            {imovel.areaM2.toLocaleString('pt-BR')} m²
-          </p>
-        ) : null}
 
         {/* Só aparência: quem leva ao imóvel é o link esticado do título. */}
         <span

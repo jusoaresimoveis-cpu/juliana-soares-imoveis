@@ -96,7 +96,10 @@ export function schemaDoImovel(imovel: Imovel, url: string): Schema {
     about: {
       '@type': tipoNoSchema(imovel.tipo),
       name: PROPERTY_TYPE_LABEL[imovel.tipo],
-      ...(imovel.quartos ? { numberOfBedrooms: imovel.quartos } : {}),
+      // No cadastro, os quartos não contam as suítes: o total é a soma.
+      ...((imovel.quartos ?? 0) + (imovel.suites ?? 0) > 0
+        ? { numberOfBedrooms: (imovel.quartos ?? 0) + (imovel.suites ?? 0) }
+        : {}),
       ...(imovel.banheiros ? { numberOfBathroomsTotal: imovel.banheiros } : {}),
       ...(imovel.areaM2
         ? { floorSize: { '@type': 'QuantitativeValue', value: imovel.areaM2, unitCode: 'MTK' } }

@@ -187,6 +187,12 @@ relação ao briefing, já combinado:
   chama `/api/revalidar` do site pelo `pg_net`, com endereço e segredo no Vault.
 - **React 18 no CRM e 19 no site**, no mesmo monorepo: `resolve.dedupe` no Vite e
   `paths` no tsconfig do CRM (ver `apps/crm/README.md`).
+- **Quartos e suítes** (decisão do usuário, 25/09): no cadastro, "Quartos" são
+  os que NÃO são suíte, então 2 quartos e 1 suíte são 3 dormitórios. O site
+  mostra os dois lado a lado, do mesmo tamanho, na página e nos cartões. O
+  total (título padrão e `numberOfBedrooms` para o Google) é a soma. No CRM o
+  campo se chama "Quartos (sem as suítes)". O `bedrooms` do CRM de origem
+  contava tudo.
 - **O CRM abre no claro e no bronze** (decisão do usuário, 25/09), qualquer que
   seja o tema do aparelho. A origem seguia o aparelho; aqui o escuro vale só
   quando a pessoa escolhe no botão do topo, e a escolha fica no aparelho. A cor
