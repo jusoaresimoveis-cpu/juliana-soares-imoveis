@@ -123,16 +123,18 @@ function MediaCard({
 }) {
   return (
     <li className="group relative overflow-hidden rounded-md border border-line bg-card-2">
-      <div className="aspect-[4/3] w-full">
+      {/* A foto por cima da caixa (absolute): no fluxo, uma foto em pé esticaria
+          a miniatura além do 4:3 (ver a mesma nota em `pages/Properties.tsx`). */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
         {media.kind === 'image' ? (
           <img
             src={urlPublica(media.storage_path)}
             alt={media.alt_text ?? ''}
             loading="lazy"
-            className="h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover"
           />
         ) : (
-          <div className="grid h-full place-items-center text-tx-3">
+          <div className="absolute inset-0 grid place-items-center text-tx-3">
             {media.kind === 'video' ? <Video className="h-6 w-6" /> : <FileText className="h-6 w-6" />}
           </div>
         )}

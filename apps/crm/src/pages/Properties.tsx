@@ -138,11 +138,17 @@ export default function Properties() {
                 onClick={() => navigate(`/imoveis/${p.id}`)}
                 className="group flex w-full flex-col overflow-hidden rounded-lg border border-transparent bg-card text-left shadow-card transition-colors hover:border-pri-light"
               >
-                <div className="relative aspect-[4/3] w-full bg-card-2">
+                {/*
+                  A foto fica POR CIMA da caixa (absolute), e não dentro do fluxo.
+                  No fluxo, uma foto em pé é mais alta do que a caixa 4:3, e o CSS
+                  deixa a caixa crescer até caber o conteúdo: o cartão esticava e
+                  a lista ficava desalinhada. Assim toda capa sai do mesmo tamanho.
+                */}
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-card-2">
                   {capas?.[p.id] ? (
-                    <img src={capas[p.id]} alt="" loading="lazy" className="h-full w-full object-cover" />
+                    <img src={capas[p.id]} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
                   ) : (
-                    <div className="grid h-full place-items-center text-tx-3">
+                    <div className="absolute inset-0 grid place-items-center text-tx-3">
                       <ImageOff className="h-6 w-6" />
                     </div>
                   )}
