@@ -1,16 +1,17 @@
 -- =============================================================================
 -- SEED DA JULIANA
 --
--- O que é dela e não é schema: a organização, as etapas do funil e o vínculo
--- do usuário dela com a organização. Fica fora de `migrations/` de propósito
--- (dado de cliente não entra em migration): assim o mesmo schema serve de
--- base para outro cliente sem limpeza.
+-- O que é dela e não é schema: a organização, as etapas do funil e quem entra
+-- no CRM. Fica fora de `migrations/` de propósito (dado de cliente não entra
+-- em migration): assim o mesmo schema serve de base para outro cliente sem
+-- limpeza.
 --
--- Idempotente: rodar de novo atualiza, não duplica.
+-- Idempotente: rodar de novo não duplica nada. A organização e as etapas voltam
+-- para os valores daqui; o perfil de quem já existe não é tocado.
 --
 -- Como rodar, depois das migrations: SQL Editor do Supabase, colar e executar.
--- O usuário da Juliana precisa existir antes em Authentication → Users (criado
--- com o e-mail dela); a última parte só o encontra pelo e-mail.
+-- Os usuários precisam existir antes em Authentication → Users; a última parte
+-- os encontra pelo e-mail e avisa (sem falhar) quem ainda não foi criado.
 -- =============================================================================
 
 begin;
@@ -71,37 +72,42 @@ on conflict (organization_id, key) do update set
   is_won = excluded.is_won,
   is_lost = excluded.is_lost;
 
--- A Juliana é a administradora da própria conta.
-do $juliana$
+-- Quem entra, e com que papel.
+--
+-- A Juliana é GERENTE: atende e acompanha a carteira inteira, e o papel já nasce
+-- com alcance 'todos' nos avisos. O ADMIN é a agência, que cuida de sistema,
+-- integrações e verba (a tela de Inteligência é só do admin); ele nasce com
+-- alcance 'nenhum', porque não atende lead. É o mesmo arranjo do CRM de origem.
+do $usuarios$
 declare
   v_org uuid;
   v_usuario uuid;
+  u record;
 begin
   select id into v_org from public.organizations where slug = 'juliana-soares';
-  select id into v_usuario from auth.users where lower(email) = 'jusoaresimoveis@gmail.com';
-  if v_usuario is null then
-    raise notice 'Usuário jusoaresimoveis@gmail.com ainda não existe em Authentication → Users. Crie e rode este arquivo de novo.';
-    return;
-  end if;
 
-  insert into public.profiles (id, organization_id, full_name, email, phone, creci, title)
-  values (v_usuario, v_org, 'Juliana Soares', 'jusoaresimoveis@gmail.com', '+5547997354111',
-          'CRECI/SC 53396-F', 'Corretora de imóveis')
-  on conflict (id) do update set
-    organization_id = excluded.organization_id,
-    full_name = excluded.full_name,
-    email = excluded.email,
-    phone = excluded.phone,
-    creci = excluded.creci,
-    title = excluded.title;
+  for u in
+    select * from (values
+      ('jusoaresimoveis@gmail.com', 'Juliana Soares', '+5547997354111', 'CRECI/SC 53396-F', 'Corretora de imóveis', 'gerente'),
+      ('gutobuyno@gmail.com', 'Guto', null, null, 'Administrador do sistema', 'admin')
+    ) as linha(email, nome, telefone, creci, cargo, papel)
+  loop
+    select id into v_usuario from auth.users where lower(email) = u.email;
+    if v_usuario is null then
+      raise notice 'Usuário % ainda não existe em Authentication → Users. Crie e rode este arquivo de novo.', u.email;
+      continue;
+    end if;
 
-  insert into public.user_roles (user_id, organization_id, role)
-  values (v_usuario, v_org, 'admin')
-  on conflict (user_id, organization_id, role) do nothing;
+    -- Perfil que já existe fica como está: o nome e o telefone podem ter sido
+    -- ajustados no próprio CRM.
+    insert into public.profiles (id, organization_id, full_name, email, phone, creci, title)
+    values (v_usuario, v_org, u.nome, u.email, u.telefone, u.creci, u.cargo)
+    on conflict (id) do nothing;
 
-  -- O papel admin nasce com alcance 'nenhum' (é o padrão de quem cuida de
-  -- sistema e não atende). A Juliana atende todos os leads da conta.
-  update public.notification_preferences set lead_scope = 'todos' where profile_id = v_usuario;
-end $juliana$;
+    insert into public.user_roles (user_id, organization_id, role)
+    values (v_usuario, v_org, u.papel::public.app_role)
+    on conflict (user_id, organization_id, role) do nothing;
+  end loop;
+end $usuarios$;
 
 commit;

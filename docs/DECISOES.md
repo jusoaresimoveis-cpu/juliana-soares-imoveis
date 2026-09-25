@@ -237,9 +237,9 @@ relação ao briefing, já combinado:
       Criado com a exposição automática de tabelas DESLIGADA e a RLS automática
       ligada: tabela nova precisa de GRANT explícito, inclusive para o
       `service_role`.
-- [ ] Usuário da Juliana (Authentication → Users) e o seed
-      (`supabase/seeds/juliana.sql`). Depois, desligar o cadastro público no
-      Auth: quem cria corretor é o CRM (`criar-corretor`).
+- [x] Usuários e seed (25/09): a Juliana é GERENTE e a agência
+      (gutobuyno@gmail.com) é ADMIN, como no CRM de origem. Cadastro público
+      desligado no Auth: quem cria corretor é o CRM (`criar-corretor`).
 - [ ] Vercel: variáveis do site (`.secrets/site.env`) e o projeto do CRM
       (`apps/crm`, variáveis em `.secrets/crm.env`). Com a URL do CRM: pôr em
       `APP_ORIGIN` e no Site URL / Redirect URLs do Auth.
