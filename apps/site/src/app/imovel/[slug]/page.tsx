@@ -1,10 +1,10 @@
 import { PROPERTY_STATUS_LABEL, rotuloDaComodidade } from '@juliana/contracts';
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import { notFound, permanentRedirect } from 'next/navigation';
 
 import { BotaoWhatsApp } from '@/components/BotaoWhatsApp';
 import { CartaoDeImovel } from '@/components/imoveis/CartaoDeImovel';
+import { GaleriaDoImovel } from '@/components/imoveis/GaleriaDoImovel';
 import { Caracteristicas } from '@/components/imoveis/Caracteristicas';
 import { Preco } from '@/components/imoveis/Preco';
 import { JsonLd } from '@/components/JsonLd';
@@ -80,7 +80,6 @@ export default async function Page(props: PageProps<'/imovel/[slug]'>) {
     .filter((outro) => outro.codigo !== imovel.codigo)
     .slice(0, 4);
 
-  const [capa, ...demaisFotos] = imovel.fotos;
   const mensagem = mensagemDoImovel(imovel);
 
   return (
@@ -95,25 +94,7 @@ export default async function Page(props: PageProps<'/imovel/[slug]'>) {
         </p>
       )}
 
-      <div className="space-y-2">
-        <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-areia sm:aspect-[16/9]">
-          {capa ? (
-            // A capa é sempre o maior elemento desta página: é o caso de `preload`.
-            <Image src={capa.url} alt={capa.alt} fill preload sizes="(min-width: 1280px) 1216px, 100vw" className="object-cover" />
-          ) : (
-            <div className="flex h-full items-center justify-center text-suave">Sem foto</div>
-          )}
-        </div>
-        {demaisFotos.length > 0 && (
-          <ul className="-mx-4 flex snap-x gap-2 overflow-x-auto px-4">
-            {demaisFotos.map((foto) => (
-              <li key={foto.url} className="relative aspect-[4/3] w-48 shrink-0 snap-start overflow-hidden rounded-lg sm:w-64">
-                <Image src={foto.url} alt={foto.alt} fill sizes="256px" className="object-cover" />
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <GaleriaDoImovel fotos={imovel.fotos} titulo={imovel.titulo} />
 
       <header className="space-y-2">
         <h1 className="font-serif text-3xl leading-tight sm:text-4xl">{imovel.titulo}</h1>

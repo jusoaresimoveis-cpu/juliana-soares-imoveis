@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { prepararFoto } from '@/lib/fotos';
 import type { Database } from '@/lib/database.types';
 import type { PropertyPurpose, PropertyStatus, PropertyType } from '@contracts';
 
@@ -226,14 +227,21 @@ export function useMediaActions(orgId: string | undefined, propertyId: string | 
       const jaTemCapa = (atuais ?? []).some((x) => (x as { is_cover: boolean }).is_cover);
 
       for (const arquivo of arquivos) {
-        const ext = arquivo.name.split('.').pop()?.toLowerCase() ?? 'bin';
+        // Foto sobe reduzida (ver `lib/fotos.ts`); vídeo sobe como veio.
+        const foto = arquivo.type.startsWith('image/') ? await prepararFoto(arquivo) : null;
+        const corpo = foto?.arquivo ?? arquivo;
+        const ext = foto?.extensao ?? arquivo.name.split('.').pop()?.toLowerCase() ?? 'bin';
         // Pasta por organização: é o primeiro segmento que a política do
         // storage confere. Depois por imóvel, para apagar em bloco.
         const caminho = `${orgId}/${propertyId}/${crypto.randomUUID()}.${ext}`;
 
         const { error: upErro } = await supabase.storage
           .from(BUCKET)
-          .upload(caminho, arquivo, { cacheControl: '31536000', upsert: false });
+          .upload(caminho, corpo, {
+            cacheControl: '31536000',
+            upsert: false,
+            contentType: foto?.tipo ?? arquivo.type,
+          });
         if (upErro) throw upErro;
 
         const kind = arquivo.type.startsWith('video/')
@@ -249,8 +257,11 @@ export function useMediaActions(orgId: string | undefined, propertyId: string | 
           storage_path: caminho,
           position: posicao,
           is_cover: kind === 'image' && !jaTemCapa && posicao === 0,
-          mime_type: arquivo.type,
-          bytes: arquivo.size,
+          mime_type: foto?.tipo ?? arquivo.type,
+          bytes: corpo.size,
+          // O site usa as dimensões na prévia do link (WhatsApp, Facebook).
+          width: foto?.largura ?? null,
+          height: foto?.altura ?? null,
         });
         if (insErro) throw insErro;
         posicao += 1;

@@ -51,6 +51,11 @@ body {
   color: var(--color-tinta);
 }
 
+/* Com a foto em destaque aberta, a página de trás não rola junto. */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
 /* O cabeçalho fixo não pode cobrir o topo da seção quando se chega por âncora (#busca). */
 [id] {
   scroll-margin-top: 5rem;

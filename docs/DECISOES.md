@@ -246,8 +246,13 @@ relação ao briefing, já combinado:
   - o fundo da chamada de captação;
   - a assinatura dela (elemento do modelo, ao lado da foto do topo).
 - [ ] Listagem: filtros de quartos e banheiros, e ordenação.
-- [ ] Detalhe do imóvel no desenho do modelo: galeria grande, mapa, formulário
-      de interesse, botões fixos de WhatsApp e visita.
+- [x] Galeria do imóvel (25/09): no computador, a capa à esquerda e duas
+      colunas de 4 à direita numa altura só (o título aparece sem rolar);
+      clicar abre a foto em destaque, com setas, teclado e arrastar. O CRM
+      reduz cada foto para 2048 px em JPEG antes de subir (perto de 400 KB).
+- [ ] Detalhe do imóvel no desenho do modelo: mapa, formulário de interesse,
+      botões fixos de WhatsApp e visita, e as garantias do aluguel (o
+      `site_imoveis` ainda não devolve `rental_guarantees`).
 - [ ] Formulário de captação (Cadastrar Imóvel), depois do banco.
 - [ ] Depoimentos do Google: pedir acesso à API do Perfil da Empresa.
 - [ ] CEP exato do escritório (`config/site.ts`).
