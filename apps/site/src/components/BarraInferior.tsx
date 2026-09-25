@@ -43,7 +43,7 @@ export function BarraInferior() {
         ))}
         <li className="flex flex-1">
           <a
-            href={linkDoWhatsApp('Olá, Juliana! Vim pelo site.')}
+            href={linkDoWhatsApp()}
             target="_blank"
             rel="noopener"
             className={`${classe} text-whatsapp`}

@@ -27,7 +27,7 @@ export default function Page() {
         </p>
       </header>
 
-      <BotaoWhatsApp mensagem="Olá, Juliana! Vim pelo site." className="w-full sm:w-auto" />
+      <BotaoWhatsApp className="w-full sm:w-auto" />
 
       {/* Nome, endereço e telefone iguais aos do Perfil da Empresa no Google. */}
       <address className="space-y-5 rounded-lg bg-white p-6 not-italic ring-1 ring-linha">

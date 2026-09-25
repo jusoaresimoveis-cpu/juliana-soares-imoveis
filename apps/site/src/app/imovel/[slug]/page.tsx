@@ -16,6 +16,7 @@ import { bairrosDe, cidadeDoImovel, filtrarImoveis, urlDaListagem } from '@/lib/
 import { resumoDoImovel } from '@/lib/imoveis/texto';
 import { STATUS_NA_VITRINE } from '@/lib/imoveis/tipos';
 import { schemaDoImovel, type Migalha } from '@/lib/seo/schema';
+import { mensagemDoImovel } from '@/lib/whatsapp';
 
 export const revalidate = 3600;
 
@@ -80,7 +81,7 @@ export default async function Page(props: PageProps<'/imovel/[slug]'>) {
     .slice(0, 4);
 
   const [capa, ...demaisFotos] = imovel.fotos;
-  const mensagem = `Olá, Juliana! Tenho interesse no imóvel cód. ${imovel.codigo}: ${SITE.url}/imovel/${imovel.slug}`;
+  const mensagem = mensagemDoImovel(imovel);
 
   return (
     <article className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8 lg:py-10">

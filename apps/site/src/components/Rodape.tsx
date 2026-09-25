@@ -42,7 +42,7 @@ export function Rodape() {
               {SITE.telefone.exibicao}
             </a>
             <a
-              href={linkDoWhatsApp('Olá, Juliana! Vim pelo site.')}
+              href={linkDoWhatsApp()}
               target="_blank"
               rel="noopener"
               className="flex items-center gap-2 hover:text-white"

@@ -155,7 +155,7 @@ export function Hero() {
             >
               Ver imóveis para alugar
             </Botao>
-            <BotaoWhatsApp mensagem="Olá, Juliana! Vim pelo site." />
+            <BotaoWhatsApp />
           </div>
         </div>
       </div>

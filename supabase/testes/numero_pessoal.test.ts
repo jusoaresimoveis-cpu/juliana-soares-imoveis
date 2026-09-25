@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { refDoSite } from '../../packages/contracts/src/rastreio';
 import { comoDono, conectar, desconectar, prepararPrivilegios, IDS } from './banco';
 
 /**
@@ -134,6 +135,29 @@ describe('com a marca ligada', () => {
       },
     });
     expect(await oQueFicou('+5547999770005', 'ctwa-1')).toMatchObject({ conversas: 1, mensagens: 1, leads: 1 });
+  });
+
+  it('o botão do site é prova, com imóvel e sem imóvel', async () => {
+    // As mensagens do jeito que o site as preenche (apps/site/src/lib/whatsapp.ts).
+    await evento({
+      telefone: '+5547999770007',
+      texto: `Olá, Juliana! Tenho interesse neste imóvel: https://julianasoaresimoveis.com.br/imovel/apartamento-1000 (${refDoSite('1000')})`,
+      id: 'site-imovel',
+    });
+    expect(await oQueFicou('+5547999770007', 'site-imovel')).toMatchObject({
+      conversas: 1,
+      mensagens: 1,
+      leads: 1,
+      fila: 'processado',
+    });
+
+    await evento({ telefone: '+5547999770008', texto: `Olá, Juliana! Vim pelo site. (${refDoSite()})`, id: 'site-geral' });
+    expect(await oQueFicou('+5547999770008', 'site-geral')).toMatchObject({
+      conversas: 1,
+      mensagens: 1,
+      leads: 1,
+      fila: 'processado',
+    });
   });
 });
 

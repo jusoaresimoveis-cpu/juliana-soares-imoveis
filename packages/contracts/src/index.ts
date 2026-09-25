@@ -11,7 +11,8 @@
  * exportado daqui ou não existe.
  *
  * Os módulos em inglês vieram do CRM de origem (SelectusConnect) junto com o
- * clone; `aluguel.ts`, `imovel.ts` e `localidades.ts` são deste projeto.
+ * clone; `aluguel.ts`, `imovel.ts`, `localidades.ts` e `rastreio.ts` são deste
+ * projeto.
  */
 
 export * from './locales';
@@ -34,3 +35,4 @@ export * from './angulos';
 export * from './aluguel';
 export * from './imovel';
 export * from './localidades';
+export * from './rastreio';

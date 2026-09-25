@@ -30,7 +30,6 @@ export function Cabecalho() {
         {/* No celular o WhatsApp fica na barra inferior; aqui ele só espremeria o logo. */}
         <div className="hidden lg:block">
           <BotaoWhatsApp
-            mensagem="Olá, Juliana! Vim pelo site."
             rotulo={
               <>
                 <span className="xl:hidden">WhatsApp</span>

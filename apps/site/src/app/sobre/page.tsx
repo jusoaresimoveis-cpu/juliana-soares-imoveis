@@ -47,7 +47,7 @@ export default function Page() {
             ))}
           </ul>
 
-          <BotaoWhatsApp mensagem="Olá, Juliana! Vim pelo site." rotulo="Falar com a Juliana" className="w-full sm:w-auto" />
+          <BotaoWhatsApp rotulo="Falar com a Juliana" className="w-full sm:w-auto" />
         </div>
       </div>
     </div>

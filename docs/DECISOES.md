@@ -128,10 +128,16 @@ relação ao briefing, já combinado:
 - **Sem prova, não entra.** Cliente orgânico (indicação, Instagram, cliente
   antigo) ela cadastra à mão; dali em diante, as mensagens daquele número entram
   sozinhas.
+- **Os botões do site já levam o `Ref.`** (decisão do usuário, 25/09): o do
+  imóvel manda `(Ref. 1000-A)` com o link da página, e os outros ganham
+  `(Ref. SITE-A)` no fim (`refDoSite`, em `packages/contracts/src/rastreio.ts`).
+  Todo contato que vem do site vira lead, ligado ao imóvel quando há um,
+  inclusive o proprietário que chama pelo "Cadastrar imóvel". O `A` é só
+  porque a leitura do CRM de origem exige uma variante; o site não tem A/B/C.
 - **Link rastreado (a fazer):** `/w/<código>` registra o clique (canal, imóvel,
-  UTMs, `gclid`, `fbclid`) e abre o WhatsApp com a mensagem já carimbada com o
-  `Ref.`. Enquanto não existir, o botão do site é `wa.me` direto, e esses
-  contatos **não** entram no CRM sozinhos.
+  UTMs, `gclid`, `fbclid`) antes de abrir o WhatsApp com o mesmo `Ref.`. Até
+  lá, o lead do site chega sem UTM nem `gclid`: dá para saber que veio do
+  site, não de qual campanha.
 - **OLX, ZAP e VivaReal:** integração oficial do Grupo OLX, com webhook de leads
   e feed XML. Exige plano de anunciante profissional e homologação do endpoint.
   Docs: https://developers.grupozap.com/webhooks/integration_leads.html
@@ -270,7 +276,8 @@ relação ao briefing, já combinado:
       (segredos gravados em 25/09). Falta ela conectar o número pelo CRM
       (Configurações → WhatsApp) e conferir que conversa pessoal não entra.
 - [ ] Meta da Juliana: conectar a conta de anúncio no CRM (Anúncios).
-- [ ] Link rastreado `/w/<código>` e captura completa de UTMs e click IDs.
+- [ ] Link rastreado `/w/<código>` e captura completa de UTMs e click IDs. O
+      `Ref.` já vai na mensagem desde 25/09; falta registrar o clique.
 - [ ] Política de privacidade (LGPD), exigida antes de ligar Google Ads.
 - [ ] Página "Sobre", com a bio que a Juliana escrever.
 - [ ] **Lançamento:** `SITE_NO_AR=sim` nas variáveis de produção do site e o
