@@ -254,6 +254,28 @@ relação ao briefing, já combinado:
       botões fixos de WhatsApp e visita, e as garantias do aluguel (o
       `site_imoveis` ainda não devolve `rental_guarantees`).
 - [ ] Formulário de captação (Cadastrar Imóvel), depois do banco.
+- [ ] **Painel do proprietário** (ideia do usuário, 25/09; para depois). O dono
+      que entrega o imóvel para a Juliana administrar a locação acompanha, num
+      painel só dele, o desempenho do SEU imóvel: visitas à página, cliques no
+      WhatsApp, contatos, visitas agendadas.
+      - Cadastro: no formulário do imóvel no CRM, os dados do proprietário:
+        nome completo, cidade onde mora e telefone com DDD. Hoje o banco não
+        tem nada disso. Como um dono pode ter mais de um imóvel, o desenho
+        provável é uma tabela de proprietários ligada ao imóvel, com GRANT
+        explícito (regra do projeto).
+      - Acesso, como o usuário definiu: login é o telefone com DDD; a senha é
+        fixa, sem troca, os 4 últimos dígitos do telefone seguidos do
+        primeiro nome em minúsculas (ex.: `4111maria`). Ele vê só o imóvel
+        dele.
+      - A decidir quando for fazer: essa senha se adivinha sabendo o telefone
+        e o nome do dono. Mostrando só números (sem nome nem telefone de quem
+        procurou, que é dado pessoal pela LGPD), o risco fica pequeno. A
+        alternativa com o mesmo trabalho para o dono é um código aleatório
+        gerado pelo CRM e mandado pela Juliana.
+      - Depende do rastreio: hoje o site não registra visita à página nem
+        clique por imóvel. Os cliques vêm com o link rastreado `/w/`, e as
+        visitas pedem um contador por imóvel. Contatos e visitas agendadas já
+        existem no CRM (leads e agenda ligados ao imóvel).
 - [ ] Depoimentos do Google: pedir acesso à API do Perfil da Empresa.
 - [ ] CEP exato do escritório (`config/site.ts`).
 - [ ] Endereço no Perfil da Empresa: hoje está "sem local físico". Decidir se
