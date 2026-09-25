@@ -19,14 +19,18 @@ begin;
 -- NAP igual ao do site (`apps/site/src/config/site.ts`) e ao Perfil da Empresa.
 insert into public.organizations (
   name, slug, creci, phone, phone_country, email, city, state, address,
-  default_locale, enabled_locales, timezone, custom_domain, brand_color, whatsapp_instance_limit
+  default_locale, enabled_locales, timezone, custom_domain, brand_color, whatsapp_instance_limit,
+  whatsapp_numero_pessoal
 ) values (
   'Juliana Soares Corretora de Imóveis', 'juliana-soares', 'CRECI/SC 53396-F',
   '+5547997354111', 'BR', 'jusoaresimoveis@gmail.com', 'Itapema', 'SC', 'Rua 143, 40, Sala 08, Centro',
   -- Sem mercados internacionais: ela atende Itapema e Porto Belo, em português.
   'pt-BR', array['pt-BR'], 'America/Sao_Paulo', 'julianasoaresimoveis.com.br', '#8B6A40',
   -- Um número só, o dela.
-  1
+  1,
+  -- E ele também é o celular pessoal: só entra conversa de cliente
+  -- (migration 20260925000000_numero_pessoal).
+  true
 )
 on conflict (slug) do update set
   name = excluded.name,
@@ -40,7 +44,8 @@ on conflict (slug) do update set
   enabled_locales = excluded.enabled_locales,
   custom_domain = excluded.custom_domain,
   brand_color = excluded.brand_color,
-  whatsapp_instance_limit = excluded.whatsapp_instance_limit;
+  whatsapp_instance_limit = excluded.whatsapp_instance_limit,
+  whatsapp_numero_pessoal = excluded.whatsapp_numero_pessoal;
 
 -- As etapas de `DEFAULT_STAGES` (packages/contracts/src/pipeline.ts), com a
 -- visita ANTES da proposta. Servem para compra e para aluguel: numa locação, a

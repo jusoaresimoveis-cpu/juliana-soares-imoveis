@@ -126,6 +126,11 @@ relação ao briefing, já combinado:
   e feed XML. Exige plano de anunciante profissional e homologação do endpoint.
   Docs: https://developers.grupozap.com/webhooks/integration_leads.html
 - **Marketplace orgânico:** não tem API. Código por imóvel mais link rastreado.
+- **Feito em 25/09 (`organizations.whatsapp_numero_pessoal`, ligado no seed da
+  Juliana):** com a marca, conversa sem lead e sem prova de origem não é
+  gravada (nem conversa, nem mensagem, nem aviso), o conteúdo bruto sai da
+  fila e grupo nunca entra. A origem guardava toda conversa na tela de
+  Conversas, porque lá o número é da empresa; sem a marca, continua assim.
 - **Limite da uazapi:** a Meta não aceita eventos de conversão de conversa
   (clique para WhatsApp) sem a conta oficial do WhatsApp Business (WABA). Leads
   que passam pelo site continuam podendo voltar para a Meta como evento do site.
@@ -243,7 +248,9 @@ relação ao briefing, já combinado:
 - [ ] Vercel: variáveis do site (`.secrets/site.env`) e o projeto do CRM
       (`apps/crm`, variáveis em `.secrets/crm.env`). Com a URL do CRM: pôr em
       `APP_ORIGIN` e no Site URL / Redirect URLs do Auth.
-- [ ] WhatsApp da Juliana: instância na uazapi e a conexão pelo CRM.
+- [ ] WhatsApp da Juliana: o mesmo servidor uazapi do Igor, instância nova
+      (segredos gravados em 25/09). Falta ela conectar o número pelo CRM
+      (Configurações → WhatsApp) e conferir que conversa pessoal não entra.
 - [ ] Meta da Juliana: conectar a conta de anúncio no CRM (Anúncios).
 - [ ] Link rastreado `/w/<código>` e captura completa de UTMs e click IDs.
 - [ ] Política de privacidade (LGPD), exigida antes de ligar Google Ads.

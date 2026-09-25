@@ -1865,6 +1865,7 @@ export type Database = {
           updated_at: string
           whatsapp_business_account_id: string | null
           whatsapp_instance_limit: number
+          whatsapp_numero_pessoal: boolean
           zip_code: string | null
         }
         Insert: {
@@ -1898,6 +1899,7 @@ export type Database = {
           updated_at?: string
           whatsapp_business_account_id?: string | null
           whatsapp_instance_limit?: number
+          whatsapp_numero_pessoal?: boolean
           zip_code?: string | null
         }
         Update: {
@@ -1931,6 +1933,7 @@ export type Database = {
           updated_at?: string
           whatsapp_business_account_id?: string | null
           whatsapp_instance_limit?: number
+          whatsapp_numero_pessoal?: boolean
           zip_code?: string | null
         }
         Relationships: []
