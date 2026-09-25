@@ -231,10 +231,18 @@ relação ao briefing, já combinado:
 - [ ] Links do Facebook e do YouTube dela para o `sameAs` do schema.
 - [x] Clone do CRM, schema base, aluguel no imóvel e o site lendo do banco
       (24/09). O código está pronto; falta subir (item abaixo).
-- [ ] **Subir o banco e o CRM:** projeto Supabase da Juliana (login da CLI,
-      `db push`, seed, segredos, Vault, edge functions: ver
-      `supabase/README.md`), projeto do CRM na Vercel dela e as variáveis do
-      site (`apps/site/.env.example`).
+- [x] Banco no ar (25/09): projeto `qwwsvyofjpoqpaniikke` (sa-east-1), as 5
+      migrations aplicadas, as 14 edge functions publicadas, segredos das
+      funções e do Vault gravados (valores em `.secrets/`, fora do Git).
+      Criado com a exposição automática de tabelas DESLIGADA e a RLS automática
+      ligada: tabela nova precisa de GRANT explícito, inclusive para o
+      `service_role`.
+- [ ] Usuário da Juliana (Authentication → Users) e o seed
+      (`supabase/seeds/juliana.sql`). Depois, desligar o cadastro público no
+      Auth: quem cria corretor é o CRM (`criar-corretor`).
+- [ ] Vercel: variáveis do site (`.secrets/site.env`) e o projeto do CRM
+      (`apps/crm`, variáveis em `.secrets/crm.env`). Com a URL do CRM: pôr em
+      `APP_ORIGIN` e no Site URL / Redirect URLs do Auth.
 - [ ] WhatsApp da Juliana: instância na uazapi e a conexão pelo CRM.
 - [ ] Meta da Juliana: conectar a conta de anúncio no CRM (Anúncios).
 - [ ] Link rastreado `/w/<código>` e captura completa de UTMs e click IDs.

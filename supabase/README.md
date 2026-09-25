@@ -24,6 +24,15 @@ supabase/
 Dado de cliente não entra em migration: fica em `seeds/`, para o mesmo schema
 servir a outro cliente sem limpeza.
 
+## O projeto no ar
+
+`qwwsvyofjpoqpaniikke` (sa-east-1), ligado a esta pasta pelo `supabase link`.
+Foi criado com a **exposição automática de tabelas desligada** e a **RLS
+automática ligada**: tabela nova chega à API sem privilégio de leitura e
+escrita, nem para o `service_role`, então toda migration que cria tabela
+precisa do GRANT dela. Função nova nasce executável por todos (o padrão do
+Postgres); feche com REVOKE quando não for para a API.
+
 ## Subir o projeto da Juliana (uma vez)
 
 A senha do banco e os tokens não passam pelo chat nem pelo repositório.

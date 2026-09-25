@@ -24,6 +24,9 @@ aluguel anual em Itapema e Porto Belo (SC). Leia `README.md` e
 - **Commit sai com a identidade da conta dona** (`git config --local`, ver
   `docs/DEPLOY.md`), senão a Vercel Hobby bloqueia o deploy. Confira com
   `git config --local user.email` antes de commitar.
+- **Tabela nova precisa de GRANT explícito**, inclusive para o `service_role`: o
+  projeto do Supabase nasceu com a exposição automática desligada, e tabela nova
+  chega à API só com `Dxtm`. A RLS liga sozinha (dois gatilhos de evento).
 - **A base do banco (`20260924000000_base.sql`) não se edita.** Mudança de schema é
   migration nova; teste que precisa ler SQL usa `supabase/testes/esquema.ts`.
 - **O CRM é React 18 e o site React 19.** Não suba o React do CRM sem tirar o

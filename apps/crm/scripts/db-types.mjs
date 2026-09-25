@@ -11,31 +11,28 @@
  * Aqui a saída só toca o arquivo depois de o comando terminar bem E o conteúdo
  * se parecer com o que deveria ser.
  *
- * O token sai de .secrets/supabase.env, fora do repositório, se não estiver no
- * ambiente.
+ * Roda da raiz do monorepo, que é onde está `supabase/` (e o `.temp` do
+ * `supabase link`). O acesso é o do `npx supabase login`; um
+ * SUPABASE_ACCESS_TOKEN no ambiente ou em `.secrets/supabase.env` vence.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
-const destino = join(raiz, 'src/lib/database.types.ts');
-const segredos = join(raiz, '../.secrets/supabase.env');
+const crm = join(dirname(fileURLToPath(import.meta.url)), '..');
+const raiz = join(crm, '../..');
+const destino = join(crm, 'src/lib/database.types.ts');
+const segredos = join(raiz, '.secrets/supabase.env');
 
 const env = { ...process.env };
 if (!env.SUPABASE_ACCESS_TOKEN && existsSync(segredos)) {
   for (const linha of readFileSync(segredos, 'utf8').split(/\r?\n/)) {
     const corte = linha.indexOf('=');
     if (corte < 1 || linha.trim().startsWith('#')) continue;
-    const chave = linha.slice(0, corte).trim();
-    if (!env[chave]) env[chave] = linha.slice(corte + 1).trim().replace(/^["']|["']$/g, '');
+    if (linha.slice(0, corte).trim() !== 'SUPABASE_ACCESS_TOKEN') continue;
+    env.SUPABASE_ACCESS_TOKEN = linha.slice(corte + 1).trim().replace(/^["']|["']$/g, '');
   }
-}
-
-if (!env.SUPABASE_ACCESS_TOKEN) {
-  console.error('SUPABASE_ACCESS_TOKEN ausente. Defina no ambiente ou em .secrets/supabase.env');
-  process.exit(1);
 }
 
 let saida;
@@ -43,8 +40,8 @@ try {
   // `shell: true` é obrigatório no Windows: `npx` é um `.cmd`, e o Node se
   // recusa a executá-lo sem shell (EINVAL) desde a correção de segurança do
   // spawn. Isso faz o Node avisar do DEP0190 — argumentos concatenados sem
-  // escape —, o que aqui não abre superfície: os cinco argumentos são
-  // literais fixos e nada vem de fora.
+  // escape —, o que aqui não abre superfície: os argumentos são literais fixos
+  // e nada vem de fora.
   saida = execFileSync('npx', ['supabase', 'gen', 'types', 'typescript', '--linked'], {
     cwd: raiz,
     env,

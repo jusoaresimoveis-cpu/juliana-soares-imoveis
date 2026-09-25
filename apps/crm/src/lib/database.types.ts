@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       availability_blocks: {
@@ -2071,7 +2096,7 @@ export type Database = {
           public_code: string
           public_title: string | null
           published_at: string | null
-          purpose: string
+          purpose: string | null
           recorte_path: string | null
           reinforcement_cents: number | null
           reinforcement_count: number | null
@@ -2132,6 +2157,7 @@ export type Database = {
           public_code?: string
           public_title?: string | null
           published_at?: string | null
+          purpose?: string | null
           recorte_path?: string | null
           reinforcement_cents?: number | null
           reinforcement_count?: number | null
@@ -2192,6 +2218,7 @@ export type Database = {
           public_code?: string
           public_title?: string | null
           published_at?: string | null
+          purpose?: string | null
           recorte_path?: string | null
           reinforcement_cents?: number | null
           reinforcement_count?: number | null
@@ -3677,6 +3704,7 @@ export type Database = {
       quem_ve_a_conversa: { Args: { _conv: string }; Returns: string[] }
       run_due_reminders: { Args: { _limit?: number }; Returns: number }
       sem_credencial: { Args: { _payload: Json }; Returns: Json }
+      site_imoveis: { Args: { _organizacao: string }; Returns: Json }
       slugify: { Args: { _txt: string }; Returns: string }
       snooze_reminder: {
         Args: { _id: string; _minutos: number }
@@ -3906,6 +3934,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       app_role: ["admin", "gerente", "corretor"],
