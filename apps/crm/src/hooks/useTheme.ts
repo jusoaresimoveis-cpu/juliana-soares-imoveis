@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 
-const KEY = 'sc-theme';
+/*
+ * `sc-tema`, e não mais `sc-theme`. O CRM seguia o tema do aparelho, e o
+ * efeito abaixo gravava o tema de quem só abriu o app: num celular escuro, a
+ * chave antiga guardou 'dark' sem ninguém escolher, e o CRM continuaria abrindo
+ * escuro. Agora ele abre no claro e o escuro vem só do botão (ver index.html).
+ */
+export const CHAVE_DO_TEMA = 'sc-tema';
 export type Theme = 'light' | 'dark';
 
 function current(): Theme {
@@ -15,7 +21,7 @@ export function useTheme() {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     try {
-      localStorage.setItem(KEY, theme);
+      localStorage.setItem(CHAVE_DO_TEMA, theme);
     } catch {
       /* storage bloqueado: o tema vale só nesta aba */
     }

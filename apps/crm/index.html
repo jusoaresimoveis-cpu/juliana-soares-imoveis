@@ -24,10 +24,11 @@
       // feia, e no celular ela acontece toda vez que o app é aberto.
       (function () {
         try {
-          var saved = localStorage.getItem('sc-theme');
-          var dark = saved
-            ? saved === 'dark'
-            : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          // Abre no claro, qualquer que seja o tema do aparelho: o escuro só
+          // vale quando a pessoa escolhe no botão do topo (decisão de 25/09).
+          // A chave é `sc-tema`, e não mais `sc-theme`, porque a antiga podia
+          // guardar o escuro do aparelho sem ninguém ter escolhido.
+          var dark = localStorage.getItem('sc-tema') === 'dark';
           if (dark) document.documentElement.classList.add('dark');
 
           // Só o essencial mora aqui: a paleta completa vive em src/lib/cores.ts

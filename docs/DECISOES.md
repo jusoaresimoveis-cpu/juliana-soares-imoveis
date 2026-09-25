@@ -181,6 +181,10 @@ relação ao briefing, já combinado:
   chama `/api/revalidar` do site pelo `pg_net`, com endereço e segredo no Vault.
 - **React 18 no CRM e 19 no site**, no mesmo monorepo: `resolve.dedupe` no Vite e
   `paths` no tsconfig do CRM (ver `apps/crm/README.md`).
+- **O CRM abre no claro e no bronze** (decisão do usuário, 25/09), qualquer que
+  seja o tema do aparelho. A origem seguia o aparelho; aqui o escuro vale só
+  quando a pessoa escolhe no botão do topo, e a escolha fica no aparelho. A cor
+  segue o perfil, como na origem.
 - **Testes.** Os testes do CRM que liam o texto das migrations passaram a ler a
   base pelo módulo `supabase/testes/esquema.ts`; os que só conferiam histórico
   (a migration N existia, a N fez tal backfill) saíram. Nove testes de RLS já
