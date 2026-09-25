@@ -37,7 +37,11 @@ export function CartaoDeImovel({ imovel, finalidade, prioridade = false }: Props
   const onde = [imovel.cidade, imovel.bairro].filter(Boolean).join(' - ');
 
   const itens = [
-    imovel.quartos ? { Icone: BedDouble, texto: plural(imovel.quartos, 'quarto', 'quartos') } : null,
+    imovel.quartos
+      ? { Icone: BedDouble, texto: plural(imovel.quartos, 'quarto', 'quartos') }
+      : imovel.suites
+        ? { Icone: BedDouble, texto: plural(imovel.suites, 'suíte', 'suítes') }
+        : null,
     imovel.banheiros ? { Icone: Bath, texto: plural(imovel.banheiros, 'banheiro', 'banheiros') } : null,
     imovel.vagas ? { Icone: Car, texto: plural(imovel.vagas, 'vaga', 'vagas') } : null,
   ].filter((item) => item !== null);
