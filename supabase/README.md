@@ -24,6 +24,10 @@ supabase/
   sino em tempo real (com lista de colunas) e a cor padrão da marca.
 - `20260925000000_numero_pessoal.sql`: com o número que também é pessoal, só
   entra conversa de cliente; a pessoal não é gravada.
+- `20260925000100_proprietario_e_visitas.sql`: o dono do imóvel
+  (`property_owners`, gravado por `definir_proprietario`) e as visitas à
+  página de cada imóvel no site, por dia (`property_page_views`, contadas por
+  `registrar_visita`).
 
 Dado de cliente não entra em migration: fica em `seeds/`, para o mesmo schema
 servir a outro cliente sem limpeza.

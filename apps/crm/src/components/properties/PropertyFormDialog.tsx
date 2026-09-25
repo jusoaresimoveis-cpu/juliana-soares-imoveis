@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import {
   CIDADES_ATENDIDAS,
@@ -16,17 +16,27 @@ import {
   type PaymentMethod,
   type RentalGuarantee,
 } from '@contracts';
-import { useSalvarImovel, type Property, type PropertyUpdate } from '@/hooks/useProperties';
+import {
+  useDefinirProprietario,
+  useSalvarImovel,
+  type Property,
+  type PropertyUpdate,
+  type Proprietario,
+} from '@/hooks/useProperties';
+import { telefoneLegivel } from '@/exportacao';
 import { MediaManager } from './MediaManager';
 import { cn } from '@/lib/utils';
 
-type Aba = 'dados' | 'local' | 'pagamento' | 'midia';
+export type AbaDoImovel = 'dados' | 'local' | 'pagamento' | 'proprietario' | 'midia';
 
 interface Props {
   orgId: string | undefined;
   // Aceita a linha inteira (vinda da ficha) ou nada (criação). A lista deixou
   // de abrir este formulário para editar — ela navega para a ficha.
   imovel: (Property & { description?: string | null }) | null;
+  /** O dono já cadastrado, que a ficha carregou. */
+  proprietario?: Proprietario | null;
+  abaInicial?: AbaDoImovel;
   onFechar: () => void;
 }
 
@@ -64,10 +74,25 @@ function campoParaInteiro(v: string): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-export function PropertyFormDialog({ orgId, imovel, onFechar }: Props) {
-  const [aba, setAba] = useState<Aba>('dados');
+export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, onFechar }: Props) {
+  const [aba, setAba] = useState<AbaDoImovel>(abaInicial ?? 'dados');
+  const barraDeAbas = useRef<HTMLElement>(null);
+
+  // No celular a barra rola: a aba ativa (inclusive a que abriu o formulário)
+  // tem que aparecer, e não ficar escondida à direita.
+  useEffect(() => {
+    barraDeAbas.current?.querySelector('[data-ativa]')?.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }, [aba]);
   const [id, setId] = useState<string | null>(imovel?.id ?? null);
   const salvar = useSalvarImovel(orgId);
+  const definirDono = useDefinirProprietario();
+
+  const [dono, setDono] = useState({
+    nome: proprietario?.full_name ?? '',
+    cidade: proprietario?.city ?? '',
+    telefone: proprietario ? (telefoneLegivel(proprietario.phone_e164, null) ?? '') : '',
+  });
+  const setDonoCampo = (k: keyof typeof dono) => (v: string) => setDono((d) => ({ ...d, [k]: v }));
 
   const [f, setF] = useState({
     title: imovel?.title ?? '',
@@ -193,6 +218,23 @@ export function PropertyFormDialog({ orgId, imovel, onFechar }: Props) {
     dados.description = f.description.trim() || null;
 
     const novoId = await salvar.mutateAsync({ id, dados });
+
+    /*
+     * O dono vai depois do imóvel, pela função do banco: é ela que acha o
+     * cadastro pelo telefone. Chama quando há dono para gravar, ou um que
+     * existia e foi apagado do formulário (aí o imóvel fica sem dono).
+     */
+    if (dono.nome.trim() || dono.telefone.trim() || proprietario) {
+      try {
+        await definirDono.mutateAsync({ imovel: novoId, ...dono });
+      } catch {
+        // O imóvel já está salvo. A frase do erro aparece e a aba do dono abre.
+        setId(novoId);
+        setAba('proprietario');
+        return;
+      }
+    }
+
     if (!id) {
       // Recém-criado: fica aberto na aba de mídia, que é o passo seguinte
       // natural e o que trava o cadastro se o corretor fechar agora.
@@ -213,7 +255,9 @@ export function PropertyFormDialog({ orgId, imovel, onFechar }: Props) {
     >
       <form
         onSubmit={onSubmit}
-        className="my-auto w-full max-w-[720px] rounded-[24px] bg-sheet p-6 shadow-sheet"
+        // `min-w-0`: no grid do fundo, o formulário cresceria até caber a barra
+        // de abas inteira e passaria da tela do celular. Assim a barra rola.
+        className="my-auto w-full min-w-0 max-w-[720px] rounded-[24px] bg-sheet p-6 shadow-sheet"
       >
         <header className="mb-4 flex items-start justify-between gap-3">
           <div>
@@ -236,12 +280,15 @@ export function PropertyFormDialog({ orgId, imovel, onFechar }: Props) {
           </button>
         </header>
 
-        <nav className="mb-5 flex gap-1 rounded-full bg-card-2 p-1">
+        {/* Cinco abas não cabem lado a lado num celular: lá a barra corre para o
+            lado, em vez de quebrar as palavras. */}
+        <nav ref={barraDeAbas} className="mb-5 flex gap-1 overflow-x-auto rounded-full bg-card-2 p-1">
           {(
             [
               ['dados', 'Dados'],
               ['local', 'Localização'],
               ['pagamento', 'Pagamento'],
+              ['proprietario', 'Proprietário'],
               ['midia', 'Mídia'],
             ] as const
           ).map(([k, rotulo]) => (
@@ -249,8 +296,9 @@ export function PropertyFormDialog({ orgId, imovel, onFechar }: Props) {
               key={k}
               type="button"
               onClick={() => setAba(k)}
+              data-ativa={aba === k || undefined}
               className={cn(
-                'flex-1 rounded-full py-2 text-base font-semibold transition-colors',
+                'flex-1 whitespace-nowrap rounded-full px-3 py-2 text-base font-semibold transition-colors',
                 aba === k ? 'bg-card text-pri shadow-card' : 'text-tx-2 hover:text-tx',
               )}
             >
@@ -581,11 +629,42 @@ export function PropertyFormDialog({ orgId, imovel, onFechar }: Props) {
           </div>
         )}
 
+        {aba === 'proprietario' && (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <p className="col-span-2 text-sm text-tx-3 sm:col-span-4">
+              Quem entregou o imóvel para administrar. Não aparece no site. O telefone identifica o
+              proprietário: o mesmo número em outro imóvel é o mesmo cadastro.
+            </p>
+            <Campo className="col-span-2 sm:col-span-4" rotulo="Nome completo">
+              <input value={dono.nome} onChange={(e) => setDonoCampo('nome')(e.target.value)} autoComplete="off" className={inputCls} />
+            </Campo>
+            <Campo className="col-span-2" rotulo="Cidade onde mora">
+              <input value={dono.cidade} onChange={(e) => setDonoCampo('cidade')(e.target.value)} autoComplete="off" className={inputCls} />
+            </Campo>
+            <Campo className="col-span-2" rotulo="Telefone com DDD">
+              <input
+                type="tel"
+                inputMode="tel"
+                value={dono.telefone}
+                onChange={(e) => setDonoCampo('telefone')(e.target.value)}
+                placeholder="(47) 99999-1234"
+                autoComplete="off"
+                className={inputCls}
+              />
+            </Campo>
+          </div>
+        )}
+
         {aba === 'midia' && <MediaManager orgId={orgId} propertyId={id} />}
 
         {salvar.isError && (
           <p className="mt-4 rounded-md bg-dng-soft px-3 py-2 text-base text-dng">
             {(salvar.error as Error).message}
+          </p>
+        )}
+        {definirDono.isError && (
+          <p className="mt-4 rounded-md bg-dng-soft px-3 py-2 text-base text-dng">
+            {(definirDono.error as Error).message}
           </p>
         )}
 
@@ -599,10 +678,10 @@ export function PropertyFormDialog({ orgId, imovel, onFechar }: Props) {
           </button>
           <button
             type="submit"
-            disabled={salvar.isPending}
+            disabled={salvar.isPending || definirDono.isPending}
             className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-pri py-2.5 text-md font-semibold text-pri-fg hover:bg-pri-deep disabled:opacity-60"
           >
-            {salvar.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+            {(salvar.isPending || definirDono.isPending) && <Loader2 className="h-4 w-4 animate-spin" />}
             {id ? 'Salvar' : 'Criar e adicionar fotos'}
           </button>
         </footer>

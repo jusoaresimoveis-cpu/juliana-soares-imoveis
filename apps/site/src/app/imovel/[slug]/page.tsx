@@ -4,6 +4,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 
 import { BotaoWhatsApp } from '@/components/BotaoWhatsApp';
 import { CartaoDeImovel } from '@/components/imoveis/CartaoDeImovel';
+import { ContadorDeVisita } from '@/components/imoveis/ContadorDeVisita';
 import { GaleriaDoImovel } from '@/components/imoveis/GaleriaDoImovel';
 import { Caracteristicas } from '@/components/imoveis/Caracteristicas';
 import { Preco } from '@/components/imoveis/Preco';
@@ -95,6 +96,7 @@ export default async function Page(props: PageProps<'/imovel/[slug]'>) {
       )}
 
       <GaleriaDoImovel fotos={imovel.fotos} titulo={imovel.titulo} />
+      <ContadorDeVisita codigo={imovel.codigo} />
 
       <header className="space-y-2">
         <h1 className="font-serif text-3xl leading-tight sm:text-4xl">{imovel.titulo}</h1>

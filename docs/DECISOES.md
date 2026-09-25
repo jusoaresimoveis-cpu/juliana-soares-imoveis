@@ -258,11 +258,12 @@ relação ao briefing, já combinado:
       que entrega o imóvel para a Juliana administrar a locação acompanha, num
       painel só dele, o desempenho do SEU imóvel: visitas à página, cliques no
       WhatsApp, contatos, visitas agendadas.
-      - Cadastro: no formulário do imóvel no CRM, os dados do proprietário:
-        nome completo, cidade onde mora e telefone com DDD. Hoje o banco não
-        tem nada disso. Como um dono pode ter mais de um imóvel, o desenho
-        provável é uma tabela de proprietários ligada ao imóvel, com GRANT
-        explícito (regra do projeto).
+      - **Feito em 25/09:** o cadastro do dono, na aba "Proprietário" do
+        formulário do imóvel (nome completo, cidade onde mora, telefone), numa
+        tabela própria (`property_owners`) achada pelo telefone, com
+        `user_id` reservado para o login; e o contador de visitas à página de
+        cada imóvel, que a ficha do CRM mostra ao lado dos leads. Falta o
+        painel e o login do dono.
       - Acesso, como o usuário definiu: login é o telefone com DDD; a senha é
         fixa, sem troca, os 4 últimos dígitos do telefone seguidos do
         primeiro nome em minúsculas (ex.: `4111maria`). Ele vê só o imóvel
@@ -272,10 +273,10 @@ relação ao briefing, já combinado:
         procurou, que é dado pessoal pela LGPD), o risco fica pequeno. A
         alternativa com o mesmo trabalho para o dono é um código aleatório
         gerado pelo CRM e mandado pela Juliana.
-      - Depende do rastreio: hoje o site não registra visita à página nem
-        clique por imóvel. Os cliques vêm com o link rastreado `/w/`, e as
-        visitas pedem um contador por imóvel. Contatos e visitas agendadas já
-        existem no CRM (leads e agenda ligados ao imóvel).
+      - Os números: as visitas à página já contam desde 25/09 (uma por
+        aparelho, por imóvel e por dia, só na produção, robôs fora). Os
+        cliques no WhatsApp vêm com o link rastreado `/w/`. Contatos e visitas
+        agendadas já existem no CRM (leads e agenda ligados ao imóvel).
 - [ ] Depoimentos do Google: pedir acesso à API do Perfil da Empresa.
 - [ ] CEP exato do escritório (`config/site.ts`).
 - [ ] Endereço no Perfil da Empresa: hoje está "sem local físico". Decidir se

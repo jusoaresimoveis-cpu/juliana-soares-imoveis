@@ -2090,6 +2090,7 @@ export type Database = {
           longitude: number | null
           neighborhood: string | null
           organization_id: string
+          owner_id: string | null
           parking_spots: number | null
           payment_methods: string[]
           payment_notes: string | null
@@ -2151,6 +2152,7 @@ export type Database = {
           longitude?: number | null
           neighborhood?: string | null
           organization_id: string
+          owner_id?: string | null
           parking_spots?: number | null
           payment_methods?: string[]
           payment_notes?: string | null
@@ -2212,6 +2214,7 @@ export type Database = {
           longitude?: number | null
           neighborhood?: string | null
           organization_id?: string
+          owner_id?: string | null
           parking_spots?: number | null
           payment_methods?: string[]
           payment_notes?: string | null
@@ -2238,6 +2241,13 @@ export type Database = {
           zip_code?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "properties_owner_fk"
+            columns: ["organization_id", "owner_id"]
+            isOneToOne: false
+            referencedRelation: "property_owners"
+            referencedColumns: ["organization_id", "id"]
+          },
           {
             foreignKeyName: "properties_created_by_fkey"
             columns: ["created_by"]
@@ -2316,6 +2326,83 @@ export type Database = {
           },
           {
             foreignKeyName: "property_media_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_owners: {
+        Row: {
+          city: string | null
+          created_at: string
+          full_name: string
+          id: string
+          organization_id: string
+          phone_e164: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          organization_id: string
+          phone_e164: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          organization_id?: string
+          phone_e164?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_owners_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_page_views: {
+        Row: {
+          day: string
+          organization_id: string
+          property_id: string
+          views: number
+        }
+        Insert: {
+          day: string
+          organization_id: string
+          property_id: string
+          views?: number
+        }
+        Update: {
+          day?: string
+          organization_id?: string
+          property_id?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_page_views_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_page_views_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
@@ -3220,6 +3307,10 @@ export type Database = {
         Returns: number
       }
       current_org_id: { Args: never; Returns: string }
+      definir_proprietario: {
+        Args: { _cidade: string; _imovel: string; _nome: string; _telefone: string }
+        Returns: string
+      }
       dono_do_anuncio: {
         Args: { _ad_id: string; _org: string }
         Returns: string
@@ -3705,6 +3796,10 @@ export type Database = {
       push_drenar: { Args: never; Returns: undefined }
       push_verificar_atraso: { Args: { _minutos?: number }; Returns: number }
       quem_ve_a_conversa: { Args: { _conv: string }; Returns: string[] }
+      registrar_visita: {
+        Args: { _codigo: string; _organizacao: string }
+        Returns: undefined
+      }
       run_due_reminders: { Args: { _limit?: number }; Returns: number }
       sem_credencial: { Args: { _payload: Json }; Returns: Json }
       site_imoveis: { Args: { _organizacao: string }; Returns: Json }

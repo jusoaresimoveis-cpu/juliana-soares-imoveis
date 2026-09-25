@@ -16,9 +16,17 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { env } from '@/lib/env';
-import { useProperty, useInteressados, usePropertyMedia, urlPublica } from '@/hooks/useProperties';
+import {
+  useProperty,
+  useInteressados,
+  usePropertyMedia,
+  useProprietario,
+  useVisitasDoImovel,
+  urlPublica,
+} from '@/hooks/useProperties';
 import { usePipelineStages } from '@/hooks/useLeadsBoard';
-import { PropertyFormDialog } from '@/components/properties/PropertyFormDialog';
+import { PropertyFormDialog, type AbaDoImovel } from '@/components/properties/PropertyFormDialog';
+import { telefoneLegivel } from '@/exportacao';
 import {
   PROPERTY_TYPE_LABEL,
   PROPERTY_STATUS_LABEL,
@@ -37,9 +45,12 @@ export default function PropertyDetail() {
   const { data: imovel, isLoading, isError } = useProperty(id);
   const { data: midia } = usePropertyMedia(id);
   const { data: interessados } = useInteressados(id);
+  const { data: visitas } = useVisitasDoImovel(id);
+  const { data: proprietario } = useProprietario(imovel?.owner_id);
   const { data: etapas } = usePipelineStages(orgId);
 
-  const [editando, setEditando] = useState(false);
+  // A aba em que o formulário abre; nulo é fechado.
+  const [editando, setEditando] = useState<AbaDoImovel | null>(null);
   const [foto, setFoto] = useState(0);
 
   if (isLoading) {
@@ -116,7 +127,7 @@ export default function PropertyDetail() {
             </a>
           )}
           <button
-            onClick={() => setEditando(true)}
+            onClick={() => setEditando('dados')}
             className="inline-flex items-center gap-1.5 rounded-full bg-pri px-4 py-2 text-base font-semibold text-pri-fg hover:bg-pri-deep"
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -234,6 +245,17 @@ export default function PropertyDetail() {
               Interessados
             </h2>
 
+            {/* Os números que o painel do proprietário vai mostrar ao dono: a
+                Juliana já vê aqui. Visita é pessoa por dia na página do site. */}
+            <div className="mb-4 grid grid-cols-2 gap-2">
+              <Contador valor={(interessados ?? []).length} rotulo="Leads" />
+              <Contador
+                valor={visitas?.total ?? 0}
+                rotulo="Visitas no site"
+                dica={visitas?.desde ? `desde ${new Date(`${visitas.desde}T12:00`).toLocaleDateString('pt-BR')}` : null}
+              />
+            </div>
+
             {(interessados ?? []).length === 0 && (
               <p className="text-base text-tx-3">Nenhum lead vinculado ainda.</p>
             )}
@@ -283,6 +305,38 @@ export default function PropertyDetail() {
               valor={new Date(imovel.updated_at).toLocaleDateString('pt-BR')}
             />
           </div>
+
+          <div className="rounded-lg bg-card p-5 shadow-card">
+            <h2 className="mb-2.5 text-2xs font-bold uppercase text-tx-3">Proprietário</h2>
+            {proprietario ? (
+              <>
+                <Linha rotulo="Nome" valor={proprietario.full_name} />
+                {proprietario.city && <Linha rotulo="Mora em" valor={proprietario.city} />}
+                <p className="flex items-baseline justify-between gap-3 py-1.5">
+                  <span className="text-sm text-tx-3">Telefone</span>
+                  <a
+                    href={`https://wa.me/${proprietario.phone_e164.replace('+', '')}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-base font-semibold text-pri hover:underline"
+                  >
+                    {telefoneLegivel(proprietario.phone_e164, null)}
+                  </a>
+                </p>
+              </>
+            ) : (
+              <p className="text-base text-tx-3">
+                Nenhum cadastrado.{' '}
+                <button
+                  type="button"
+                  onClick={() => setEditando('proprietario')}
+                  className="font-semibold text-pri hover:underline"
+                >
+                  Cadastrar
+                </button>
+              </p>
+            )}
+          </div>
         </aside>
       </div>
 
@@ -290,7 +344,9 @@ export default function PropertyDetail() {
         <PropertyFormDialog
           orgId={orgId}
           imovel={imovel}
-          onFechar={() => setEditando(false)}
+          proprietario={proprietario ?? null}
+          abaInicial={editando}
+          onFechar={() => setEditando(null)}
         />
       )}
     </div>
@@ -316,6 +372,16 @@ function Numero({
         <span className="text-sm text-tx-3">{rotulo}</span>
       </p>
       {extra && <p className="ml-5 text-sm text-tx-3">{extra}</p>}
+    </div>
+  );
+}
+
+function Contador({ valor, rotulo, dica }: { valor: number; rotulo: string; dica?: string | null }) {
+  return (
+    <div className="rounded-lg bg-card-2 px-3 py-2.5">
+      <b className="block text-2xl font-bold tabular-nums">{valor.toLocaleString('pt-BR')}</b>
+      <span className="text-sm text-tx-3">{rotulo}</span>
+      {dica && <span className="block text-2xs text-tx-3">{dica}</span>}
     </div>
   );
 }
