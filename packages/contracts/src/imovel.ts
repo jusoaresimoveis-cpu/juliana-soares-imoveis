@@ -1,48 +1,13 @@
 /**
- * Domínio de imóvel.
+ * O imóvel do lado do site: URL, finalidade na frase e rótulo de comodidade.
  *
- * Os valores são os MESMOS do CRM de origem (SelectusConnect, `packages/contracts/property.ts`).
- * No banco eles são TEXT + CHECK, e o clone do CRM traz esses CHECKs junto:
- * renomear um valor só aqui faz o site procurar um tipo que o banco nunca grava,
- * e a página fica vazia sem erro nenhum.
+ * Tipo, finalidade e situação vêm de `property.ts`, que é o contrato do CRM e
+ * do banco (TEXT + CHECK). Aqui só se acrescenta o que o site precisa em cima
+ * deles; redefinir um valor aqui faria o site procurar algo que o banco nunca
+ * grava, e a página ficaria vazia sem erro nenhum.
  */
 
-export const PROPERTY_TYPES = [
-  'apartamento',
-  'casa',
-  'casa_condominio',
-  'cobertura',
-  'studio',
-  'kitnet',
-  'terreno',
-  'chacara',
-  'sitio',
-  'fazenda',
-  'sala_comercial',
-  'loja',
-  'galpao',
-  'predio',
-  'outro',
-] as const;
-export type PropertyType = (typeof PROPERTY_TYPES)[number];
-
-export const PROPERTY_TYPE_LABEL: Record<PropertyType, string> = {
-  apartamento: 'Apartamento',
-  casa: 'Casa',
-  casa_condominio: 'Casa em condomínio',
-  cobertura: 'Cobertura',
-  studio: 'Studio',
-  kitnet: 'Kitnet',
-  terreno: 'Terreno',
-  chacara: 'Chácara',
-  sitio: 'Sítio',
-  fazenda: 'Fazenda',
-  sala_comercial: 'Sala comercial',
-  loja: 'Loja',
-  galpao: 'Galpão',
-  predio: 'Prédio',
-  outro: 'Outro',
-};
+import { COMMON_AMENITIES, PROPERTY_TYPES, type PropertyType } from './property';
 
 /**
  * O tipo no plural, como aparece na URL e no título da listagem.
@@ -79,21 +44,10 @@ export function tipoPeloSlug(slug: string): PropertyType | null {
 }
 
 /**
- * O que se faz com o imóvel.
- *
- * `temporada` continua na lista porque o CHECK do banco herdado aceita. A
- * Juliana trabalha só com venda e aluguel anual (decisão de 24/09/2026), e o
- * site publica apenas `FINALIDADES_DO_SITE`.
+ * As finalidades que o site publica. `temporada` o banco aceita porque vem do
+ * CRM de origem, mas a Juliana trabalha só com venda e aluguel anual (decisão
+ * de 24/09/2026).
  */
-export const PROPERTY_PURPOSES = ['venda', 'aluguel', 'temporada'] as const;
-export type PropertyPurpose = (typeof PROPERTY_PURPOSES)[number];
-
-export const PROPERTY_PURPOSE_LABEL: Record<PropertyPurpose, string> = {
-  venda: 'Venda',
-  aluguel: 'Aluguel',
-  temporada: 'Temporada',
-};
-
 export const FINALIDADES_DO_SITE = ['aluguel', 'venda'] as const;
 export type FinalidadeDoSite = (typeof FINALIDADES_DO_SITE)[number];
 
@@ -110,21 +64,6 @@ export function ehFinalidadeDoSite(valor: string): valor is FinalidadeDoSite {
   return (FINALIDADES_DO_SITE as readonly string[]).includes(valor);
 }
 
-/** Comodidades mais buscadas (mesma lista do CRM de origem). O banco aceita qualquer texto. */
-export const COMMON_AMENITIES = [
-  'piscina',
-  'churrasqueira',
-  'academia',
-  'salao_festas',
-  'playground',
-  'quadra',
-  'portaria_24h',
-  'elevador',
-  'varanda_gourmet',
-  'mobiliado',
-  'aceita_pet',
-  'vista_mar',
-] as const;
 export type CommonAmenity = (typeof COMMON_AMENITIES)[number];
 
 export const COMMON_AMENITY_LABEL: Record<CommonAmenity, string> = {
@@ -148,20 +87,3 @@ export function rotuloDaComodidade(valor: string): string {
   const texto = valor.replace(/_/g, ' ').trim();
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
-
-export const PROPERTY_STATUSES = [
-  'disponivel',
-  'reservado',
-  'vendido',
-  'alugado',
-  'suspenso',
-] as const;
-export type PropertyStatus = (typeof PROPERTY_STATUSES)[number];
-
-export const PROPERTY_STATUS_LABEL: Record<PropertyStatus, string> = {
-  disponivel: 'Disponível',
-  reservado: 'Reservado',
-  vendido: 'Vendido',
-  alugado: 'Alugado',
-  suspenso: 'Suspenso',
-};

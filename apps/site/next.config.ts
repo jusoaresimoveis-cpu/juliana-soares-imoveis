@@ -1,5 +1,17 @@
 import type { NextConfig } from 'next';
 
+/**
+ * Só as fotos de imóvel do Supabase da Juliana passam pelo otimizador de
+ * imagem. Liberar `*.supabase.co` deixaria qualquer projeto do mundo gastar a
+ * cota de otimização do site.
+ */
+function fotosDoBanco(): NonNullable<NextConfig['images']>['remotePatterns'] {
+  const url = process.env.SUPABASE_URL;
+  if (!url) return [];
+  const { hostname } = new URL(url);
+  return [{ protocol: 'https', hostname, pathname: '/storage/v1/object/public/property-media/**' }];
+}
+
 const nextConfig: NextConfig = {
   // O pacote de contratos é TypeScript puro dentro do monorepo, sem build
   // próprio: quem compila é o Next.
@@ -25,10 +37,7 @@ const nextConfig: NextConfig = {
     // AVIF primeiro: foto de imóvel é o que mais pesa na página, e no 4G do
     // celular é ela que decide se a página abre rápido ou não.
     formats: ['image/avif', 'image/webp'],
-    // As fotos vão morar no Storage do Supabase. O host exato entra aqui
-    // quando o projeto da Juliana estiver criado — qualquer outro host fica
-    // bloqueado, de propósito.
-    remotePatterns: [],
+    remotePatterns: fotosDoBanco(),
   },
 };
 

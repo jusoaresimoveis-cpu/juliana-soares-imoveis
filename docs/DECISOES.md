@@ -142,6 +142,42 @@ relação ao briefing, já combinado:
 - **Dado de cliente não entra em migration.** Seeds ficam separados, para que
   este código possa servir de base a outro cliente sem limpeza.
 
+### Como o clone foi feito (24/09/2026, origem no commit 64a81ec)
+
+- **Base consolidada** (`supabase/migrations/20260924000000_base.sql`): as 152
+  migrations da origem aplicadas num banco vazio e extraídas com `pg_dump`, com
+  as funções no texto original do autor. Conferida de três jeitos: o `pg_dump`
+  dela é idêntico ao das 152 aplicadas; ela aplica num Postgres 17.6 (o major do
+  Supabase); e os 188 testes de RLS passam contra ela. Só um bloco de dado da HV
+  (reconciliação de três conversas de anúncio, migration 114) precisou sair
+  para as migrations rodarem num banco vazio.
+- **Sem landing pages no CRM.** A origem gera páginas de anúncio no próprio CRM
+  (SPA). Aqui a página pública é o site; o gerador, as rotas públicas e o
+  `api/lp.js` não vieram. As tabelas ficam no banco, vazias: arrancá-las
+  mexeria em funções de atribuição que dependem delas.
+- **Aluguel no imóvel** (`20260924000100_aluguel.sql`): `for_sale` e
+  `for_rent` no lugar de uma finalidade só, `price_cents` é o preço de VENDA e
+  `rent_cents` o aluguel MENSAL, mais `rental_guarantees` (lista fechada, em
+  `packages/contracts/src/aluguel.ts`). `purpose` virou coluna calculada, porque
+  a origem ainda a lê.
+- **O site lê por uma função** (`site_imoveis`, em `20260924000200_site.sql`),
+  e não pela tabela: só o publicado, sem dono, observação interna ou valor de
+  regime desligado. Um gatilho por comando em `properties` e `property_media`
+  chama `/api/revalidar` do site pelo `pg_net`, com endereço e segredo no Vault.
+- **React 18 no CRM e 19 no site**, no mesmo monorepo: `resolve.dedupe` no Vite e
+  `paths` no tsconfig do CRM (ver `apps/crm/README.md`).
+- **Testes.** Os testes do CRM que liam o texto das migrations passaram a ler a
+  base pelo módulo `supabase/testes/esquema.ts`; os que só conferiam histórico
+  (a migration N existia, a N fez tal backfill) saíram. Nove testes de RLS já
+  estavam desatualizados na origem (o job `rls` de lá está vermelho desde
+  22/08) e foram corrigidos aqui.
+- **Achado na origem:** as policies `documentos_read` e `documentos_write` do
+  storage continuam valendo lá, porque a migration 021 quis trocá-las pelas
+  versões por lead mas apagou pelo nome errado. Como policies permissivas se
+  somam, qualquer corretor da organização lê e grava documento de lead que não
+  é dele. Na origem o risco hoje é baixo (o app não usa o bucket `documentos`),
+  mas a correção lá é um `drop policy` de cada. Aqui a base já nasce sem elas.
+
 ## Pendências
 
 - [ ] Logo (o usuário vai criar) e fotos profissionais da Juliana, em
@@ -193,7 +229,14 @@ relação ao briefing, já combinado:
 - [ ] Endereço no Perfil da Empresa: hoje está "sem local físico". Decidir se
       mostra a sala da Rua 143.
 - [ ] Links do Facebook e do YouTube dela para o `sameAs` do schema.
-- [ ] Clone do CRM, schema base e ligação do site ao Supabase.
+- [x] Clone do CRM, schema base, aluguel no imóvel e o site lendo do banco
+      (24/09). O código está pronto; falta subir (item abaixo).
+- [ ] **Subir o banco e o CRM:** projeto Supabase da Juliana (login da CLI,
+      `db push`, seed, segredos, Vault, edge functions: ver
+      `supabase/README.md`), projeto do CRM na Vercel dela e as variáveis do
+      site (`apps/site/.env.example`).
+- [ ] WhatsApp da Juliana: instância na uazapi e a conexão pelo CRM.
+- [ ] Meta da Juliana: conectar a conta de anúncio no CRM (Anúncios).
 - [ ] Link rastreado `/w/<código>` e captura completa de UTMs e click IDs.
 - [ ] Política de privacidade (LGPD), exigida antes de ligar Google Ads.
 - [ ] Página "Sobre", com a bio que a Juliana escrever.

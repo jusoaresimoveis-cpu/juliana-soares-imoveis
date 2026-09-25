@@ -21,6 +21,12 @@ export interface Imovel {
   /** `public_code` do CRM. É o código que a Juliana fala no WhatsApp. */
   codigo: string;
   slug: string;
+  /**
+   * Endereços antigos do imóvel. O CRM troca o slug quando a Juliana muda o nome
+   * público; o link velho pode estar num anúncio ou num grupo de WhatsApp, então
+   * ele redireciona em vez de dar 404.
+   */
+  slugsAntigos: string[];
   titulo: string;
   descricao: string;
   tipo: PropertyType;

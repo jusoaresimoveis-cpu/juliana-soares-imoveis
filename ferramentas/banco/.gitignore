@@ -1,0 +1,5 @@
+node_modules/
+.pg17/
+.pg17-rls/
+dados-*/
+*.dump.sql

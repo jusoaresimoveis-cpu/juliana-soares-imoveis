@@ -1,0 +1,81 @@
+project_id = "juliana-soares-imoveis"
+
+# -----------------------------------------------------------------------------
+# Edge functions
+#
+# `verify_jwt` é ligado por padrão, e é assim que tem de ficar: toda função que
+# o CRM chama passa por sessão de usuário, e a organização é lida do perfil de
+# quem chamou — nunca do corpo da requisição.
+#
+# A exceção é o webhook, e ela é inevitável: quem chama é o provedor de
+# WhatsApp, que não tem conta no Supabase. A autenticação dele é o segredo de 32
+# bytes no caminho da URL, guardado só como digest, conferido por comparação de
+# hash e rotacionável por instância.
+# -----------------------------------------------------------------------------
+
+[functions.whatsapp-webhook]
+verify_jwt = false
+
+[functions.whatsapp-instancia]
+verify_jwt = true
+
+[functions.whatsapp-trabalhador]
+# Chamado pelo cron do Postgres, que nao tem sessao. Autentica por
+# X-Cron-Secret proprio do modulo.
+verify_jwt = false
+
+[functions.push-trabalhador]
+# Chamado pelo cron. Autentica por X-Cron-Secret proprio.
+verify_jwt = false
+
+[functions.push-inscrever]
+verify_jwt = true
+
+[functions.criar-corretor]
+verify_jwt = true
+
+# Redefine senha de terceiro. `true` e a checagem de papel dentro da funcao sao
+# camadas diferentes: o portao garante que existe uma sessao, e a funcao decide
+# se AQUELA sessao pode mexer NAQUELA conta.
+[functions.redefinir-senha]
+verify_jwt = true
+
+[functions.meta-webhook]
+# Quem chama e a Meta, que nao tem conta no Supabase. A autenticacao e DUPLA:
+# segredo de 32 bytes no caminho da URL (guardado so como digest) E assinatura
+# HMAC do corpo cru com o app secret, que vive no Vault. Segredo ausente e 401,
+# nunca "pula a verificacao" — que foi o defeito mais grave do sistema auditado.
+verify_jwt = false
+
+[functions.meta-trabalhador]
+# Chamado pelo cron do Postgres e pelo proprio webhook, para o lead chegar em
+# segundos. Autentica por X-Cron-Secret.
+verify_jwt = false
+
+[functions.meta-conectar]
+verify_jwt = true
+
+[functions.meta-insights]
+# Chamado pelo cron (duas cadencias) e pelo botao de importar. X-Cron-Secret.
+verify_jwt = false
+
+[functions.meta-conversoes]
+# O caminho contrario das outras meta-*: leva ao inves de trazer. Devolve a
+# Meta as conversoes que so o CRM conhece. Chamado pelo cron. X-Cron-Secret.
+verify_jwt = false
+
+[functions.landing-lead]
+# Chamada por quem NAO tem sessao: um visitante vindo de um anuncio. Nao ha
+# token para verificar, e a defesa e o proprio corpo da funcao — isca, tempo
+# minimo, validacao campo a campo, e a pagina publicada como unica fonte da
+# organizacao. Dar ao anon permissao de inserir em `leads` abriria a tabela
+# mais sensivel do sistema para a internet inteira.
+verify_jwt = false
+
+[functions.reportar-erro]
+# Caixa-preta. Sem token de proposito: o erro mais caro de reproduzir depois e o
+# da tela de entrar, onde nao existe sessao — exigir token aqui recusaria
+# justamente o relato que ninguem consegue refazer. Quando o token vem, ele
+# carimba a organizacao e o usuario. Escrita limitada por acesso, como a
+# landing-lead, e a tabela so aceita os campos que a funcao monta.
+verify_jwt = false

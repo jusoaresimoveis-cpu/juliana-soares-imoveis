@@ -1,0 +1,4 @@
+# O CRM é todo atrás de login: nada aqui é para buscador. As páginas públicas
+# são o site (apps/site), em outro domínio, com o robots.txt dele.
+User-agent: *
+Disallow: /

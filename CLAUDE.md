@@ -24,14 +24,22 @@ aluguel anual em Itapema e Porto Belo (SC). Leia `README.md` e
 - **Commit sai com a identidade da conta dona** (`git config --local`, ver
   `docs/DEPLOY.md`), senão a Vercel Hobby bloqueia o deploy. Confira com
   `git config --local user.email` antes de commitar.
+- **A base do banco (`20260924000000_base.sql`) não se edita.** Mudança de schema é
+  migration nova; teste que precisa ler SQL usa `supabase/testes/esquema.ts`.
+- **O CRM é React 18 e o site React 19.** Não suba o React do CRM sem tirar o
+  `dedupe` e os `paths` (ver `apps/crm/README.md`).
 - **Dado de cliente não entra em migration.**
 
 ## Comandos
 
 ```bash
 npm run dev:site
+npm run dev:crm
 npm test
+npm run test:rls   # RLS; precisa de Postgres com as migrations (CI: Supabase local)
+# aqui, sem Docker: ferramentas/banco (ver o README de lá; no Windows, de pasta sem acento)
 npm run typecheck
 npm run lint
 npm run build:site
+npm run build:crm
 ```

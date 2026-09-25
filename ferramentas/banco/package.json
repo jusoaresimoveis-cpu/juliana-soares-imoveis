@@ -1,0 +1,16 @@
+{
+  "name": "ferramentas-banco",
+  "private": true,
+  "type": "module",
+  "description": "Banco local sem Docker: aplica as migrations num Postgres 17 e roda os testes de RLS. Fora dos workspaces de propósito.",
+  "scripts": {
+    "rls": "node rls-local.mjs",
+    "pg17": "node verificar-pg17.mjs"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@electric-sql/pglite-tools": "^0.4.8",
+    "embedded-postgres": "17.6.0-beta.15",
+    "pg": "^8.23.0"
+  }
+}

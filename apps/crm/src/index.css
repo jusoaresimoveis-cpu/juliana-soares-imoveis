@@ -1,0 +1,581 @@
+/*
+ * Poppins, hospedada no próprio projeto.
+ *
+ * `@fontsource` copia os arquivos para dentro do build em vez de apontar para
+ * o Google Fonts. Numa landing page de anúncio isso vale mais do que parece:
+ * um `<link>` externo custa DNS, conexão e handshake antes de a primeira letra
+ * aparecer — e quem chegou por anúncio pago já está esperando.
+ *
+ * Quatro pesos, e cada um tem função: 300 para a linha fina do título, 400
+ * para o texto corrido, 600 para rótulo, 700 para número e chamada. Pesos que
+ * ninguém usa são bytes que todo mundo baixa.
+ *
+ * O `swap` do fontsource garante que o texto apareça na fonte do sistema
+ * enquanto a nossa carrega, em vez de deixar a tela em branco.
+ *
+ * E `latin-`, não o pacote inteiro: o entrypoint completo traz devanagári,
+ * cirílico e latim estendido — doze arquivos, 224 kB. O navegador só baixaria
+ * o que o texto pede, mas o service worker pré-carrega TUDO que está no build,
+ * e português, espanhol e inglês cabem no subconjunto latino.
+ */
+@import '@fontsource/poppins/latin-300.css';
+@import '@fontsource/poppins/latin-400.css';
+@import '@fontsource/poppins/latin-600.css';
+@import '@fontsource/poppins/latin-700.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Design system do CRM.
+ *
+ * Um lugar só para a paleta. O Tailwind referencia estas variáveis, então
+ * trocar o tema não recompila classe nenhuma.
+ *
+ * O violeta é mais fechado e saturado que o da referência de design — foi
+ * pedido "mais imponente". Se precisar de mais peso, é aqui e só aqui.
+ */
+
+@layer base {
+  :root {
+    /*
+     * Três degraus de superfície, e eles precisam ser VISÍVEIS.
+     *
+     * O painel (`sheet`) estava em 99% de luminosidade e o card em 100%: um
+     * ponto de diferença, que não se enxerga. O resultado era uma parede branca
+     * onde oito cards encostados um no outro viravam um bloco só — sem a borda
+     * do card, o olho não sabia onde um número terminava e o outro começava.
+     *
+     * Agora a distância entre os degraus é de 3,5 pontos, o suficiente para
+     * separar sem chamar atenção para si:
+     *
+     *   bg    94%    fora do painel
+     *   sheet 96,5%  o painel, atrás dos cards
+     *   card  100%   o card
+     *
+     * O cinza não é neutro puro: leva o roxo da marca no matiz. Cinza sem
+     * matiz ao lado de uma marca colorida parece sujeira, não escolha.
+     */
+    --bg: 34 45% 94%;
+    --sheet: 34 40% 96.5%;
+    --card: 0 0% 100%;
+    /* Superfície recuada DENTRO de um card branco — não sobre o painel. */
+    --card-2: 34 45% 97.5%;
+    --line: 34 41% 93%;
+    --line-2: 34 35% 90%;
+
+    --tx: 34 35% 15%;
+    --tx-2: 34 12% 41%;
+    --tx-3: 34 14% 65%;
+
+    /* O bronze de `src/lib/cores.ts`, que o app reaplica ao montar. */
+    --pri: 34 37% 40%;
+    --pri-2: 35 39% 32%;
+    --pri-3: 34 42% 47%;
+    --pri-soft: 36 55% 96.5%;
+    /* O que se lê POR CIMA do acento. No tema claro é branco; no escuro o
+       acento é claro e isto vira escuro — por isso é token, não literal. */
+    --pri-fg: 0 0% 100%;
+
+    --ok: 165 84% 35%;
+    --ok-soft: 162 55% 91%;
+    --warn: 36 80% 43%;
+    --warn-soft: 38 76% 91%;
+    --dng: 344 74% 58%;
+    --dng-soft: 344 78% 94%;
+
+    --shadow-sheet: 32 40% 22% / 0.22;
+    --shadow-card-a: 32 35% 18% / 0.03;
+    --shadow-card-b: 32 35% 18% / 0.12;
+    --shadow-pop: 32 40% 16% / 0.26;
+
+    /*
+     * O BRILHO das peças roxas — menu, funil, atalhos, botão de ação.
+     *
+     * É a cor da marca usada como sombra, e no claro ela lê como o que é: a
+     * peça projetando a própria cor sobre um fundo branco, de leve.
+     *
+     * No escuro a mesma sombra vira LUZ. Sobre um fundo quase preto, um halo
+     * roxo em volta de um bloco roxo não parece sombra: parece néon, e a tela
+     * inteira ganha um brilho que ninguém pediu. Por isso o valor mora aqui, e
+     * não escrito em cada componente — são quatro lugares, e um controle só
+     * evita que eles sejam ajustados metade agora e metade nunca.
+     */
+    --brilho: hsl(var(--pri));
+    --brilho-2: hsl(var(--pri-2));
+
+    color-scheme: light;
+  }
+
+  .dark {
+    /*
+     * No escuro a ordem se INVERTE: o card é mais claro que o painel, porque
+     * quem está mais perto do olho recebe mais luz. A distância entre os
+     * degraus é a mesma do tema claro — separação medida, não copiada.
+     */
+    --bg: 34 40% 7%;
+    --sheet: 34 34% 11%;
+    --card: 34 40% 16.5%;
+    --card-2: 34 40% 21%;
+    --line: 34 36% 21%;
+    --line-2: 34 36% 26%;
+
+    --tx: 34 71% 95%;
+    --tx-2: 34 25% 72%;
+    --tx-3: 34 18% 53%;
+
+    --pri: 36 58% 66%;
+    --pri-2: 36 62% 74%;
+    --pri-3: 38 66% 76%;
+    --pri-soft: 34 32% 18%;
+    --pri-fg: 250 45% 10%;
+
+    --ok: 165 67% 52%;
+    --ok-soft: 168 51% 12%;
+    --warn: 38 76% 60%;
+    --warn-soft: 38 42% 13%;
+    --dng: 344 100% 72%;
+    --dng-soft: 340 42% 14%;
+
+    --shadow-sheet: 0 0% 0% / 0.7;
+    --shadow-card-a: 0 0% 0% / 0.2;
+    --shadow-card-b: 0 0% 0% / 0.5;
+    --shadow-pop: 0 0% 0% / 0.6;
+
+    /*
+     * A 18% em vez de cheio: o halo continua existindo, só que como um
+     * assentamento da peça no fundo, e não como lâmpada acesa atrás dela.
+     *
+     * Está aqui para ser avaliado antes de sumir de vez — se ainda incomodar, o
+     * caminho é zerar os dois valores, e nenhum componente precisa ser tocado.
+     */
+    --brilho: hsl(var(--pri) / 0.18);
+    --brilho-2: hsl(var(--pri-2) / 0.18);
+
+    color-scheme: dark;
+  }
+
+  * {
+    @apply border-line;
+  }
+
+  body {
+    @apply bg-bg text-tx font-sans antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-pri ring-offset-2 ring-offset-sheet;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/*
+ * O pulsar do botão de WhatsApp da landing page.
+ *
+ * `animate-pulse` do Tailwind mexe na OPACIDADE, e opacidade piscando é o
+ * vocabulário de "carregando" — o botão pareceria desabilitado esperando algo.
+ * Aqui o que respira é a sombra, com um toque mínimo de escala: chama o olho
+ * sem sugerir que a página ainda não terminou de abrir.
+ *
+ * Quem pede movimento reduzido não recebe nada disso: a regra global de
+ * `prefers-reduced-motion` acima já zera a duração de toda animação.
+ */
+@keyframes respira {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgb(37 211 102 / 0.45);
+  }
+  50% {
+    transform: scale(1.015);
+    box-shadow: 0 0 0 12px rgb(37 211 102 / 0);
+  }
+}
+
+.respira {
+  animation: respira 2.6s ease-in-out infinite;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Cobre metalizado — a assinatura do Modelo C                                */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * DOIS gradientes, e não um.
+ *
+ * Metal tem faixas claras e escuras alternadas — é isso que faz parecer metal e
+ * não uma cor lisa. Só que a mesma escala não serve aos dois usos:
+ *
+ *   .cobre       texto sobre fundo quase preto. Precisa de um piso claro o
+ *                bastante para o dígito não sumir na faixa escura.
+ *   .cobre-fundo superfície de botão e faixa, com tinta escura por cima.
+ *                Precisa de um TETO escuro baixo, senão a letra preta cai em
+ *                cima de um trecho médio e o contraste desaba.
+ *
+ * Um gradiente único que servisse aos dois teria de ser tão comportado que
+ * deixaria de parecer metal.
+ */
+.cobre {
+  /*
+   * A cor lisa vem PRIMEIRO e é o que sobra se o recorte no texto não existir.
+   * Sem ela, `color: transparent` num navegador sem `background-clip: text`
+   * apagaria o número por completo — e são justamente os números que a faixa
+   * existe para mostrar.
+   */
+  color: #d08a4f;
+}
+
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .cobre {
+    /*
+     * Mais fundo nos escuros e mais estouro nos claros: é a amplitude que faz
+     * parecer metal, não a cor média. O piso é #9c5227 e para aí — abaixo
+     * disso o dígito perde o contraste contra o fundo quase preto da faixa.
+     */
+    background-image: linear-gradient(
+      100deg,
+      #9c5227 0%,
+      #f8cfa8 18%,
+      #c07037 34%,
+      #ffe3c8 50%,
+      #a85e2c 66%,
+      #f2c199 84%,
+      #9c5227 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+/*
+ * Os dois gradientes de superfície ficam em variável, e não escritos duas
+ * vezes: a mesma borda é usada por classe (botão, faixa) e por estilo em linha
+ * (o cartão do formulário, cujo preenchimento vem de `TINTA.fundo`, que só
+ * existe no TypeScript). Duas cópias divergiriam na primeira correção feita
+ * numa só — e ninguém compara gradiente de cor a olho.
+ */
+:root {
+  /*
+   * PREENCHIMENTO — o piso é #bb6c31 e não mais escuro por um motivo medido:
+   * ele carrega texto. Com a tinta marrom por cima, esse tom dá 4,8:1, e
+   * qualquer degrau abaixo dele derruba o contraste para menos do que o mínimo
+   * de texto pequeno. Escurecer mais o botão exigiria trocar a tinta por
+   * branca — e aí o topo claro do metal é que ficaria ilegível.
+   */
+  --cobre-fundo: linear-gradient(
+    100deg,
+    #bb6c31 0%,
+    #e8b183 16%,
+    #c87941 32%,
+    #f5d2ae 50%,
+    #bf7135 68%,
+    #edc49c 86%,
+    #bb6c31 100%
+  );
+
+  /*
+   * BORDA — aqui o degradê vai ao extremo, porque a borda não carrega texto.
+   * É esse contraste maior que dá a sensação de chapa: claro na quina de cima,
+   * escuro no vinco, claro de novo embaixo.
+   *
+   * O ÂNGULO É OUTRO de propósito (160° contra 100°). Com o mesmo ângulo, borda
+   * e preenchimento acendem no mesmo ponto e o objeto vira uma mancha lisa —
+   * são as luzes discordando que fazem o olho ler duas superfícies.
+   */
+  --cobre-borda: linear-gradient(
+    160deg,
+    #ffe7ce 0%,
+    #a6572a 22%,
+    #5c2b11 46%,
+    #c57b44 68%,
+    #ffdcbb 88%,
+    #7a3b1a 100%
+  );
+}
+
+.cobre-fundo {
+  /*
+   * Duas camadas e dois recortes: o preenchimento para dentro da borda, a borda
+   * ocupando a moldura. É o único jeito de ter borda em degradê num objeto de
+   * cantos arredondados — `border-color` não aceita gradiente.
+   *
+   * A borda precisa ser `transparent`, e o elemento NÃO pode ter
+   * `background-color`: cor de fundo pinta também a área da moldura e apaga a
+   * borda inteira, sem erro nenhum.
+   */
+  border: 2px solid transparent;
+  background-image: var(--cobre-fundo), var(--cobre-borda);
+  background-origin: border-box;
+  -webkit-background-clip: padding-box, border-box;
+  background-clip: padding-box, border-box;
+}
+
+/* A linha divisória da faixa de números: cobre a 22%, fina o bastante para
+   separar sem virar grade. */
+.cobre-linha {
+  border-color: rgb(200 121 65 / 0.22);
+}
+
+/* -------------------------------------------------------------------------- */
+/* A escala de texto das páginas públicas                                     */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * A landing page NÃO usa a escala do CRM.
+ *
+ * A do CRM é apertada de propósito — `text-base` são 13px — porque lá a tela é
+ * um painel de trabalho: o corretor quer ver quinze leads de uma vez, no
+ * computador, e cada pixel de altura é uma linha a mais na lista.
+ *
+ * A landing page é o contrário disso. Quem lê é um cliente, no telefone, com
+ * uma mão só, decidindo se manda o telefone dele para um desconhecido. Herdando
+ * os 13px, o corpo do texto ficava em 12 e 13 pixels e o aviso de dados em 10.
+ *
+ * E havia um estrago maior que a leitura. O campo do formulário está escrito
+ * com `text-base` e um comentário ao lado dizendo "16px é o mínimo: abaixo
+ * disso o iPhone dá zoom sozinho ao focar o campo". A intenção estava certa e o
+ * token desmentia: eram 13px, e o iPhone dava zoom nos QUATRO campos. A pessoa
+ * tocava em "Seu nome", a página saltava, ela pinchava de volta, tocava no
+ * telefone e saltava de novo — no meio do único formulário da página.
+ *
+ * O remapeamento é por SUBTREE, e não trocando a escala global, porque o CRM
+ * continua querendo a dele. Quem escreve `text-base` numa página pública passa
+ * a ter 16px, que é o que o comentário do formulário sempre quis dizer.
+ *
+ * Só os tamanhos pequenos são remapeados: `lg` para cima já servem aos dois, e
+ * os títulos usam medida explícita em pixel.
+ */
+.pagina-publica .text-2xs {
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+.pagina-publica .text-sm {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.pagina-publica .text-base {
+  font-size: 1rem;
+  line-height: 1.6;
+  letter-spacing: 0;
+}
+.pagina-publica .text-md {
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+
+/*
+ * As variantes por faixa precisam ser repetidas DENTRO da mesma consulta de
+ * mídia: `sm:text-md` é outro nome de classe, não o mesmo com um seletor a
+ * mais, então a regra acima não a alcança.
+ */
+@media (min-width: 640px) {
+  .pagina-publica .sm\:text-md {
+    font-size: 1.0625rem;
+    line-height: 1.55;
+  }
+  .pagina-publica .sm\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.45;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Botão de vidro com anel de ouro                                            */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * O anel é OUTRO degradê, e não `--cobre-borda`.
+ *
+ * A borda de cobre desce até #5c2b11 no meio do percurso — quase preto. Numa
+ * chapa isso é o vinco, e é o que faz parecer metal. Num anel que precisa
+ * PARECER ACESO, o mesmo trecho vira um pedaço queimado: a luz apaga no meio
+ * do caminho e o brilho não fecha a volta. Aqui o piso é #c9752f, escuro o
+ * bastante para dar volume e claro o bastante para o anel continuar aceso em
+ * toda a extensão.
+ *
+ * 200° porque a referência é iluminada de baixo à esquerda: a quina que acende
+ * primeiro é a de baixo, ao contrário da chapa de cobre, que acende em cima.
+ */
+:root {
+  --ouro-anel: linear-gradient(
+    200deg,
+    #ffeacf 0%,
+    #f2ad57 18%,
+    #c9752f 44%,
+    #f6c079 68%,
+    #ffe6c6 86%,
+    #d18a3c 100%
+  );
+}
+
+/*
+ * Vidro SEM tinta: o fundo é o que está atrás, desfocado, e mais nada.
+ *
+ * Não tem `background-color`. As duas versões anteriores tinham — primeiro um
+ * quase preto a 62%, depois um cinza quente a 84% — e as duas garantiam a
+ * leitura do texto por conta própria, custando justamente o que faz um vidro
+ * parecer vidro: a cor do que está atrás.
+ *
+ * O que sobrou de pintura é LUZ, não cor: um degradê de branco puro que é o
+ * reflexo na superfície, e as duas quinas internas. Nenhum matiz entra.
+ *
+ * A conta que isso muda: sem tinta, o contraste do texto passa a depender
+ * inteiramente do chão, e ele deixa de ser propriedade da classe. Por isso a
+ * cor da letra é decidida em cada uso — clara sobre a foto do herói, escura
+ * sobre a seção de lazer. Ver o comentário em `.botao-vidro` no TSX.
+ */
+/*
+ * Sem `isolation: isolate` aqui, de propósito.
+ *
+ * O reflexo seria isolar o botão e pôr o anel em `z-index: -1`, entre o vidro e
+ * o texto. Só que `isolation` é uma das propriedades que formam um BACKDROP
+ * ROOT — e um elemento que é a raiz do próprio fundo não tem fundo nenhum para
+ * desfocar: o `backdrop-filter` viraria enfeite morto, sem erro e sem aviso.
+ *
+ * Sem ele, os pseudo-elementos pintam ACIMA do texto. O que atravessa é só o
+ * brilho — translúcido, quente, uns 5% no meio do botão — e o anel em si passa
+ * a 26px da primeira letra. Na referência o brilho também lava o miolo.
+ */
+.botao-vidro {
+  position: relative;
+  border-radius: 9999px;
+  /*
+   * Só o reflexo: branco puro, sem matiz. Forte na quina de cima, some no
+   * meio, e volta a acender embaixo à direita — é onde a luz da referência
+   * bate de novo ao sair do vidro.
+   */
+  background-image: linear-gradient(
+    165deg,
+    rgb(255 255 255 / 0.22) 0%,
+    rgb(255 255 255 / 0.04) 42%,
+    rgb(255 255 255 / 0.14) 100%
+  );
+  /*
+   * `saturate` sem `brightness`: acender a cor do que está atrás é próprio de
+   * vidro, escurecer seria pintar por cima. O desfoque é maior que o anterior
+   * porque agora ele é o efeito inteiro, e não um detalhe sobre a tinta.
+   */
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+  box-shadow:
+    /* apoio no chão — é o que tira a pastilha de cima do papel */
+    0 14px 34px -14px rgb(0 0 0 / 0.5),
+    /* quina de cima e devolução embaixo: a espessura do vidro */
+    inset 0 1px 0 rgb(255 255 255 / 0.42),
+    inset 0 -1px 0 rgb(255 255 255 / 0.2);
+  transition:
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+/*
+ * O BRILHO mora sozinho, e vem antes do anel.
+ *
+ * Ele não pode dividir elemento com a moldura: a máscara que recorta o anel
+ * recorta TUDO que o elemento pinta, sombra inclusive — o halo seria apagado
+ * junto com o miolo. Em elemento próprio, sem máscara, ele sobrevive.
+ *
+ * E vem primeiro para o anel pintar por cima do próprio halo, e não por baixo:
+ * assim a moldura fica nítida e o brilho fica sendo brilho.
+ */
+.botao-vidro::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: inherit;
+  box-shadow:
+    /* para fora, o halo; para dentro, a luz molhando o vidro */
+    0 0 12px rgb(242 173 87 / 0.45),
+    inset 0 0 14px rgb(242 173 87 / 0.25);
+  pointer-events: none;
+  transition: box-shadow 180ms ease;
+}
+
+/*
+ * O ANEL. Cor lisa é o PISO, não o plano.
+ *
+ * A borda em degradê do `.cobre-fundo` não serve aqui, e o motivo é exatamente
+ * o que quebrou este botão na primeira versão: aquela técnica precisa de uma
+ * camada OPACA por dentro, que é quem tapa o degradê no miolo e deixa só a
+ * moldura à mostra. Pondo uma camada transparente para o vidro aparecer, nada
+ * tapa nada — o dourado enche a pastilha e engole o texto.
+ *
+ * Anel com miolo transparente só sai por máscara. E o degradê fica atrás de um
+ * `@supports` porque a falha desta técnica é a MESMA catástrofe: sem
+ * `mask-composite`, o fundo dourado não é recortado e vira pastilha cheia de
+ * novo. Assim o pior caso é um anel de cor lisa, que é um botão correto.
+ */
+.botao-vidro::after {
+  content: '';
+  position: absolute;
+  /*
+   * Recuado 6px: é a proporção da referência (o anel entra cerca de um décimo
+   * da altura). Num botão de 54px dá exatamente essa medida.
+   */
+  inset: 6px;
+  border-radius: inherit;
+  border: 1.5px solid #e8a552;
+  pointer-events: none;
+}
+
+@supports (mask-composite: exclude) or (-webkit-mask-composite: xor) {
+  .botao-vidro::after {
+    /*
+     * `padding` é a espessura do anel: a máscara subtrai a caixa de conteúdo da
+     * caixa inteira, e o que sobra visível é exatamente esse cinturão.
+     *
+     * O degradê é pintado no elemento TODO e só o cinturão o revela — por isso
+     * o topo do anel mostra a cor do topo do degradê e a base mostra a da base.
+     * É o que dá a volta iluminada de baixo, como na referência.
+     */
+    border: 0;
+    padding: 1.5px;
+    background: var(--ouro-anel);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+}
+
+.botao-vidro:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 18px 38px -14px rgb(0 0 0 / 0.7),
+    inset 0 1px 0 rgb(255 255 255 / 0.46),
+    inset 0 -1px 0 rgb(255 255 255 / 0.2);
+}
+
+.botao-vidro:hover::before {
+  box-shadow:
+    0 0 18px rgb(242 173 87 / 0.7),
+    inset 0 0 18px rgb(242 173 87 / 0.38);
+}
+
+.botao-vidro:active {
+  transform: translateY(0);
+}
+
+/*
+ * O foco NÃO pode ser o próprio anel ficando mais aceso: quem navega por
+ * teclado precisa distinguir "focado" de "o mouse passou por cima", e as duas
+ * coisas ficariam iguais. Um anel externo, afastado, é inequívoco.
+ */
+.botao-vidro:focus-visible {
+  outline: 2px solid #ffe6c6;
+  outline-offset: 3px;
+}

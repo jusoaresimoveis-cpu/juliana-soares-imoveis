@@ -9,6 +9,7 @@ export const IMOVEIS_DE_EXEMPLO: Imovel[] = [
   {
     codigo: 'EX1',
     slug: 'exemplo-apartamento-2-quartos-meia-praia-itapema-ex1',
+    slugsAntigos: [],
     titulo: '[EXEMPLO] Apartamento 2 quartos em Meia Praia',
     descricao:
       'Imóvel de exemplo para desenvolvimento do site. Texto, valores e características são fictícios.',
@@ -34,6 +35,7 @@ export const IMOVEIS_DE_EXEMPLO: Imovel[] = [
   {
     codigo: 'EX2',
     slug: 'exemplo-kitnet-centro-itapema-ex2',
+    slugsAntigos: [],
     titulo: '[EXEMPLO] Kitnet mobiliada no Centro',
     descricao:
       'Imóvel de exemplo para desenvolvimento do site. Texto, valores e características são fictícios.',
@@ -59,6 +61,7 @@ export const IMOVEIS_DE_EXEMPLO: Imovel[] = [
   {
     codigo: 'EX3',
     slug: 'exemplo-casa-3-quartos-pereque-porto-belo-ex3',
+    slugsAntigos: [],
     titulo: '[EXEMPLO] Casa 3 quartos no Perequê',
     descricao:
       'Imóvel de exemplo para desenvolvimento do site. Texto, valores e características são fictícios.',
@@ -84,6 +87,7 @@ export const IMOVEIS_DE_EXEMPLO: Imovel[] = [
   {
     codigo: 'EX4',
     slug: 'exemplo-apartamento-3-quartos-meia-praia-itapema-ex4',
+    slugsAntigos: [],
     titulo: '[EXEMPLO] Apartamento 3 quartos, venda ou aluguel',
     descricao:
       'Imóvel de exemplo para desenvolvimento do site. Texto, valores e características são fictícios.',

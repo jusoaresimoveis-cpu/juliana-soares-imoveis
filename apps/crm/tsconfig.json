@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "types": ["node", "vite/client"],
+
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": false,
+    "verbatimModuleSyntax": false,
+    "noEmit": true,
+    "skipLibCheck": true,
+
+    /* Ligado desde o começo, de propósito.
+       Um dos sistemas de referência conseguiu "pipeline verde" desligando
+       strict e strictNullChecks, e tem 80 arquivos com a checagem suprimida.
+       A lógica de atribuição financeira deste projeto não sobrevive a isso. */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@contracts": ["../../packages/contracts/src/index.ts"],
+      "@contracts/*": ["../../packages/contracts/src/*"],
+      /* Os tipos do React 18, que é o do CRM, também para as bibliotecas que o
+         npm deixou na raiz do monorepo (lá está o 19, do site). Sem isto o
+         React Router tipado com o 19 não passa como componente do 18. */
+      "react": ["./node_modules/@types/react"],
+      "react/*": ["./node_modules/@types/react/*"],
+      "react-dom": ["./node_modules/@types/react-dom"],
+      "react-dom/*": ["./node_modules/@types/react-dom/*"]
+    }
+  },
+  /* `supabase/testes` (na raiz do repositório) entra aqui e as edge functions
+     NÃO: elas rodam em Deno, importam por URL e usam globais que não existem no
+     Node — este `tsc` as reprovaria por motivos que não são erros. Os testes de
+     RLS são Node comum e precisam da mesma checagem que o resto. Os contratos
+     são checados no pacote deles. */
+  "include": ["src", "../../supabase/testes", "vite.config.ts", "vitest.rls.config.ts"]
+}

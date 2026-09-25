@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <!--
+      Fora de buscador. Este HTML serve só o CRM, que é todo atrás de login: as
+      páginas públicas são o site (apps/site), em outro domínio. Na origem ele
+      servia também as landing pages e por isso não podia ter noindex.
+    -->
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#8c6b40" />
+    <!-- O iOS ignora o manifest para o icone da tela de inicio: ele le esta tag. -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="CRM Juliana" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>CRM · Juliana Soares</title>
+
+    <script>
+      // Aplica tema E cor antes da primeira pintura. Sem isto o app abre no
+      // bronze e vira verde depois que o React monta — a piscada é curta e
+      // feia, e no celular ela acontece toda vez que o app é aberto.
+      (function () {
+        try {
+          var saved = localStorage.getItem('sc-theme');
+          var dark = saved
+            ? saved === 'dark'
+            : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (dark) document.documentElement.classList.add('dark');
+
+          // Só o essencial mora aqui: a paleta completa vive em src/lib/cores.ts
+          // e é reaplicada no boot do app. Estes valores existem para cobrir os
+          // milissegundos entre o HTML e o JavaScript.
+          var cor = localStorage.getItem('sc-cor');
+          var P = {
+            roxo:     [['251 90% 60%','253 78% 51%','251 100% 69%','251 100% 95%','0 0% 100%',250],
+                       ['254 100% 72%','253 100% 79%','252 100% 80%','252 46% 17%','250 45% 10%',248]],
+            azul:     [['214 90% 44%','216 88% 37%','210 100% 54%','212 100% 95%','0 0% 100%',216],
+                       ['207 100% 68%','209 100% 75%','203 100% 80%','214 46% 20%','250 45% 10%',215]],
+            verde:    [['160 86% 26%','162 88% 21%','156 72% 34%','158 62% 93%','0 0% 100%',166],
+                       ['156 72% 58%','158 76% 66%','152 70% 68%','160 40% 18%','250 45% 10%',164]],
+            vermelho: [['352 78% 43%','354 78% 36%','350 90% 52%','352 100% 95%','0 0% 100%',348],
+                       ['352 94% 68%','354 92% 76%','348 100% 78%','352 42% 20%','250 45% 10%',346]],
+            laranja:  [['24 92% 35%','22 94% 29%','28 94% 44%','28 100% 93%','0 0% 100%',28],
+                       ['28 96% 60%','24 96% 68%','32 100% 70%','24 44% 18%','250 45% 10%',26]]
+          };
+          var p = P[cor] && P[cor][dark ? 1 : 0];
+          if (p) {
+            var r = document.documentElement.style;
+            r.setProperty('--pri', p[0]);
+            r.setProperty('--pri-2', p[1]);
+            r.setProperty('--pri-3', p[2]);
+            r.setProperty('--pri-soft', p[3]);
+            r.setProperty('--pri-fg', p[4]);
+            // A MESMA lista de src/lib/cores.ts. Esquecer um token aqui faz a
+            // tela abrir com metade da cor antiga por alguns milissegundos.
+            var n = dark
+              ? [['--bg','40% 7%'],['--sheet','34% 11%'],['--card','40% 16.5%'],['--card-2','40% 21%'],
+                 ['--line','36% 21%'],['--line-2','36% 26%'],
+                 ['--tx','71% 95%'],['--tx-2','25% 72%'],['--tx-3','18% 53%']]
+              : [['--bg','45% 94%'],['--sheet','40% 96.5%'],['--card','0% 100%'],['--card-2','45% 97.5%'],
+                 ['--line','41% 93%'],['--line-2','35% 90%'],
+                 ['--tx','35% 15%'],['--tx-2','12% 41%'],['--tx-3','14% 65%']];
+            for (var i = 0; i < n.length; i++) r.setProperty(n[i][0], p[5] + ' ' + n[i][1]);
+          }
+        } catch (e) {
+          /* localStorage bloqueado: segue no tema e na cor padrão */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

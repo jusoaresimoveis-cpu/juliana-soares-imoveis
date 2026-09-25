@@ -1,7 +1,7 @@
 import { PROPERTY_STATUS_LABEL, rotuloDaComodidade } from '@juliana/contracts';
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 
 import { BotaoWhatsApp } from '@/components/BotaoWhatsApp';
 import { CartaoDeImovel } from '@/components/imoveis/CartaoDeImovel';
@@ -11,7 +11,7 @@ import { JsonLd } from '@/components/JsonLd';
 import { Migalhas } from '@/components/Migalhas';
 import { SITE } from '@/config/site';
 import { reais } from '@/lib/formato';
-import { buscarImovel, carregarImoveisPublicados } from '@/lib/imoveis/dados';
+import { buscarImovel, buscarPorSlugAntigo, carregarImoveisPublicados } from '@/lib/imoveis/dados';
 import { bairrosDe, cidadeDoImovel, filtrarImoveis, urlDaListagem } from '@/lib/imoveis/listagem';
 import { resumoDoImovel } from '@/lib/imoveis/texto';
 import { STATUS_NA_VITRINE } from '@/lib/imoveis/tipos';
@@ -27,8 +27,12 @@ export async function generateStaticParams() {
 async function carregar(props: PageProps<'/imovel/[slug]'>) {
   const { slug } = await props.params;
   const imovel = await buscarImovel(slug);
-  if (!imovel) notFound();
-  return imovel;
+  if (imovel) return imovel;
+  // Nome público trocado no CRM: o endereço velho leva ao novo (308), em vez
+  // de um 404 para quem clicou num anúncio ou num link de WhatsApp.
+  const renomeado = await buscarPorSlugAntigo(slug);
+  if (renomeado) permanentRedirect(`/imovel/${renomeado.slug}`);
+  notFound();
 }
 
 export async function generateMetadata(props: PageProps<'/imovel/[slug]'>): Promise<Metadata> {

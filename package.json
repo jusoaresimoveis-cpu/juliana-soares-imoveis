@@ -10,9 +10,12 @@
   },
   "scripts": {
     "dev:site": "npm run dev -w apps/site",
+    "dev:crm": "npm run dev -w apps/crm",
     "build:site": "npm run build -w apps/site",
+    "build:crm": "npm run build -w apps/crm",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present"
+    "test": "npm run test --workspaces --if-present",
+    "test:rls": "npm run test:rls -w apps/crm"
   }
 }

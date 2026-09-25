@@ -9,6 +9,25 @@ O GitHub Actions (`.github/workflows/verificar.yml`) roda testes, tipos e lint
 em cada push. Ele **não** segura o deploy, só mostra o X vermelho no commit
 quando algo quebrou.
 
+## O CRM
+
+Um segundo projeto na mesma conta Vercel da Juliana (o Hobby aceita vários),
+ligado ao mesmo repositório:
+
+| Campo | Valor |
+|---|---|
+| Root Directory | `apps/crm` |
+| Framework | Vite (o `apps/crm/vercel.json` já diz build e saída) |
+| Variáveis | as de `apps/crm/.env.example` |
+
+A mesma regra do autor do commit vale para ele. O CRM é todo atrás de login e
+não indexa (`noindex` no HTML, no cabeçalho e no `robots.txt`).
+
+## As variáveis do site
+
+As de `apps/site/.env.example`, em Settings → Environment Variables do projeto
+`juliana-soares-site`. Sem elas o site continua no ar, só sem imóvel.
+
 ## A regra que trava o deploy: quem assina o commit
 
 O repositório é privado e tem duas contas no GitHub:

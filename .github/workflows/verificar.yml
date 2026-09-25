@@ -1,8 +1,8 @@
 # Testes, tipos e lint a cada push e pull request.
 #
-# Quem publica o site é a integração Git da própria Vercel (ver docs/DEPLOY.md).
-# Isto aqui não bloqueia o deploy: avisa, com um X vermelho no commit, que
-# alguma coisa quebrou.
+# Quem publica o site e o CRM é a integração Git da própria Vercel (ver
+# docs/DEPLOY.md). Isto aqui não bloqueia o deploy: avisa, com um X vermelho no
+# commit, que alguma coisa quebrou.
 
 name: Verificar
 
@@ -21,8 +21,14 @@ concurrency:
 
 jobs:
   verificar:
-    name: Testes, tipos e lint
+    name: Testes, tipos, lint e build do CRM
     runs-on: ubuntu-latest
+    # O `env.ts` do CRM valida as variáveis no import e estoura sem elas, de
+    # propósito (o app não sobe meio configurado). Os testes chegam nele por
+    # importação indireta; valores de faz-de-conta bastam.
+    env:
+      VITE_SUPABASE_URL: https://exemplo.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: build-only
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -33,3 +39,32 @@ jobs:
       - run: npm test
       - run: npm run typecheck
       - run: npm run lint
+      - run: npm run build -w apps/crm
+
+  # ---------------------------------------------------------------------------
+  # As policies contra um Supabase de verdade.
+  #
+  # Job separado porque é o único que precisa de Docker e leva minutos. É também
+  # a prova de que as migrations aplicam no Supabase, e não só no Postgres puro.
+  # ---------------------------------------------------------------------------
+  rls:
+    name: RLS no Supabase local
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      # Só o que o teste usa. O `auth` FICA: é ele que cria `auth.users`.
+      - name: Subir o Postgres local
+        run: supabase start -x realtime,storage-api,imgproxy,studio,logflare,vector,edge-runtime,mailpit,supavisor
+      - name: Testes de RLS
+        run: npm run test:rls -w apps/crm
+      - name: Derrubar
+        if: always()
+        run: supabase stop
