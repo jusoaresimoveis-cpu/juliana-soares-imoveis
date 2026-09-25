@@ -43,6 +43,14 @@
       ]
     }
   ],
+  "redirects": [
+    {
+      "source": "/:caminho(.*)",
+      "has": [{ "type": "host", "value": "juliana-soares-crm.vercel.app" }],
+      "destination": "https://app.julianasoaresimoveis.com.br/:caminho",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!assets/|manifest.webmanifest|sw.js|icone-|apple-touch-icon.png|robots.txt).*)",

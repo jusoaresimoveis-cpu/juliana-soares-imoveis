@@ -1,4 +1,4 @@
-import { CORS, json, admin, quemChamou } from '../_shared/wa.ts';
+import { CORS, json, admin, quemChamou, servir } from '../_shared/wa.ts';
 
 /**
  * Registra ou remove o aparelho que vai receber push.
@@ -7,7 +7,7 @@ import { CORS, json, admin, quemChamou } from '../_shared/wa.ts';
  * `criar-corretor`.
  */
 
-Deno.serve(async (req) => {
+servir(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
   if (req.method !== 'POST') return json({ erro: 'Método não permitido' }, 405);
 

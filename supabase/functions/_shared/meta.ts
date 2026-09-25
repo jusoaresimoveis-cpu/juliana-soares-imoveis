@@ -7,7 +7,7 @@
  * regra de autorização, que é como sistemas ganham um caminho seguro e um
  * caminho esquecido.
  */
-export { admin, quemChamou, lerSegredo, guardarSegredo, digest, segredoDeWebhook, json, CORS } from './wa.ts';
+export { admin, quemChamou, lerSegredo, guardarSegredo, digest, segredoDeWebhook, json, CORS, servir } from './wa.ts';
 
 /**
  * A versão da Graph API mora AQUI, e em nenhum outro lugar.

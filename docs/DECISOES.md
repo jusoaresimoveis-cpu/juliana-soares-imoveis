@@ -73,6 +73,16 @@ com a data. Não apague: o motivo antigo explica código que ainda pode existir.
 - **Publicar pelo GitHub Actions com token NÃO contorna isso.** Foi testado: a
   CLI envia o autor do commit e a Vercel bloqueia igual. O Actions ficou só
   com os testes (`verificar.yml`), e quem publica é a integração Git da Vercel.
+- **Os endereços definitivos antes do lançamento** (25/09): o site em
+  `julianasoaresimoveis.com.br` e o CRM em `app.julianasoaresimoveis.com.br`.
+  Sessão, app instalado e aviso no celular ficam guardados por endereço:
+  mudar o CRM de endereço depois faria a Juliana entrar, instalar e ligar o
+  aviso de novo. O site no domínio continua fora do Google até `SITE_NO_AR=sim`.
+- **O CRM num subdomínio, não em `/app` do site** (decisão do usuário, 25/09).
+  No mesmo endereço do site, os scripts de anúncio (pixel da Meta, tag do
+  Google) rodariam onde o CRM guarda a sessão e conseguiriam lê-la. Separado, o
+  CRM também não depende do deploy do site. É o mesmo arranjo do CRM de origem
+  (`app.hvaimoveis.com.br`). Detalhes em `docs/DEPLOY.md`, "Os endereços".
 
 ## Briefing do site (24/09/2026)
 
@@ -245,9 +255,13 @@ relação ao briefing, já combinado:
 - [x] Usuários e seed (25/09): a Juliana é GERENTE e a agência
       (gutobuyno@gmail.com) é ADMIN, como no CRM de origem. Cadastro público
       desligado no Auth: quem cria corretor é o CRM (`criar-corretor`).
-- [ ] Vercel: variáveis do site (`.secrets/site.env`) e o projeto do CRM
-      (`apps/crm`, variáveis em `.secrets/crm.env`). Com a URL do CRM: pôr em
-      `APP_ORIGIN` e no Site URL / Redirect URLs do Auth.
+- [x] Vercel (25/09): as variáveis do site e o projeto do CRM
+      (`juliana-soares-crm`, variáveis em `.secrets/crm.env`).
+- [x] Endereços definitivos (25/09): o site em `julianasoaresimoveis.com.br`
+      (o `www` redireciona) e o CRM em `app.julianasoaresimoveis.com.br`, com
+      os registros no Cloudflare, o `APP_ORIGIN` e o Site URL / Redirect URLs
+      do Auth. Os `.vercel.app` redirecionam para o domínio. Ver
+      `docs/DEPLOY.md`, "Os endereços".
 - [ ] WhatsApp da Juliana: o mesmo servidor uazapi do Igor, instância nova
       (segredos gravados em 25/09). Falta ela conectar o número pelo CRM
       (Configurações → WhatsApp) e conferir que conversa pessoal não entra.
@@ -255,6 +269,6 @@ relação ao briefing, já combinado:
 - [ ] Link rastreado `/w/<código>` e captura completa de UTMs e click IDs.
 - [ ] Política de privacidade (LGPD), exigida antes de ligar Google Ads.
 - [ ] Página "Sobre", com a bio que a Juliana escrever.
-- [ ] **Lançamento:** domínio na Vercel, registros no Cloudflare e
-      `SITE_NO_AR=sim` nas variáveis de produção. **Não apagar** o TXT
-      `google-site-verification`.
+- [ ] **Lançamento:** `SITE_NO_AR=sim` nas variáveis de produção do site e o
+      sitemap enviado no Search Console. O domínio já está no ar desde 25/09,
+      fora do Google até lá. **Não apagar** o TXT `google-site-verification`.

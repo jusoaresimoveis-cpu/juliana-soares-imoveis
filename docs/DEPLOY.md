@@ -3,7 +3,7 @@
 O site publica pela **integração Git da Vercel**, na conta da Juliana (plano
 Hobby, gratuito). Projeto `juliana-soares-site`, Root Directory `apps/site`.
 Todo push na `main` vai para produção:
-https://juliana-soares-site.vercel.app
+https://julianasoaresimoveis.com.br
 
 O GitHub Actions (`.github/workflows/verificar.yml`) roda testes, tipos e lint
 em cada push. Ele **não** segura o deploy, só mostra o X vermelho no commit
@@ -22,6 +22,36 @@ ligado ao mesmo repositório:
 
 A mesma regra do autor do commit vale para ele. O CRM é todo atrás de login e
 não indexa (`noindex` no HTML, no cabeçalho e no `robots.txt`).
+
+## Os endereços
+
+| Endereço | Projeto na Vercel |
+|---|---|
+| `julianasoaresimoveis.com.br` | `juliana-soares-site` |
+| `www.julianasoaresimoveis.com.br` | `juliana-soares-site`, redireciona para o de cima |
+| `app.julianasoaresimoveis.com.br` | `juliana-soares-crm` |
+
+O DNS é do Cloudflare, com os três registros em **DNS only** (nuvem cinza). O
+proxy do Cloudflare (nuvem laranja) a Vercel desaconselha: o certificado dela
+pode deixar de renovar e tudo passa por duas CDNs. **Não apagar** o TXT
+`google-site-verification`: é ele que mantém o domínio no Search Console.
+
+Os `.vercel.app` de produção redirecionam (308) para o domínio: o do site em
+`apps/site/next.config.ts`, menos `/api/`, por onde o banco avisa a revalidação;
+o do CRM em `apps/crm/vercel.json`. Sessão, app instalado e inscrição de push
+são guardados por endereço no navegador: com o CRM num endereço só, cada coisa
+existe uma vez.
+
+O que depende do endereço do CRM, fora do código:
+
+- `APP_ORIGIN`, nos segredos das edge functions: o domínio primeiro (é o que
+  responde a quem não está na lista), depois o `.vercel.app` e o localhost;
+- Supabase, Authentication → URL Configuration: Site URL
+  `https://app.julianasoaresimoveis.com.br`; Redirect URLs
+  `https://app.julianasoaresimoveis.com.br/**` e `http://localhost:5173/**`
+  (o link de redefinir senha volta para `/redefinir`);
+- `VITE_PUBLIC_SITE_URL` do projeto do CRM, que aponta para o site. É lida no
+  build: trocar pede um deploy novo.
 
 ## As variáveis do site
 
@@ -71,7 +101,7 @@ publica tudo o que está atrás dele.
 O `/versao` responde o commit que está no ar:
 
 ```bash
-curl -s https://juliana-soares-site.vercel.app/versao
+curl -s https://julianasoaresimoveis.com.br/versao
 # {"commit":"abc1234","ambiente":"production"}
 ```
 

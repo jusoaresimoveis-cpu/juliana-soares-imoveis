@@ -42,8 +42,10 @@ Em build de produção eles nunca aparecem: sem banco, o site sai sem imóveis.
 
 Vercel (Hobby), na conta da Juliana: projeto `juliana-soares-site`, Root
 Directory `apps/site`. Todo push na `main` publica em
-https://juliana-soares-site.vercel.app (fora do Google até o lançamento; veja
-`SITE_NO_AR` em `docs/DECISOES.md`). Para saber qual commit está no ar: `/versao`.
+https://julianasoaresimoveis.com.br (fora do Google até o lançamento; veja
+`SITE_NO_AR` em `docs/DECISOES.md`), e o CRM em
+https://app.julianasoaresimoveis.com.br. Para saber qual commit está no ar:
+`/versao`.
 
 **Antes do primeiro commit numa máquina nova, leia [docs/DEPLOY.md](docs/DEPLOY.md).**
 Os commits precisam sair com a identidade da conta dona, ou a Vercel bloqueia o

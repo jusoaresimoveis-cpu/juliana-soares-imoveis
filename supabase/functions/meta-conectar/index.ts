@@ -3,6 +3,7 @@ import {
   quemChamou,
   json,
   CORS,
+  servir,
   graph,
   guardarSegredo,
   lerSegredo,
@@ -60,7 +61,7 @@ interface Corpo {
 const ESCOPO_OBRIGATORIO = 'ads_read';
 const ESCOPO_DE_LEADS = 'leads_retrieval';
 
-Deno.serve(async (req) => {
+servir(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
   const sb = admin();

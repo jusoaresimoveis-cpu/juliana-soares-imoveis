@@ -63,7 +63,9 @@ A senha do banco e os tokens não passam pelo chat nem pelo repositório.
 4. **Criar o usuário da Juliana** em Authentication → Users → Add user, com o
    e-mail `jusoaresimoveis@gmail.com` e uma senha dela. Depois, no SQL Editor,
    colar e rodar `seeds/juliana.sql`. Ele cria a organização, as etapas do funil
-   e liga o usuário como administradora; rodar de novo não duplica nada.
+   e liga os usuários (a Juliana como gerente, a agência como admin); rodar de
+   novo não duplica nada. Em Authentication → URL Configuration vão os endereços
+   do CRM (`docs/DEPLOY.md`, "Os endereços").
 
 5. **Segredos das edge functions** (Project Settings → Edge Functions →
    Secrets). `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` o próprio Supabase
@@ -71,7 +73,7 @@ A senha do banco e os tokens não passam pelo chat nem pelo repositório.
 
    | Segredo | O que é |
    |---|---|
-   | `APP_ORIGIN` | endereços do CRM, separados por vírgula (a URL da Vercel e, depois, o domínio próprio) |
+   | `APP_ORIGIN` | endereços do CRM, separados por vírgula, o principal primeiro: `https://app.julianasoaresimoveis.com.br,https://juliana-soares-crm.vercel.app,http://localhost:5173` |
    | `UAZAPI_BASE_URL` / `UAZAPI_ADMIN_TOKEN` | servidor da uazapi e o token de admin dele, que cria a instância |
    | `WHATSAPP_CRON_SECRET` | um segredo longo qualquer; o mesmo vai no Vault |
    | `PUSH_CRON_SECRET` | idem |
@@ -87,7 +89,8 @@ A senha do banco e os tokens não passam pelo chat nem pelo repositório.
    select vault.create_secret('<o mesmo WHATSAPP_CRON_SECRET>', 'whatsapp_cron_secret');
    select vault.create_secret('<o mesmo PUSH_CRON_SECRET>', 'push_cron_secret');
    select vault.create_secret('<o mesmo META_CRON_SECRET>', 'meta_cron_secret');
-   -- O site: o banco avisa quando um imóvel muda.
+   -- O site: o banco avisa quando um imóvel muda. Pelo endereço da Vercel, que
+   -- não depende do DNS; o site deixa `/api/` fora do redirecionamento.
    select vault.create_secret('https://juliana-soares-site.vercel.app/api/revalidar', 'site_revalidar_url');
    select vault.create_secret('<o mesmo REVALIDACAO_SEGREDO da Vercel do site>', 'site_revalidar_segredo');
    ```

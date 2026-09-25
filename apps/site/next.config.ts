@@ -30,6 +30,20 @@ const nextConfig: NextConfig = {
     return [
       // Nome antigo da página de captação, antes do menu do modelo.
       { source: '/anuncie', destination: '/cadastrar-imovel', permanent: true },
+
+      /*
+       * O endereço da Vercel leva ao domínio. A produção responde pelos dois e,
+       * com `SITE_NO_AR=sim`, os dois indexariam: o mesmo site duas vezes no
+       * Google. `/api/` fica de fora porque é por esse endereço que o banco
+       * avisa a revalidação (Vault `site_revalidar_url`), e o aviso não segue
+       * redirecionamento.
+       */
+      {
+        source: '/:caminho((?!api/).*)',
+        has: [{ type: 'host', value: 'juliana-soares-site.vercel.app' }],
+        destination: 'https://julianasoaresimoveis.com.br/:caminho',
+        permanent: true,
+      },
     ];
   },
 
