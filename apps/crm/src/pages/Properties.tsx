@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Plus, Loader2, ImageOff, AlertCircle, BedDouble, Bath, Car, Ruler } from 'lucide-react';
+import { Search, Plus, Loader2, ImageOff, AlertCircle, BedDouble, BedSingle, Bath, Car, Ruler } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProperties, useCovers, type Property } from '@/hooks/useProperties';
 import { PropertyFormDialog } from '@/components/properties/PropertyFormDialog';
@@ -136,7 +136,7 @@ export default function Properties() {
             <li key={p.id}>
               <button
                 onClick={() => navigate(`/imoveis/${p.id}`)}
-                className="group flex w-full flex-col overflow-hidden rounded-lg border border-transparent bg-card text-left shadow-card transition-colors hover:border-pri-light"
+                className="group flex h-full w-full flex-col overflow-hidden rounded-lg border border-transparent bg-card text-left shadow-card transition-colors hover:border-pri-light"
               >
                 {/*
                   A foto fica POR CIMA da caixa (absolute), e não dentro do fluxo.
@@ -190,9 +190,12 @@ export default function Properties() {
                   )}
 
                   <div className="mt-auto flex flex-wrap items-center gap-3 border-t border-line pt-2.5 text-sm text-tx-2">
-                    {p.bedrooms != null && <Ficha icone={BedDouble} valor={`${p.bedrooms}`} rotulo="dorm" />}
+                    {/* Quartos e suítes lado a lado, com os ícones do site: no cadastro,
+                        os quartos não contam as suítes (2 quartos e 1 suíte são 3). */}
+                    {!!p.bedrooms && <Ficha icone={BedSingle} valor={`${p.bedrooms}`} rotulo={p.bedrooms === 1 ? 'quarto' : 'quartos'} />}
+                    {!!p.suites && <Ficha icone={BedDouble} valor={`${p.suites}`} rotulo={p.suites === 1 ? 'suíte' : 'suítes'} />}
                     {p.bathrooms != null && <Ficha icone={Bath} valor={`${p.bathrooms}`} rotulo="banh" />}
-                    {p.parking_spots != null && <Ficha icone={Car} valor={`${p.parking_spots}`} rotulo="vagas" />}
+                    {p.parking_spots != null && <Ficha icone={Car} valor={`${p.parking_spots}`} rotulo={p.parking_spots === 1 ? 'vaga' : 'vagas'} />}
                     {p.area_total != null && <Ficha icone={Ruler} valor={`${p.area_total}`} rotulo="m²" />}
                     <span className="ml-auto font-mono text-xs text-tx-3">{p.public_code}</span>
                   </div>

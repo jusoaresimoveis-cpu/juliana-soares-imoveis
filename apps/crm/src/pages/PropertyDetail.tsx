@@ -6,6 +6,7 @@ import {
   Pencil,
   MapPin,
   BedDouble,
+  BedSingle,
   Bath,
   Car,
   Ruler,
@@ -189,10 +190,13 @@ export default function PropertyDetail() {
               </p>
             )}
 
-            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-line pt-4 sm:grid-cols-4">
-              <Numero icone={BedDouble} valor={imovel.bedrooms} rotulo="dorm." extra={imovel.suites ? `${imovel.suites} suíte${imovel.suites > 1 ? 's' : ''}` : null} />
+            {/* Quartos e suítes lado a lado, com os ícones do site: no cadastro, os
+                quartos não contam as suítes (2 quartos e 1 suíte são 3 dormitórios). */}
+            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-line pt-4 sm:grid-cols-5">
+              <Numero icone={BedSingle} valor={imovel.bedrooms} rotulo={imovel.bedrooms === 1 ? 'quarto' : 'quartos'} />
+              <Numero icone={BedDouble} valor={imovel.suites} rotulo={imovel.suites === 1 ? 'suíte' : 'suítes'} />
               <Numero icone={Bath} valor={imovel.bathrooms} rotulo="banh." />
-              <Numero icone={Car} valor={imovel.parking_spots} rotulo="vagas" />
+              <Numero icone={Car} valor={imovel.parking_spots} rotulo={imovel.parking_spots === 1 ? 'vaga' : 'vagas'} />
               <Numero
                 icone={Ruler}
                 valor={imovel.area_total}

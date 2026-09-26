@@ -19,6 +19,7 @@ export const LISTA_COLUNAS = [
   'price_cents',
   'rent_cents',
   'bedrooms',
+  'suites',
   'bathrooms',
   'parking_spots',
   'area_total',
