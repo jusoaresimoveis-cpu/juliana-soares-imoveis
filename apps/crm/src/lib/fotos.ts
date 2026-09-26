@@ -1,3 +1,5 @@
+import { desenharMarcaDagua } from './marcaDagua';
+
 /**
  * A foto do imóvel reduzida no navegador, antes de subir.
  *
@@ -29,6 +31,20 @@ export function precisaReduzir(arquivo: { type: string; size: number }, largura:
   return arquivo.size > JA_LEVE_BYTES || Math.max(largura, altura) > LADO_MAIOR;
 }
 
+/**
+ * A foto passa pelo canvas quando precisa encolher, trocar de formato ou
+ * ganhar a marca d'água. Com a marca ligada, até o JPEG já leve é redesenhado:
+ * subir como veio seria subir sem marca.
+ */
+export function precisaRedesenhar(
+  arquivo: { type: string; size: number },
+  largura: number,
+  altura: number,
+  marcaDagua: boolean,
+): boolean {
+  return marcaDagua || precisaReduzir(arquivo, largura, altura);
+}
+
 export interface FotoPronta {
   arquivo: Blob;
   tipo: string;
@@ -37,8 +53,11 @@ export interface FotoPronta {
   altura: number;
 }
 
-/** Abre, gira conforme o celular gravou, reduz e devolve em JPEG, com as dimensões. */
-export async function prepararFoto(arquivo: File): Promise<FotoPronta> {
+/**
+ * Abre, gira conforme o celular gravou, reduz, põe a marca d'água se pedida e
+ * devolve em JPEG, com as dimensões.
+ */
+export async function prepararFoto(arquivo: File, { marcaDagua = false } = {}): Promise<FotoPronta> {
   let bitmap: ImageBitmap;
   try {
     bitmap = await createImageBitmap(arquivo, { imageOrientation: 'from-image' });
@@ -47,7 +66,7 @@ export async function prepararFoto(arquivo: File): Promise<FotoPronta> {
   }
 
   try {
-    if (!precisaReduzir(arquivo, bitmap.width, bitmap.height)) {
+    if (!precisaRedesenhar(arquivo, bitmap.width, bitmap.height, marcaDagua)) {
       return {
         arquivo,
         tipo: arquivo.type,
@@ -68,6 +87,7 @@ export async function prepararFoto(arquivo: File): Promise<FotoPronta> {
     ctx.fillRect(0, 0, largura, altura);
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(bitmap, 0, 0, largura, altura);
+    if (marcaDagua) desenharMarcaDagua(ctx, largura, altura);
 
     const reduzida = await new Promise<Blob | null>((pronto) => tela.toBlob(pronto, 'image/jpeg', QUALIDADE));
     if (!reduzida) throw new Error(`Não deu para reduzir "${arquivo.name}".`);

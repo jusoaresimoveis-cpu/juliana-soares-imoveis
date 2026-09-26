@@ -163,6 +163,19 @@ relação ao briefing, já combinado:
 - **Ícone já instalado não troca sozinho no iPhone:** o CRM na tela de início
   fica com o ícone antigo até ser removido e adicionado de novo. No Android e
   no computador, o Chrome troca quando confere o manifesto outra vez.
+- **Marca d'água nas fotos** (26/09). As fotos são muitas vezes exclusivas, e
+  a marca impede outro anunciante de usá-las como suas.
+  - É o símbolo, branco a 50%, no meio da foto, com 35% do lado menor e uma
+    sombra leve para aparecer sobre parede e cortina brancas. Os valores saíram
+    de teste com fotos reais dos imóveis.
+  - É desenhada NA foto, no navegador, antes de subir (`lib/marcaDagua.ts`).
+    Por cima da foto na tela não protegeria: bastaria abrir o endereço da
+    imagem para ter a foto limpa.
+  - É regra da imobiliária (`organizations.marca_dagua_nas_fotos`), ligada por
+    padrão. A chave fica na aba de fotos do imóvel, e só admin e gerente mudam.
+  - Vale para as fotos novas. As que já subiram ficam como estão, e o arquivo
+    original continua só no aparelho de quem tirou a foto. Vídeo sobe sem
+    marca.
 
 ## Leads e WhatsApp
 

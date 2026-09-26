@@ -216,7 +216,9 @@ export function useMediaActions(orgId: string | undefined, propertyId: string | 
   };
 
   const enviar = useMutation({
-    mutationFn: async (arquivos: File[]) => {
+    // `marcaDagua` vem de quem chama, e não de uma consulta aqui dentro: a foto
+    // sai com a marca que a tela MOSTRAVA ligada na hora do envio.
+    mutationFn: async ({ arquivos, marcaDagua }: { arquivos: File[]; marcaDagua: boolean }) => {
       if (!orgId || !propertyId) throw new Error('Salve o imóvel antes de enviar mídia.');
 
       const { data: atuais } = await supabase
@@ -228,8 +230,9 @@ export function useMediaActions(orgId: string | undefined, propertyId: string | 
       const jaTemCapa = (atuais ?? []).some((x) => (x as { is_cover: boolean }).is_cover);
 
       for (const arquivo of arquivos) {
-        // Foto sobe reduzida (ver `lib/fotos.ts`); vídeo sobe como veio.
-        const foto = arquivo.type.startsWith('image/') ? await prepararFoto(arquivo) : null;
+        // Foto sobe reduzida e, com a chave ligada, com a marca d'água (ver
+        // `lib/fotos.ts`); vídeo sobe como veio.
+        const foto = arquivo.type.startsWith('image/') ? await prepararFoto(arquivo, { marcaDagua }) : null;
         const corpo = foto?.arquivo ?? arquivo;
         const ext = foto?.extensao ?? arquivo.name.split('.').pop()?.toLowerCase() ?? 'bin';
         // Pasta por organização: é o primeiro segmento que a política do

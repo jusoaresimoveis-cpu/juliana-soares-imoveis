@@ -31,6 +31,9 @@ supabase/
 - `20260925000200_historico_de_endereco.sql`: trocar o "Nome no site" de um
   imóvel já cadastrado voltou a salvar (o gatilho que guarda o endereço antigo
   roda como dono da função).
+- `20260926000000_marca_dagua.sql`: a chave da marca d'água nas fotos
+  (`organizations.marca_dagua_nas_fotos`, ligada por padrão; só admin e
+  gerente mudam).
 
 Dado de cliente não entra em migration: fica em `seeds/`, para o mesmo schema
 servir a outro cliente sem limpeza.

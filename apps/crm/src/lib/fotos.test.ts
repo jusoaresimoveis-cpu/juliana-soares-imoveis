@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dimensoesReduzidas, JA_LEVE_BYTES, LADO_MAIOR, precisaReduzir } from './fotos';
+import { dimensoesReduzidas, JA_LEVE_BYTES, LADO_MAIOR, precisaRedesenhar, precisaReduzir } from './fotos';
 
 /**
  * A regra de quando e quanto reduzir. O desenho no canvas só roda no
@@ -36,5 +36,19 @@ describe('precisaReduzir', () => {
   it('PNG e AVIF viram JPEG mesmo pequenos', () => {
     expect(precisaReduzir({ type: 'image/png', size: 50_000 }, 800, 600)).toBe(true);
     expect(precisaReduzir({ type: 'image/avif', size: 50_000 }, 800, 600)).toBe(true);
+  });
+});
+
+describe('precisaRedesenhar', () => {
+  const leve = { type: 'image/jpeg', size: JA_LEVE_BYTES - 1 };
+
+  it("com a marca d'água ligada, até a foto já leve passa pelo canvas", () => {
+    // Subir como veio seria subir SEM a marca.
+    expect(precisaRedesenhar(leve, 1600, 1200, true)).toBe(true);
+  });
+
+  it('com ela desligada, vale a regra de reduzir', () => {
+    expect(precisaRedesenhar(leve, 1600, 1200, false)).toBe(false);
+    expect(precisaRedesenhar({ type: 'image/jpeg', size: 4_200_000 }, 4032, 3024, false)).toBe(true);
   });
 });

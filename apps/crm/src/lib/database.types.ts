@@ -1854,6 +1854,7 @@ export type Database = {
           is_active: boolean
           legal_name: string | null
           logo_url: string | null
+          marca_dagua_nas_fotos: boolean
           meta_pixel_id: string | null
           meta_whatsapp_dataset_id: string | null
           name: string
@@ -1888,6 +1889,7 @@ export type Database = {
           is_active?: boolean
           legal_name?: string | null
           logo_url?: string | null
+          marca_dagua_nas_fotos?: boolean
           meta_pixel_id?: string | null
           meta_whatsapp_dataset_id?: string | null
           name: string
@@ -1922,6 +1924,7 @@ export type Database = {
           is_active?: boolean
           legal_name?: string | null
           logo_url?: string | null
+          marca_dagua_nas_fotos?: boolean
           meta_pixel_id?: string | null
           meta_whatsapp_dataset_id?: string | null
           name?: string

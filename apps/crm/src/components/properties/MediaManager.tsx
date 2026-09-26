@@ -1,6 +1,9 @@
 import { useRef, useState } from 'react';
 import { Upload, Star, Trash2, ArrowLeft, ArrowRight, FileText, Video, Loader2 } from 'lucide-react';
 import { usePropertyMedia, useMediaActions, urlPublica, type PropertyMedia } from '@/hooks/useProperties';
+import { useMarcaDagua, useSalvarMarcaDagua } from '@/hooks/useSettings';
+import { useAuth } from '@/hooks/useAuth';
+import { Switch } from '@/components/Switch';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -13,6 +16,19 @@ export function MediaManager({ orgId, propertyId }: Props) {
   const { enviar, definirCapa, remover, mover } = useMediaActions(orgId, propertyId);
   const inputRef = useRef<HTMLInputElement>(null);
   const [arrastando, setArrastando] = useState(false);
+  const { isAdminOrAbove } = useAuth();
+  const marca = useMarcaDagua(orgId);
+  const salvarMarca = useSalvarMarcaDagua(orgId);
+
+  /*
+   * A foto sai com o que a chave MOSTRA. Enquanto grava, a chave já mostra o
+   * pedido; se o banco recusar, volta sozinha. Antes de a regra carregar, vale
+   * ligada, que é o padrão da casa: na dúvida, a foto sai protegida.
+   */
+  const marcaLigada = salvarMarca.isPending ? !!salvarMarca.variables : (marca.data ?? true);
+  const enviarArquivos = (arquivos: File[]) => {
+    if (arquivos.length) enviar.mutate({ arquivos, marcaDagua: marcaLigada });
+  };
 
   if (!propertyId) {
     return (
@@ -26,6 +42,23 @@ export function MediaManager({ orgId, propertyId }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
+      {/* Regra da imobiliária, e não desta tela: vale para toda foto que subir, de qualquer imóvel. */}
+      <div className="flex flex-col gap-1 rounded-md border border-line bg-card-2 px-3.5 py-3">
+        <Switch
+          marcado={marcaLigada}
+          onMudar={(v) => salvarMarca.mutate(v)}
+          rotulo="Marca d'água com a logo"
+          desabilitado={!isAdminOrAbove() || salvarMarca.isPending}
+        />
+        <p className="pl-[46px] text-sm text-tx-3">
+          {marcaLigada ? 'As fotos novas sobem com a logo no meio.' : 'As fotos novas sobem sem marca.'} As
+          que já estão aqui não mudam.{!isAdminOrAbove() && ' Só gerente ou administrador muda.'}
+        </p>
+        {salvarMarca.isError && (
+          <p className="pl-[46px] text-sm text-dng">{(salvarMarca.error as Error).message}</p>
+        )}
+      </div>
+
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
@@ -37,8 +70,7 @@ export function MediaManager({ orgId, propertyId }: Props) {
         onDrop={(e) => {
           e.preventDefault();
           setArrastando(false);
-          const arquivos = Array.from(e.dataTransfer.files);
-          if (arquivos.length) enviar.mutate(arquivos);
+          enviarArquivos(Array.from(e.dataTransfer.files));
         }}
         className={cn(
           'flex flex-col items-center gap-2 rounded-md border-[1.5px] border-dashed border-line-2 py-8 transition-colors hover:border-pri hover:bg-pri-soft',
@@ -68,8 +100,7 @@ export function MediaManager({ orgId, propertyId }: Props) {
         accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm"
         className="hidden"
         onChange={(e) => {
-          const arquivos = Array.from(e.target.files ?? []);
-          if (arquivos.length) enviar.mutate(arquivos);
+          enviarArquivos(Array.from(e.target.files ?? []));
           e.target.value = '';
         }}
       />

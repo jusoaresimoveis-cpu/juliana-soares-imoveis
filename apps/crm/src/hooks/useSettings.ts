@@ -158,3 +158,51 @@ export function useSalvarCobrancaDeResposta(orgId: string) {
     },
   });
 }
+
+// Marca d'água nas fotos (migration 20260926000000)
+// -----------------------------------------------------------------------------
+
+/**
+ * Se as fotos que sobem ganham o símbolo da marca no meio.
+ *
+ * Mora na IMOBILIÁRIA, como a cobrança de resposta: é regra da casa, e a foto
+ * tem que sair igual do celular e do computador. Todos leem, e só gerente e
+ * admin gravam (RLS de `organizations`).
+ */
+export function useMarcaDagua(orgId: string | undefined) {
+  return useQuery({
+    queryKey: ['marca-dagua', orgId],
+    enabled: !!orgId,
+    staleTime: 60_000,
+    queryFn: async (): Promise<boolean> => {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('marca_dagua_nas_fotos')
+        .eq('id', orgId!)
+        .single();
+      if (error) throw error;
+      return data?.marca_dagua_nas_fotos ?? true;
+    },
+  });
+}
+
+export function useSalvarMarcaDagua(orgId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (ligada: boolean) => {
+      if (!orgId) throw new Error('Sem imobiliária carregada.');
+      const { data, error } = await supabase
+        .from('organizations')
+        .update({ marca_dagua_nas_fotos: ligada })
+        .eq('id', orgId)
+        .select('marca_dagua_nas_fotos');
+      if (error) throw error;
+      // A RLS não dá erro quando recusa: a atualização só não pega linha.
+      // Sem esta conferência, a chave mudaria na tela e não no banco.
+      if (!data?.length) throw new Error("Só gerente ou administrador muda a marca d'água.");
+    },
+    onSuccess: (_, ligada) => {
+      qc.setQueryData(['marca-dagua', orgId], ligada);
+    },
+  });
+}
