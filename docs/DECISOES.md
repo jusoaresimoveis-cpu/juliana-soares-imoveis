@@ -94,10 +94,21 @@ relação ao briefing, já combinado:
   Anúncio de imóvel inexistente é infração no CRECI, propaganda enganosa e
   motivo de reprovação no Google Ads.
 - **Nenhum depoimento inventado.** Os depoimentos vêm das avaliações reais do
-  Google (nota 5,0). Para puxar TODAS é preciso a API do Perfil da Empresa
-  (acesso sob aprovação do Google). A API do Places devolve só 5. Sem marcação
-  de estrelas no schema: o Google não mostra estrela de avaliação que a própria
-  empresa publica sobre si.
+  Google (nota 5,0). Sem marcação de estrelas no schema: o Google não mostra
+  estrela de avaliação que a própria empresa publica sobre si.
+- **Depoimentos pelo widget da Trustindex** (decisão do usuário, 25/09). A API
+  do Perfil da Empresa, que traria todas as avaliações para o nosso banco, foi
+  recusada na checagem automática do Google no mesmo dia (conta dona do perfil,
+  60 dias de verificado e site no perfil são os critérios). A API do Places
+  devolve só 5, exige cobrança e proíbe guardar.
+  - O código do widget fica em `config/site.ts` (`widgetDeAvaliacoes`).
+  - O script deles só é baixado quando a seção chega perto da tela.
+  - O título "Depoimentos" só aparece quando o widget tem altura: widget vazio
+    ou fora do ar não deixa um título solto.
+  - Limites do plano grátis deles: layout "profissional" funciona só 7 dias e
+    depois some do site; avaliação nova entra quando alguém atualiza no painel.
+  - O script é de terceiro (cdn.trustindex.io): entra na política de
+    privacidade.
 - **Regiões: só Itapema e Porto Belo** (o modelo mostrava também Balneário
   Camboriú e Bombinhas).
 - **A área administrativa é o CRM.** Cadastro de imóvel, leads, dashboard,
@@ -290,7 +301,9 @@ relação ao briefing, já combinado:
         aparelho, por imóvel e por dia, só na produção, robôs fora). Os
         cliques no WhatsApp vêm com o link rastreado `/w/`. Contatos e visitas
         agendadas já existem no CRM (leads e agenda ligados ao imóvel).
-- [ ] Depoimentos do Google: pedir acesso à API do Perfil da Empresa.
+- [x] Depoimentos no site pelo widget da Trustindex (25/09). Falta, no painel
+      deles: publicar o conteúdo do widget (em 25/09 ele estava vazio) e usar
+      um layout do plano grátis, ou o widget some depois de 7 dias.
 - [ ] CEP exato do escritório (`config/site.ts`).
 - [ ] Endereço no Perfil da Empresa: hoje está "sem local físico". Decidir se
       mostra a sala da Rua 143.
@@ -319,7 +332,8 @@ relação ao briefing, já combinado:
 - [ ] Meta da Juliana: conectar a conta de anúncio no CRM (Anúncios).
 - [ ] Link rastreado `/w/<código>` e captura completa de UTMs e click IDs. O
       `Ref.` já vai na mensagem desde 25/09; falta registrar o clique.
-- [ ] Política de privacidade (LGPD), exigida antes de ligar Google Ads.
+- [ ] Política de privacidade (LGPD), exigida antes de ligar Google Ads. Citar
+      o widget da Trustindex (script de terceiro) e o contador de visitas.
 - [ ] Página "Sobre", com a bio que a Juliana escrever.
 - [ ] **Lançamento:** `SITE_NO_AR=sim` nas variáveis de produção do site e o
       sitemap enviado no Search Console. O domínio já está no ar desde 25/09,
