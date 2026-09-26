@@ -325,9 +325,11 @@ relação ao briefing, já combinado:
         aparelho, por imóvel e por dia, só na produção, robôs fora). Os
         cliques no WhatsApp vêm com o link rastreado `/w/`. Contatos e visitas
         agendadas já existem no CRM (leads e agenda ligados ao imóvel).
-- [x] Depoimentos no site pelo widget da Trustindex (25/09). Falta, no painel
-      deles: publicar o conteúdo do widget (em 25/09 ele estava vazio) e usar
-      um layout do plano grátis, ou o widget some depois de 7 dias.
+- [x] Depoimentos no site pelo widget da Trustindex (25/09). Em 26/09 o widget
+      novo (carrossel) já veio com as avaliações: nota 5,0 e 26 avaliações no
+      topo, 9 no carrossel. Falta conferir no painel deles que o layout é do
+      plano grátis, ou o widget some depois de 7 dias (aí a seção se esconde
+      sozinha, sem deixar buraco).
 - [ ] CEP exato do escritório (`config/site.ts`).
 - [ ] Endereço no Perfil da Empresa: hoje está "sem local físico". Decidir se
       mostra a sala da Rua 143.
