@@ -51,7 +51,8 @@ export const MIDIA: {
   /**
    * Retrato da seção "Sobre Juliana" na home e da página /sobre. Precisa ser
    * uma foto DIFERENTE da do topo: a mesma foto duas vezes na mesma rolagem
-   * fica repetitivo. Sem ela, a home mostra o monograma e a /sobre usa a do topo.
+   * fica repetitivo. Sem ela, a home mostra o símbolo da marca e a /sobre usa
+   * a do topo.
    */
   julianaRetrato: Foto | null;
   /** Fundo escurecido do topo da home. */

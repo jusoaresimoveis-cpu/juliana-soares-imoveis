@@ -129,6 +129,29 @@ relação ao briefing, já combinado:
   - favoritos no próprio aparelho, sem login.
 - **CRECI real** (53396-F) no lugar do "00000" do modelo.
 
+## Marca (26/09/2026)
+
+- **O símbolo é o do arquivo do logo:** o "JS" sob o telhado, marrom
+  `#72573a` (original em `conteudo/marca`). O nome e o subtítulo continuam em
+  texto, na Playfair Display e na Inter do site: decisão do usuário.
+- **Um arquivo gera tudo.** `ferramentas/marca/simbolo.svg` tem o desenho com
+  a caixa justa; `node ferramentas/marca/gerar.mjs` escreve os favicons e os
+  ícones do site e do CRM. O cabeçalho do site desenha o mesmo símbolo no HTML
+  (`Simbolo.tsx`), e um teste confere que os traços não se separam.
+- **Site:**
+  - cabeçalho: símbolo marrom;
+  - rodapé escuro: caramelo, porque o marrom some no grafite;
+  - favicon: o símbolo solto; o SVG vira caramelo com o navegador no escuro
+    (o .ico não consegue e fica marrom);
+  - ícone do iPhone: o símbolo marrom sobre o creme.
+- **CRM:** o quadrado bronze de antes, com o símbolo em creme no lugar das
+  letras. É o favicon (a aba do CRM se distingue da do site), o ícone do topo
+  e da entrada e o do app instalado. O ícone maskable é calculado para caber
+  no círculo que o Android garante não cortar.
+- **Ícone já instalado não troca sozinho no iPhone:** o CRM na tela de início
+  fica com o ícone antigo até ser removido e adicionado de novo. No Android e
+  no computador, o Chrome troca quando confere o manifesto outra vez.
+
 ## Leads e WhatsApp
 
 - **O número dela é pessoal E profissional.** Só vira lead automático a
@@ -229,8 +252,9 @@ relação ao briefing, já combinado:
 
 ## Pendências
 
-- [ ] Logo (o usuário vai criar) e fotos profissionais da Juliana, em
-      `conteudo/marca` e `conteudo/fotos-juliana`.
+- [x] Símbolo do logo (26/09): no cabeçalho, no rodapé, nos favicons e nos
+      ícones do CRM (ver "Marca").
+- [ ] Fotos profissionais da Juliana, em `conteudo/fotos-juliana`.
 - [ ] Imóveis iniciais reais em `conteudo/imoveis`.
 - [x] Visual do modelo (24/09):
   - Playfair Display nos títulos e Inter no texto; paleta creme, grafite e bronze;

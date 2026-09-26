@@ -3,8 +3,9 @@
 Material original que chega da Juliana: fotos, textos, logo. **Nada daqui vai
 para o Git** (só este README e o modelo de ficha), porque foto em resolução
 cheia pesa centenas de MB. Daqui o material é otimizado e segue para o lugar
-certo: fotos de imóvel para o Storage do Supabase, e logo e fotos da Juliana
-para `apps/site/public`.
+certo: fotos de imóvel para o Storage do Supabase, fotos da Juliana para
+`apps/site/src/assets/fotos`, e o símbolo do logo para `ferramentas/marca`, que
+gera os favicons e os ícones.
 
 ```
 conteudo/

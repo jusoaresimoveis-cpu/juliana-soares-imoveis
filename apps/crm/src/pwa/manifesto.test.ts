@@ -30,6 +30,12 @@ const icones = manifesto.icons ?? [];
 const propositos = (i: (typeof icones)[number]): string[] =>
   Array.isArray(i.purpose) ? i.purpose : (i.purpose ?? '').split(/\s+/).filter(Boolean);
 
+/** Os `<link rel="icon">` do index.html: o favicon da aba, fora do manifesto. */
+const faviconsDoHtml = () =>
+  [...readFileSync(join(RAIZ, 'index.html'), 'utf8').matchAll(/<link\s+rel="icon"\s+href="([^"]+)"/gi)].map(
+    (m) => m[1]!,
+  );
+
 /** Um ícone serve de "any" quando não declara propósito ou o inclui na lista. */
 const serveComoPadrao = (i: (typeof icones)[number]) => {
   const p = propositos(i);
@@ -83,6 +89,15 @@ describe('manifesto do PWA', () => {
     expect(meta?.toLowerCase()).toBe(manifesto.theme_color?.toLowerCase());
   });
 
+  it('todo favicon do index.html existe em public/', () => {
+    // Link para arquivo que não existe não dá erro: a aba só fica sem ícone.
+    const favicons = faviconsDoHtml();
+    expect(favicons.length, 'o index.html não declara favicon').toBeGreaterThan(0);
+    for (const href of favicons) {
+      expect(existsSync(join(PUBLICO, href.replace(/^\//, ''))), `${href} não está em public/`).toBe(true);
+    }
+  });
+
   it('o iOS tem o ícone que ele lê, que não vem do manifesto', () => {
     // O Safari ignora `icons` para a tela de início: ele lê a tag do HTML.
     const html = readFileSync(join(RAIZ, 'index.html'), 'utf8');
@@ -129,6 +144,7 @@ describe('manifesto do PWA', () => {
       '/robots.txt',
       ...icones.map((i) => i.src),
       ...(appleIcon ? [appleIcon] : []),
+      ...faviconsDoHtml(),
     ];
     for (const caminho of intocaveis) {
       expect(re.test(caminho), `${caminho} vira index.html em produção`).toBe(false);

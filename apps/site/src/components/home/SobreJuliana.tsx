@@ -1,6 +1,7 @@
 import { ArrowRight, FileText, Handshake, MapPinned, UserRound } from 'lucide-react';
 import Image from 'next/image';
 
+import { Simbolo } from '@/components/marca/Simbolo';
 import { Botao } from '@/components/ui/Botao';
 import { MIDIA, type Foto } from '@/config/midia';
 import { SITE } from '@/config/site';
@@ -14,10 +15,10 @@ export const DIFERENCIAIS = [
 ] as const;
 
 /**
- * Sem foto, fica o monograma num bloco de areia: é marca, não é um buraco de
- * foto. Foto recortada (fundo transparente) vai inteira, apoiada embaixo, sobre
- * a areia, como retrato de estúdio; foto comum preenche o bloco, cortada em
- * volta do `enquadramento`.
+ * Sem foto, fica o símbolo da marca num bloco de areia: é marca, não é um
+ * buraco de foto. Foto recortada (fundo transparente) vai inteira, apoiada
+ * embaixo, sobre a areia, como retrato de estúdio; foto comum preenche o
+ * bloco, cortada em volta do `enquadramento`.
  */
 export function RetratoDaJuliana({
   foto = MIDIA.julianaRetrato,
@@ -44,10 +45,8 @@ export function RetratoDaJuliana({
           style={foto.enquadramento ? { objectPosition: foto.enquadramento } : undefined}
         />
       ) : (
-        <div aria-hidden className="flex h-full flex-col items-center justify-center gap-3 text-bronze">
-          <span className="font-serif text-8xl leading-none tracking-tighter">
-            J<span className="-ml-4 italic">S</span>
-          </span>
+        <div aria-hidden className="flex h-full flex-col items-center justify-center gap-4">
+          <Simbolo className="h-28 w-auto text-marca" />
           <span className="text-xs tracking-[0.3em] text-suave uppercase">{SITE.creci}</span>
         </div>
       )}

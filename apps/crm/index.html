@@ -11,6 +11,14 @@
     -->
     <meta name="robots" content="noindex, nofollow" />
     <meta name="theme-color" content="#8c6b40" />
+    <!--
+      O favicon é o quadrado bronze do ícone do app, e não o símbolo solto do
+      site: com os dois abertos, a aba do CRM se distingue de longe. O .ico
+      declara 32x32, e não "any", para o Chrome preferir o SVG, que é nítido
+      em qualquer tela. Os dois saem de ferramentas/marca/gerar.mjs.
+    -->
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <!-- O iOS ignora o manifest para o icone da tela de inicio: ele le esta tag. -->
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />

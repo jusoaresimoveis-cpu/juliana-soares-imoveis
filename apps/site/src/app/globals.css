@@ -26,6 +26,9 @@
   --color-bronze: #8b6a40;
   --color-bronze-escuro: #735732;
   --color-caramelo: #c29b66;
+  /* O marrom do símbolo, tirado do arquivo do logo (ferramentas/marca). Só o
+     símbolo usa: em texto, o bronze continua sendo a cor de ação. */
+  --color-marca: #72573a;
   --color-marinho: #2b3a55;
   /* Verde do WhatsApp escurecido: o oficial não passa no contraste com texto branco. */
   --color-whatsapp: #15803d;

@@ -53,7 +53,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!assets/|manifest.webmanifest|sw.js|icone-|apple-touch-icon.png|robots.txt).*)",
+      "source": "/((?!assets/|manifest.webmanifest|sw.js|icone-|apple-touch-icon.png|favicon.|robots.txt).*)",
       "destination": "/index.html"
     }
   ]
