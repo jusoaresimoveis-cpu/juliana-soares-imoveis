@@ -40,7 +40,7 @@ export const SITE = {
    * (conta criada pelo usuário em 25/09/2026). Trocar o layout no painel deles
    * mantém este código. `null` tira a seção do site.
    */
-  widgetDeAvaliacoes: '09d6d558211a317f2d8619d7f08' as string | null,
+  widgetDeAvaliacoes: '4980877829163183a6368038222' as string | null,
 } as const;
 
 /**
