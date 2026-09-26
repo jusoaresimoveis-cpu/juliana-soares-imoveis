@@ -4,6 +4,7 @@ import Image, { getImageProps } from 'next/image';
 import { BotaoWhatsApp } from '@/components/BotaoWhatsApp';
 import { Botao } from '@/components/ui/Botao';
 import { MIDIA, type Foto } from '@/config/midia';
+import { SITE } from '@/config/site';
 import { urlDaListagem } from '@/lib/imoveis/listagem';
 
 /*
@@ -136,13 +137,24 @@ export function Hero() {
         <div
           className={`relative max-w-2xl space-y-6 pb-28 lg:order-1 lg:pb-40 ${julianaHero ? '-mt-16 sm:-mt-20 lg:mt-0 lg:pt-20' : 'pt-12 sm:pt-16 lg:pt-20'}`}
         >
-          {/* Sobre a foto, o caramelo não tem contraste para letra desse tamanho: fica branco, como no modelo. */}
-          <p className="text-xs font-medium tracking-[0.3em] text-white/90 uppercase">Corretora de Imóveis</p>
-          <h1 className="font-serif text-4xl leading-[1.12] sm:text-5xl lg:text-[3.5rem]">
-            Encontre o imóvel ideal com atendimento direto e personalizado.
+          {/* Sobre a foto, o caramelo não tem contraste para letra desse tamanho: fica branco, como no modelo.
+              No celular o CRECI desce de linha: em versal espaçada, a frase inteira não cabe na largura. */}
+          <p className="text-xs font-medium tracking-[0.3em] text-white/90 uppercase">
+            Corretora de imóveis
+            <span aria-hidden className="hidden sm:inline"> · </span>
+            <span className="block sm:inline">{SITE.creci}</span>
+          </p>
+          {/* O título diz o quê e onde, com as palavras de quem busca: depois do título da aba, é o texto
+              que mais pesa para o Google. O jeito de atender, que era o título do briefing, foi para o
+              subtítulo (decisão de 26/09). O nome da cidade não quebra no meio: no desktop, "Belo"
+              ficava sozinho na última linha, longe do "Porto". */}
+          <h1 className="font-serif text-4xl leading-[1.12] text-balance sm:text-5xl lg:text-[3.5rem]">
+            Imóveis à venda e para alugar em{' '}
+            {SITE.areaAtendida.map((cidade) => cidade.nome.replaceAll(' ', ' ')).join(' e ')}
           </h1>
+          {/* "Aluguel anual": em Itapema, quem busca aluguel quase sempre quer temporada, e aqui o aluguel é anual. */}
           <p className="max-w-lg text-base text-white/85 sm:text-lg">
-            Compra, venda e locação de imóveis com acompanhamento completo do início ao fechamento.
+            Compra, venda e aluguel anual com atendimento direto e personalizado, do primeiro contato ao fechamento.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Botao href={urlDaListagem({ finalidade: 'venda' })} icone={<House aria-hidden className="size-4" />}>

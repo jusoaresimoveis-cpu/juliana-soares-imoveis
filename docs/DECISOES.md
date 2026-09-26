@@ -111,6 +111,18 @@ relação ao briefing, já combinado:
     privacidade.
 - **Regiões: só Itapema e Porto Belo** (o modelo mostrava também Balneário
   Camboriú e Bombinhas).
+- **Topo da home com o quê e onde** (26/09). O título do briefing ("Encontre o
+  imóvel ideal com atendimento direto e personalizado.") não dizia cidade nem
+  serviço, e o H1 é o texto da página que mais pesa para o Google depois do
+  título da aba.
+  - Linha de cima: "Corretora de imóveis · CRECI/SC 53396-F".
+  - H1: "Imóveis à venda e para alugar em Itapema e Porto Belo", com as
+    palavras de quem busca, como os títulos de /venda e /aluguel.
+  - Subtítulo: "Compra, venda e aluguel anual com atendimento direto e
+    personalizado, do primeiro contato ao fechamento." O jeito de atender
+    desceu do título para cá.
+  - "Aluguel anual" e não "locação": em Itapema, quem busca aluguel quase
+    sempre quer temporada, e "locação" é palavra do mercado, não de quem busca.
 - **A área administrativa é o CRM.** Cadastro de imóvel, leads, dashboard,
   aprovação da captação e depoimentos: tudo no CRM. O site só lê.
 - **Supabase (PostgreSQL), sem Prisma.** O Prisma brigaria com as migrations e
