@@ -227,7 +227,15 @@ describe('o histórico do lead segue o lead', () => {
 });
 
 describe('o painel conta a carteira de quem está olhando', () => {
-  const PAINEL = `select public.painel_indicadores(current_date, current_date) as j`;
+  /*
+   * HOJE na hora da imobiliária, e não `current_date`. O painel corta o período
+   * no fuso dela (`inicio_do_dia` com `fuso_da_org`), e o banco da CI roda em
+   * UTC: das 21h à meia-noite de Brasília, `current_date` já é amanhã, o
+   * período começa depois dos leads da fixtura e o painel conta zero. A suíte
+   * falhava toda noite sem nada ter quebrado.
+   */
+  const PAINEL = `select public.painel_indicadores(d.hoje, d.hoje) as j
+                    from (select (now() at time zone public.fuso_da_org('${IDS.orgA}'))::date as hoje) d`;
 
   it('para o gerente, o total é o da imobiliária', async () => {
     const r = await como('gerente', PAINEL);
