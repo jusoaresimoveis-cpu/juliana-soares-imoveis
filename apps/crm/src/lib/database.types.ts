@@ -2277,7 +2277,9 @@ export type Database = {
           id: string
           is_cover: boolean
           kind: string
+          marca_dagua: boolean
           mime_type: string | null
+          original_sem_marca: Json | null
           organization_id: string
           position: number
           property_id: string
@@ -2294,7 +2296,9 @@ export type Database = {
           id?: string
           is_cover?: boolean
           kind?: string
+          marca_dagua?: boolean
           mime_type?: string | null
+          original_sem_marca?: Json | null
           organization_id: string
           position?: number
           property_id: string
@@ -2311,7 +2315,9 @@ export type Database = {
           id?: string
           is_cover?: boolean
           kind?: string
+          marca_dagua?: boolean
           mime_type?: string | null
+          original_sem_marca?: Json | null
           organization_id?: string
           position?: number
           property_id?: string

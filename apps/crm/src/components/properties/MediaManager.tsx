@@ -13,12 +13,13 @@ interface Props {
 
 export function MediaManager({ orgId, propertyId }: Props) {
   const { data: midias } = usePropertyMedia(propertyId);
-  const { enviar, definirCapa, remover, mover } = useMediaActions(orgId, propertyId);
+  const { enviar, definirCapa, remover, mover, porMarca, tirarMarca } = useMediaActions(orgId, propertyId);
   const inputRef = useRef<HTMLInputElement>(null);
   const [arrastando, setArrastando] = useState(false);
   const { isAdminOrAbove } = useAuth();
   const marca = useMarcaDagua(orgId);
   const salvarMarca = useSalvarMarcaDagua(orgId);
+  const [progresso, setProgresso] = useState<{ feitas: number; total: number } | null>(null);
 
   /*
    * A foto sai com o que a chave MOSTRA. Enquanto grava, a chave já mostra o
@@ -39,6 +40,10 @@ export function MediaManager({ orgId, propertyId }: Props) {
   }
 
   const lista = midias ?? [];
+  // As fotos que subiram antes da marca, e as que ganharam a marca depois (com o original guardado).
+  const semMarca = lista.filter((m) => m.kind === 'image' && !m.marca_dagua);
+  const comOriginal = lista.filter((m) => m.original_sem_marca);
+  const ocupado = porMarca.isPending || tirarMarca.isPending;
 
   return (
     <div className="flex flex-col gap-3">
@@ -51,11 +56,60 @@ export function MediaManager({ orgId, propertyId }: Props) {
           desabilitado={!isAdminOrAbove() || salvarMarca.isPending}
         />
         <p className="pl-[46px] text-sm text-tx-3">
-          {marcaLigada ? 'As fotos novas sobem com a logo no meio.' : 'As fotos novas sobem sem marca.'} As
-          que já estão aqui não mudam.{!isAdminOrAbove() && ' Só gerente ou administrador muda.'}
+          {marcaLigada ? 'As fotos novas sobem com a logo no meio.' : 'As fotos novas sobem sem marca.'}
+          {!isAdminOrAbove() && ' Só gerente ou administrador muda.'}
         </p>
         {salvarMarca.isError && (
           <p className="pl-[46px] text-sm text-dng">{(salvarMarca.error as Error).message}</p>
+        )}
+
+        {marcaLigada && semMarca.length > 0 && (
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 pl-[46px]">
+            <span className="text-sm text-tx-2">
+              {semMarca.length === 1 ? '1 foto deste imóvel subiu' : `${semMarca.length} fotos deste imóvel subiram`} antes
+              da marca.
+            </span>
+            <button
+              type="button"
+              disabled={ocupado}
+              onClick={() => {
+                setProgresso({ feitas: 0, total: semMarca.length });
+                porMarca.mutate(
+                  { fotos: semMarca, aoAvancar: (feitas, total) => setProgresso({ feitas, total }) },
+                  { onSettled: () => setProgresso(null) },
+                );
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-pri px-3.5 py-1.5 text-sm font-semibold text-pri-fg hover:bg-pri-deep disabled:opacity-60"
+            >
+              {porMarca.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              {porMarca.isPending && progresso
+                ? `Pondo a marca… ${progresso.feitas} de ${progresso.total}`
+                : semMarca.length === 1
+                  ? 'Pôr a marca nela'
+                  : 'Pôr a marca nelas'}
+            </button>
+          </div>
+        )}
+
+        {comOriginal.length > 0 && (
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 pl-[46px]">
+            <span className="text-sm text-tx-3">
+              A marca foi posta depois em {comOriginal.length === 1 ? '1 foto' : `${comOriginal.length} fotos`}, e o
+              original de cada uma ficou guardado.
+            </span>
+            <button
+              type="button"
+              disabled={ocupado}
+              onClick={() => tirarMarca.mutate({ fotos: comOriginal })}
+              className="text-sm font-semibold text-pri underline-offset-2 hover:underline disabled:opacity-60"
+            >
+              {tirarMarca.isPending ? 'Desfazendo…' : 'Desfazer'}
+            </button>
+          </div>
+        )}
+
+        {(porMarca.isError || tirarMarca.isError) && (
+          <p className="pl-[46px] text-sm text-dng">{((porMarca.error ?? tirarMarca.error) as Error).message}</p>
         )}
       </div>
 

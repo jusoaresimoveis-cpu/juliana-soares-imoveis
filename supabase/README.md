@@ -34,6 +34,9 @@ supabase/
 - `20260926000000_marca_dagua.sql`: a chave da marca d'água nas fotos
   (`organizations.marca_dagua_nas_fotos`, ligada por padrão; só admin e
   gerente mudam).
+- `20260926000100_marca_dagua_nas_fotos_enviadas.sql`: a marca nas fotos que
+  já estavam no CRM (`property_media.marca_dagua` contra a marca dupla, e
+  `original_sem_marca` para desfazer).
 
 Dado de cliente não entra em migration: fica em `seeds/`, para o mesmo schema
 servir a outro cliente sem limpeza.

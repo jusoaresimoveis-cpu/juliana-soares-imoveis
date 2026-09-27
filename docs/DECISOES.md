@@ -173,9 +173,16 @@ relação ao briefing, já combinado:
     imagem para ter a foto limpa.
   - É regra da imobiliária (`organizations.marca_dagua_nas_fotos`), ligada por
     padrão. A chave fica na aba de fotos do imóvel, e só admin e gerente mudam.
-  - Vale para as fotos novas. As que já subiram ficam como estão, e o arquivo
-    original continua só no aparelho de quem tirou a foto. Vídeo sobe sem
-    marca.
+  - Foto nova sobe com a marca, e o original fica só no aparelho de quem tirou
+    a foto. Vídeo sobe sem marca.
+  - Foto que já estava no CRM: com a chave ligada, a aba de fotos oferece "Pôr
+    a marca nelas". Cada foto é baixada, ganha a marca e sobe num arquivo NOVO
+    (o site e o navegador guardam a foto antiga por um ano no mesmo endereço).
+    O arquivo sem marca fica no Storage e em `original_sem_marca`, e
+    "Desfazer" volta a foto para ele. `marca_dagua` impede a marca dupla.
+  - Enquanto o original fica guardado para desfazer, ele continua acessível
+    pelo endereço antigo. Primeiro teste no imóvel 1004 (26/09), com cópia das
+    fotos em `conteudo/backup-fotos`.
 
 ## Leads e WhatsApp
 
