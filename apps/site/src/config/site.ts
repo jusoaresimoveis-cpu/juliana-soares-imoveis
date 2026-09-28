@@ -22,6 +22,8 @@ export const SITE = {
   },
   /** Só dígitos, que é como o wa.me aceita. */
   whatsapp: '5547997354111',
+  /** O e-mail central das contas dela; na política de privacidade, é o canal dos pedidos de dados. */
+  email: 'jusoaresimoveis@gmail.com',
   endereco: {
     logradouro: 'Rua 143, 40',
     complemento: 'Sala 08',

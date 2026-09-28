@@ -13,12 +13,17 @@ import { useNovoWebhook } from '@/hooks/useMeta';
  * O segredo continua existindo só como resumo no banco, o que é o certo. O que
  * muda é ter um caminho honesto para gerar outro, com o aviso do que isso
  * quebra.
+ *
+ * O token de verificação aparece SEPARADO. A `meta-webhook` confere o
+ * `hub.verify_token` contra o segredo do fim do endereço, e não contra o
+ * endereço inteiro; a tela dizia "o mesmo valor serve", e quem colava o
+ * endereço nos dois campos via a Meta recusar a verificação (28/09).
  */
 export function EnderecoWebhook({ conexaoId }: { conexaoId: string }) {
   const gerar = useNovoWebhook(conexaoId);
-  const [copiado, setCopiado] = useState(false);
 
   const url = (gerar.data as { webhookUrl?: string } | undefined)?.webhookUrl;
+  const token = url?.split('/').pop();
 
   return (
     <section className="rounded-lg bg-card p-5 shadow-card">
@@ -27,25 +32,14 @@ export function EnderecoWebhook({ conexaoId }: { conexaoId: string }) {
         Endereço do webhook
       </h2>
       <p className="mt-0.5 text-base text-tx-2">
-        É o que vai colado no seu aplicativo da Meta, em <b>Webhooks → Página → leadgen</b>. O mesmo
-        valor serve de token de verificação.
+        Vai no seu aplicativo da Meta, em <b>Webhooks → Page</b>: o endereço em <b>URL de callback</b> e o token em{' '}
+        <b>Verificar token</b>. Depois de salvar, assine o campo <b>leadgen</b>.
       </p>
 
-      {url ? (
+      {url && token ? (
         <>
-          <div className="mt-3 flex items-start gap-2 rounded-xl bg-card-2 p-3">
-            <code className="min-w-0 flex-1 break-all font-mono text-sm">{url}</code>
-            <button
-              onClick={() => {
-                void navigator.clipboard.writeText(url);
-                setCopiado(true);
-              }}
-              className="shrink-0 rounded-lg border border-line-2 bg-card p-1.5 text-tx-2 hover:text-tx"
-              aria-label="Copiar endereço"
-            >
-              {copiado ? <Check className="h-3.5 w-3.5 text-ok" /> : <Copy className="h-3.5 w-3.5" />}
-            </button>
-          </div>
+          <Copiavel rotulo="URL de callback" valor={url} />
+          <Copiavel rotulo="Verificar token" valor={token} />
 
           <p className="mt-2.5 flex items-start gap-2 rounded-xl bg-warn-soft p-3 text-sm text-warn">
             <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -75,5 +69,28 @@ export function EnderecoWebhook({ conexaoId }: { conexaoId: string }) {
         <p className="mt-3 text-sm text-dng">{(gerar.error as Error).message}</p>
       )}
     </section>
+  );
+}
+
+/** Um valor para copiar, com o nome do campo da Meta onde ele vai. */
+function Copiavel({ rotulo, valor }: { rotulo: string; valor: string }) {
+  const [copiado, setCopiado] = useState(false);
+  return (
+    <div className="mt-3">
+      <span className="text-sm font-semibold text-tx-2">{rotulo}</span>
+      <div className="mt-1 flex items-start gap-2 rounded-xl bg-card-2 p-3">
+        <code className="min-w-0 flex-1 break-all font-mono text-sm">{valor}</code>
+        <button
+          onClick={() => {
+            void navigator.clipboard.writeText(valor);
+            setCopiado(true);
+          }}
+          className="shrink-0 rounded-lg border border-line-2 bg-card p-1.5 text-tx-2 hover:text-tx"
+          aria-label={`Copiar ${rotulo}`}
+        >
+          {copiado ? <Check className="h-3.5 w-3.5 text-ok" /> : <Copy className="h-3.5 w-3.5" />}
+        </button>
+      </div>
+    </div>
   );
 }

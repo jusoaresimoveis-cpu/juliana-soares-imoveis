@@ -1272,7 +1272,8 @@ function Conectar() {
         )}
         <p className="mt-1 text-base text-tx-2">
           Falta um passo, e ele só aparece <b>agora</b>: cole este endereço no seu aplicativo da
-          Meta, em <b>Webhooks → Página → leadgen</b>. O mesmo valor serve de token de verificação.
+          Meta, em <b>Webhooks → Page</b>, como URL de callback. O token de verificação é só o
+          trecho depois da última barra. Depois assine o campo <b>leadgen</b>.
         </p>
 
         <div className="mt-3 flex items-start gap-2 rounded-xl bg-card-2 p-3">

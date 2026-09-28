@@ -387,11 +387,32 @@ relação ao briefing, já combinado:
 - [ ] WhatsApp da Juliana: o mesmo servidor uazapi do Igor, instância nova
       (segredos gravados em 25/09). Falta ela conectar o número pelo CRM
       (Configurações → WhatsApp) e conferir que conversa pessoal não entra.
-- [ ] Meta da Juliana: conectar a conta de anúncio no CRM (Anúncios).
+- [ ] Meta da Juliana: conectada ao CRM em 28/09. Falta publicar o app e
+      testar com um lead de verdade.
+  - App "CRM Juliana Soares" (1646372130498346), tipo Empresa, no portfólio
+    "Juliana Soares". Existe um segundo app com o mesmo nome (1578242086635759),
+    que não é usado.
+  - Usuário do sistema "CRM Juliana", token sem validade com ads_read,
+    leads_retrieval, pages_show_list, pages_read_engagement,
+    pages_manage_metadata e pages_manage_ads.
+  - Webhook Página → leadgen verificado (o evento de teste do painel chegou com
+    a assinatura válida), e a página Juliana Soares Corretora assinada.
+  - Em desenvolvimento, a Meta só entrega os eventos de teste do painel. Lead de
+    verdade só chega com o app publicado, e publicar exige a política de
+    privacidade, o ícone e a categoria.
+  - O token de verificação do webhook é só o segredo do fim do endereço, e não o
+    endereço inteiro, como a tela do CRM dizia. Desde 28/09 ela mostra os dois
+    separados, cada um com o nome do campo da Meta.
 - [ ] Link rastreado `/w/<código>` e captura completa de UTMs e click IDs. O
       `Ref.` já vai na mensagem desde 25/09; falta registrar o clique.
-- [ ] Política de privacidade (LGPD), exigida antes de ligar Google Ads. Citar
-      o widget da Trustindex (script de terceiro) e o contador de visitas.
+- [x] Política de privacidade (28/09): `/politica-de-privacidade`, com link no
+      rodapé. Escrita a partir do que o site e o CRM fazem de verdade (sem
+      cookie nem pixel, favoritos e controle de visita no navegador, Trustindex,
+      WhatsApp só com prova de origem, conversões para a Meta em hash).
+  - `#exclusao` é o endereço das instruções de exclusão de dados no app da Meta.
+  - O `robots.txt` do pré-lançamento libera só essa página, para a Meta ler.
+  - A Juliana precisa ler e aprovar o texto. Contato de privacidade: o WhatsApp
+    e o e-mail central (`SITE.email`).
 - [ ] Página "Sobre", com a bio que a Juliana escrever.
 - [ ] **Lançamento:** `SITE_NO_AR=sim` nas variáveis de produção do site e o
       sitemap enviado no Search Console. O domínio já está no ar desde 25/09,

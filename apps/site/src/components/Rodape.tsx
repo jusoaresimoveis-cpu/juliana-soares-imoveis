@@ -93,7 +93,10 @@ export function Rodape() {
       {/* No celular, folga embaixo (da cor do rodapé) para a barra fixa não cobrir o fim da página. */}
       <div className="border-t border-white/10 pb-16 lg:pb-0">
         <p className="mx-auto max-w-7xl px-4 py-5 text-center text-xs text-white/50 lg:px-8">
-          © {new Date().getFullYear()} {SITE.nome} · {SITE.creci}. Todos os direitos reservados.
+          © {new Date().getFullYear()} {SITE.nome} · {SITE.creci}. Todos os direitos reservados. ·{' '}
+          <Link href="/politica-de-privacidade" className="underline-offset-2 hover:text-white hover:underline">
+            Política de privacidade
+          </Link>
         </p>
       </div>
     </footer>
