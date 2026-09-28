@@ -9,6 +9,7 @@ import {
   type CacheDePagina,
   type RespostaGraph,
 } from '../_shared/meta.ts';
+import { ehLeadDeTeste, origemDoFormulario } from '../_shared/lead-de-teste.ts';
 
 /**
  * Processa os leads de formulário que o webhook enfileirou.
@@ -240,6 +241,7 @@ Deno.serve(async (req) => {
         ad_id?: unknown;
         form_id?: unknown;
         is_organic?: boolean;
+        platform?: unknown;
       };
       const campos = Array.isArray(d.field_data) ? d.field_data : [];
       const captadoEm = d.created_time ?? new Date().toISOString();
@@ -252,7 +254,9 @@ Deno.serve(async (req) => {
        * telefone e descartava o resto: a prova de consentimento deixava de
        * existir, e as respostas de qualificação junto.
        */
-      const ehTeste = d.is_organic === true;
+      // Só o lead da ferramenta de testes. Orgânico (link da bio, Marketplace,
+      // Google) é cliente e entra: ver `_shared/lead-de-teste.ts`.
+      const ehTeste = ehLeadDeTeste(campos);
 
       await sb.from('meta_lead_submissions').upsert(
         {
@@ -277,7 +281,7 @@ Deno.serve(async (req) => {
       if (ehTeste) {
         await sb
           .from('meta_webhook_inbox')
-          .update({ status: 'descartado', motivo: 'lead orgânico/teste', processed_at: new Date().toISOString() })
+          .update({ status: 'descartado', motivo: 'lead de teste da Meta', processed_at: new Date().toISOString() })
           .eq('id', id);
         conta.descartados++;
         continue;
@@ -303,7 +307,8 @@ Deno.serve(async (req) => {
         _full_name: nome ?? 'Sem nome',
         _phone: telefone,
         _email: email,
-        _source: 'meta_ads',
+        // Anúncio é `meta_ads`; sem anúncio, o perfil orgânico onde a pessoa preencheu.
+        _source: origemDoFormulario(d),
         _entry_point: 'formulario_meta',
         _attribution: {
           // As chaves são as que `find_or_create_lead` LÊ. Passar `ft_meta_ad_id`

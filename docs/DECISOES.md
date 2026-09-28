@@ -390,10 +390,13 @@ relação ao briefing, já combinado:
 - [x] Meta da Juliana: conectada ao CRM e testada em 28/09. Um lead da
       ferramenta de testes, no formulário "LEAD" da página, chegou pelo webhook
       com a assinatura válida, e o CRM leu os 8 campos em 7 segundos.
-  - Lead de teste e lead orgânico caem na mesma regra (`is_organic`) e não
-    entram na fila. Um lead de verdade vindo do formulário fora de anúncio
-    também ficaria de fora. A Meta marca o de teste com "<test lead: dummy
-    data…>": decidir se a regra passa a descartar só esse.
+  - Lead de formulário que chega sem anúncio (link da bio, Marketplace, Google)
+    SEMPRE vira lead, como Instagram ou Facebook orgânico conforme a
+    plataforma (decisão do usuário, 28/09). Só o lead da ferramenta de testes,
+    marcado com "<test lead: dummy data…>", fica de fora
+    (`_shared/lead-de-teste.ts`). Antes, `is_organic` descartava os dois. A
+    `meta-trabalhador` com a regra nova precisa ser publicada com o token de
+    acesso da conta da Juliana no Supabase.
   - O app "Imobilead" (320165242350871), de um sistema antigo, continua
     assinado na página e falha em toda entrega.
   - App "CRM Juliana Soares" (1646372130498346), tipo Empresa, no portfólio
