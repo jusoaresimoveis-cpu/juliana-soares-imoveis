@@ -395,8 +395,7 @@ relação ao briefing, já combinado:
     plataforma (decisão do usuário, 28/09). Só o lead da ferramenta de testes,
     marcado com "<test lead: dummy data…>", fica de fora
     (`_shared/lead-de-teste.ts`). Antes, `is_organic` descartava os dois. A
-    `meta-trabalhador` com a regra nova precisa ser publicada com o token de
-    acesso da conta da Juliana no Supabase.
+    `meta-trabalhador` com a regra nova foi publicada em 28/09.
   - O app "Imobilead" (320165242350871), de um sistema antigo, continua
     assinado na página e falha em toda entrega.
   - App "CRM Juliana Soares" (1646372130498346), tipo Empresa, no portfólio

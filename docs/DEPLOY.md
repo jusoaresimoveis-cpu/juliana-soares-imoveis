@@ -112,6 +112,25 @@ gh api repos/jusoaresimoveis-cpu/juliana-soares-imoveis/commits/<sha>/statuses \
   --jq '.[] | "\(.state) \(.description)"'
 ```
 
+## As funções e o banco do Supabase
+
+A Vercel não publica nada do Supabase: migration e função de borda sobem daqui.
+
+- **Migration:** `npx supabase db push`, com a senha do banco
+  (`SUPABASE_DB_PASSWORD` em `.secrets/supabase.env`).
+- **Função de borda, tipos do banco, segredos:** passam pela API de gestão do
+  Supabase e precisam de um token da conta dona do projeto. Ele fica em
+  `.secrets/supabase.env` como `SUPABASE_ACCESS_TOKEN`, e vale só para o
+  comando, sem trocar o login da CLI desta máquina:
+
+```bash
+set -a; . ./.secrets/supabase.env; set +a
+npx supabase functions deploy meta-trabalhador --project-ref qwwsvyofjpoqpaniikke
+```
+
+O token se gera e se revoga em supabase.com → Account preferences → Access
+Tokens.
+
 ## Antes de faturar
 
 Este arranjo existe para ficar no plano gratuito, e tem limites:
