@@ -387,8 +387,15 @@ relação ao briefing, já combinado:
 - [ ] WhatsApp da Juliana: o mesmo servidor uazapi do Igor, instância nova
       (segredos gravados em 25/09). Falta ela conectar o número pelo CRM
       (Configurações → WhatsApp) e conferir que conversa pessoal não entra.
-- [ ] Meta da Juliana: conectada ao CRM em 28/09. Falta publicar o app e
-      testar com um lead de verdade.
+- [x] Meta da Juliana: conectada ao CRM e testada em 28/09. Um lead da
+      ferramenta de testes, no formulário "LEAD" da página, chegou pelo webhook
+      com a assinatura válida, e o CRM leu os 8 campos em 7 segundos.
+  - Lead de teste e lead orgânico caem na mesma regra (`is_organic`) e não
+    entram na fila. Um lead de verdade vindo do formulário fora de anúncio
+    também ficaria de fora. A Meta marca o de teste com "<test lead: dummy
+    data…>": decidir se a regra passa a descartar só esse.
+  - O app "Imobilead" (320165242350871), de um sistema antigo, continua
+    assinado na página e falha em toda entrega.
   - App "CRM Juliana Soares" (1646372130498346), tipo Empresa, no portfólio
     "Juliana Soares". Existe um segundo app com o mesmo nome (1578242086635759),
     que não é usado.
@@ -399,7 +406,8 @@ relação ao briefing, já combinado:
     a assinatura válida), e a página Juliana Soares Corretora assinada.
   - Em desenvolvimento, a Meta só entrega os eventos de teste do painel. Lead de
     verdade só chega com o app publicado, e publicar exige a política de
-    privacidade, o ícone e a categoria.
+    privacidade, o ícone e a categoria. Publicado em 28/09, sem verificação da
+    empresa: o app é dela e só lê os ativos dela, e o acesso padrão basta.
   - O token de verificação do webhook é só o segredo do fim do endereço, e não o
     endereço inteiro, como a tela do CRM dizia. Desde 28/09 ela mostra os dois
     separados, cada um com o nome do campo da Meta.
@@ -409,7 +417,8 @@ relação ao briefing, já combinado:
       rodapé. Escrita a partir do que o site e o CRM fazem de verdade (sem
       cookie nem pixel, favoritos e controle de visita no navegador, Trustindex,
       WhatsApp só com prova de origem, conversões para a Meta em hash).
-  - `#exclusao` é o endereço das instruções de exclusão de dados no app da Meta.
+  - A seção `#exclusao` tem as instruções de exclusão de dados. No app da Meta,
+    o campo aponta para a página sem o `#`, que a Meta recusa.
   - O `robots.txt` do pré-lançamento libera só essa página, para a Meta ler.
   - A Juliana precisa ler e aprovar o texto. Contato de privacidade: o WhatsApp
     e o e-mail central (`SITE.email`).

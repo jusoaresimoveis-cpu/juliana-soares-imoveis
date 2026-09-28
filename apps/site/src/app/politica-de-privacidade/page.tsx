@@ -19,7 +19,9 @@ export const metadata: Metadata = {
  * voltam para a Meta com telefone e e-mail em hash (`meta-conversoes`). Mudou
  * o que o sistema faz, muda aqui.
  *
- * `#exclusao` é o endereço das instruções de exclusão de dados no app da Meta.
+ * A seção `#exclusao` são as instruções de exclusão de dados que o app da Meta
+ * exige. Lá, o campo aponta para esta página SEM o `#`: a Meta recusa endereço
+ * com âncora.
  */
 export default function Page() {
   const { endereco } = SITE;
