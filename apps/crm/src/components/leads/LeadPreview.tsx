@@ -4,7 +4,7 @@ import { MessageCircle, ExternalLink, Loader2, AlertTriangle, Home, Clock } from
 import { useLeadPreview, diasDesde, tempoAte } from '@/hooks/useLeadPreview';
 import type { BoardLead, PipelineStage } from '@/types/db';
 import { brl, cn, valoresDoImovel } from '@/lib/utils';
-import { explicarTemperatura, resumoDaQualificacao } from '@contracts';
+import { LEAD_SOURCE_LABEL_CURTO, explicarTemperatura, resumoDaQualificacao } from '@contracts';
 import { SeloDeTemperatura } from './SeloDeTemperatura';
 
 const LARGURA = 320;
@@ -210,17 +210,9 @@ export function LeadPreview({ lead, etapa, origem, onFechar, onManter, onAbrirFi
   );
 }
 
-const ORIGEM: Record<string, string> = {
-  landing_page: 'Landing page',
-  meta_ads: 'Meta Ads',
-  google_ads: 'Google Ads',
-  whatsapp: 'WhatsApp',
-  instagram: 'Instagram',
-  portal: 'Portal',
-  indicacao: 'Indicação',
-  manual: 'Manual',
-  outro: 'Outro',
-};
+// A lista dos contratos. A cópia que morava aqui tinha ficado sem cinco origens
+// (bio, Facebook, placa, Google, Marketplace), que apareciam com o código cru.
+const ORIGEM: Record<string, string> = LEAD_SOURCE_LABEL_CURTO;
 
 function Metrica({ rotulo, valor, alerta }: { rotulo: string; valor: string; alerta?: boolean }) {
   return (

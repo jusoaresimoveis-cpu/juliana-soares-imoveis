@@ -13,6 +13,7 @@
  */
 
 import { buildRefCode, type Variant } from './attribution';
+import type { LeadSource } from './pipeline';
 
 /**
  * No lugar do código do imóvel, nos botões que não são de um imóvel (topo,
@@ -24,7 +25,49 @@ export const CODIGO_DO_SITE = 'SITE';
 
 const VARIANTE_DO_SITE: Variant = 'a';
 
-/** `Ref. 1000-A` para um imóvel; `Ref. SITE-A` para o site em geral. */
-export function refDoSite(codigoDoImovel?: string): string {
-  return `Ref. ${buildRefCode(codigoDoImovel ?? CODIGO_DO_SITE, VARIANTE_DO_SITE)}`;
+/**
+ * Por onde a pessoa chegou antes de chamar no WhatsApp: viaja no segmento do
+ * MEIO do código, `Ref. 1004-GO-A`.
+ *
+ * No CRM de origem esse segmento era o país da página de anúncio, para cinco
+ * mercados. Aqui não há mercado, e desde 05/10 ele diz o canal: o site anota de
+ * onde o visitante veio, o link `/w/<canal>` já sai com ele, e o banco o traduz
+ * na origem do lead (`origem_do_canal`, conferida contra esta lista por teste).
+ * Sem canal, a origem é o site.
+ *
+ * Duas letras, porque é o que a leitura do código aceita (`REF_CODE_RE`).
+ * `slug` é o endereço do link (`/w/bio`) e `nome` vai na mensagem ("Vim pelo
+ * Google"), para a Juliana ler de onde veio sem abrir o CRM.
+ */
+export const CANAIS = {
+  go: { origem: 'google', slug: 'google', nome: 'Google' },
+  ga: { origem: 'google_ads', slug: 'google-ads', nome: 'anúncio do Google' },
+  ma: { origem: 'meta_ads', slug: 'meta-ads', nome: 'anúncio do Instagram ou Facebook' },
+  bi: { origem: 'link_bio', slug: 'bio', nome: 'link da bio' },
+  ig: { origem: 'instagram', slug: 'instagram', nome: 'Instagram' },
+  fb: { origem: 'facebook', slug: 'facebook', nome: 'Facebook' },
+  mk: { origem: 'marketplace', slug: 'marketplace', nome: 'Marketplace' },
+} as const satisfies Record<string, { origem: LeadSource; slug: string; nome: string }>;
+
+export type Canal = keyof typeof CANAIS;
+
+/** A origem do lead que chega com o código do site e sem canal. */
+export const ORIGEM_SEM_CANAL: LeadSource = 'landing_page';
+
+export function ehCanal(valor: unknown): valor is Canal {
+  return typeof valor === 'string' && Object.prototype.hasOwnProperty.call(CANAIS, valor);
+}
+
+/** O canal do endereço `/w/<slug>`. */
+export function canalDoSlug(slug: string): Canal | null {
+  const achado = (Object.keys(CANAIS) as Canal[]).find((c) => CANAIS[c].slug === slug.toLowerCase());
+  return achado ?? null;
+}
+
+/**
+ * `Ref. 1000-A` para um imóvel; `Ref. SITE-A` para o site em geral; com o
+ * canal no meio, `Ref. 1000-GO-A`.
+ */
+export function refDoSite(codigoDoImovel?: string, canal?: Canal): string {
+  return `Ref. ${buildRefCode(codigoDoImovel ?? CODIGO_DO_SITE, VARIANTE_DO_SITE, canal)}`;
 }

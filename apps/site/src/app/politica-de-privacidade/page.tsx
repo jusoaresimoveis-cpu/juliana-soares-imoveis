@@ -12,8 +12,9 @@ export const metadata: Metadata = {
 /**
  * A política de privacidade, escrita a partir do que o site e o CRM FAZEM.
  *
- * Cada frase tem lastro no código: sem cookie nem pixel no site, favoritos e o
- * controle de visita no navegador (`lib/favoritos.ts`, `ContadorDeVisita`), a
+ * Cada frase tem lastro no código: sem cookie nem pixel no site, favoritos, o
+ * controle de visita e o canal da chegada no navegador (`lib/favoritos.ts`,
+ * `ContadorDeVisita`, `lib/origem.ts`, que leva o canal ao código), a
  * contagem por imóvel sem quem visitou (`/api/visita`), o widget da Trustindex,
  * o WhatsApp que só registra conversa com prova de origem, e as conversões que
  * voltam para a Meta com telefone e e-mail em hash (`meta-conversoes`). Mudou
@@ -44,7 +45,7 @@ export default function Page() {
 
       <header className="space-y-3">
         <h1 className="font-serif text-3xl leading-tight sm:text-4xl">Política de privacidade</h1>
-        <p className="text-sm text-suave">Atualizada em 28 de setembro de 2026.</p>
+        <p className="text-sm text-suave">Atualizada em 5 de outubro de 2026.</p>
         <p className="text-lg text-suave">
           Quais dados pessoais a {SITE.nome} usa, para quê, e como você pode ver, corrigir ou apagar os seus. Vale
           para este site, para o atendimento pelo WhatsApp e para os formulários dos anúncios no Facebook e no
@@ -78,6 +79,11 @@ export default function Page() {
               dos imóveis vistos no dia.
             </li>
             <li>
+              <b>De onde você chegou:</b> o seu navegador anota por onde você chegou ao site, por exemplo pelo Google, pelo
+              Instagram ou por um anúncio. A anotação fica só no seu aparelho, não identifica você e vale por 90 dias.
+              Quando você toca num botão de WhatsApp, esse canal vai no código de referência da mensagem.
+            </li>
+            <li>
               <b>Hospedagem:</b> como em qualquer site, o servidor registra dados técnicos do acesso, como o endereço IP e
               o navegador, para segurança e funcionamento.
             </li>
@@ -91,9 +97,10 @@ export default function Page() {
         <section>
           <h2>Quando você fala com a Juliana</h2>
           <p>
-            Os botões do site abrem o WhatsApp com uma mensagem pronta e um código de referência do imóvel ou da página.
-            Também dá para falar por telefone, pelo Instagram ou preenchendo um formulário de anúncio no Facebook ou no
-            Instagram.
+            Os botões do site, e os links de WhatsApp que a Juliana divulga na bio, no Google e no Marketplace, abrem o
+            WhatsApp com uma mensagem pronta e um código de referência do imóvel ou da página e do canal de onde você
+            veio. Também dá para falar por telefone, pelo Instagram ou preenchendo um formulário de anúncio no Facebook
+            ou no Instagram.
           </p>
           <p className="mt-3">
             Desses contatos, o nosso sistema de atendimento guarda: nome, telefone, e-mail (quando você informa), as

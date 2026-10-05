@@ -200,14 +200,31 @@ relação ao briefing, já combinado:
   Todo contato que vem do site vira lead, ligado ao imóvel quando há um,
   inclusive o proprietário que chama pelo "Cadastrar imóvel". O `A` é só
   porque a leitura do CRM de origem exige uma variante; o site não tem A/B/C.
-- **Link rastreado (a fazer):** `/w/<código>` registra o clique (canal, imóvel,
-  UTMs, `gclid`, `fbclid`) antes de abrir o WhatsApp com o mesmo `Ref.`. Até
-  lá, o lead do site chega sem UTM nem `gclid`: dá para saber que veio do
-  site, não de qual campanha.
+- **O canal no código** (decisão do usuário, 05/10): o lead tem que dizer de
+  onde veio, e o Google tem que aparecer medido no CRM. O canal viaja no
+  segmento do meio do `Ref.` (`Ref. 1004-GO-A`), que na origem era o país da
+  página de anúncio e aqui sobrava.
+  - Canais (`CANAIS`, em `rastreio.ts`): `go` Google orgânico (busca e Perfil
+    da Empresa), `ga` Google Ads, `ma` anúncio da Meta, `bi` link da bio,
+    `ig` Instagram, `fb` Facebook, `mk` Marketplace. O banco traduz com
+    `origem_do_canal` (migration 20261005000000), e um teste confere as duas
+    listas. As origens ganharam `google` e `marketplace`.
+  - Sem canal, a origem é o **site** (`landing_page`, rótulo "Site"), e não mais
+    `whatsapp`, que é o caminho de todos e não diz de onde a pessoa veio.
+  - No site, `OrigemDaVisita` anota no navegador o PRIMEIRO canal reconhecido
+    (`gclid`, UTMs, página anterior), por 90 dias, e põe o canal no código na
+    hora do clique no WhatsApp. Chegada direta não anota nem apaga nada.
+  - Fora do site, `/w/<canal>` e `/w/<canal>/<imóvel>` abrem o WhatsApp com a
+    mensagem pronta e o canal no código ("Vim pelo Google"). Canal que não
+    existe abre como site, sem página de erro.
+  - Lead que já existia não muda de origem: vale o primeiro contato.
+  - Ainda não se registra o CLIQUE: o painel conta lead por canal, não clique.
 - **OLX, ZAP e VivaReal:** integração oficial do Grupo OLX, com webhook de leads
   e feed XML. Exige plano de anunciante profissional e homologação do endpoint.
   Docs: https://developers.grupozap.com/webhooks/integration_leads.html
-- **Marketplace orgânico:** não tem API. Código por imóvel mais link rastreado.
+- **Marketplace orgânico:** não tem API. Código por imóvel mais link com canal
+  (`/w/marketplace/<imóvel>`). O contato pelo Messenger do Marketplace não
+  entra no CRM.
 - **Feito em 25/09 (`organizations.whatsapp_numero_pessoal`, ligado no seed da
   Juliana):** com a marca, conversa sem lead e sem prova de origem não é
   gravada (nem conversa, nem mensagem, nem aviso), o conteúdo bruto sai da
@@ -413,8 +430,11 @@ relação ao briefing, já combinado:
   - O token de verificação do webhook é só o segredo do fim do endereço, e não o
     endereço inteiro, como a tela do CRM dizia. Desde 28/09 ela mostra os dois
     separados, cada um com o nome do campo da Meta.
-- [ ] Link rastreado `/w/<código>` e captura completa de UTMs e click IDs. O
-      `Ref.` já vai na mensagem desde 25/09; falta registrar o clique.
+- [x] Canal do lead (05/10): `/w/<canal>`, o canal da chegada anotado no
+      site e lido pelo banco (ver "O canal no código"). Falta registrar o
+      clique, para ter a taxa de clique para lead por canal.
+- [ ] Pôr os links com canal nos lugares: Perfil da Empresa no Google, bio do
+      Instagram e descrição dos anúncios do Marketplace.
 - [x] Política de privacidade (28/09): `/politica-de-privacidade`, com link no
       rodapé. Escrita a partir do que o site e o CRM fazem de verdade (sem
       cookie nem pixel, favoritos e controle de visita no navegador, Trustindex,

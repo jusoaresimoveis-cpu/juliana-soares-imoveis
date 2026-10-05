@@ -79,14 +79,20 @@ export const LOSS_REASON_LABEL: Record<LossReason, string> = {
  *
  * `placa` não é folclore: no interior ela ainda traz mais lead que portal, e a
  * referência já dividia o gasto de anúncio por ela sem perceber.
+ *
+ * `google` é o Google ORGÂNICO (a busca e o Perfil da Empresa) e `marketplace` é
+ * o Marketplace do Facebook, as duas desde 05/10: o canal agora viaja no código
+ * do WhatsApp (ver `CANAIS`, em rastreio.ts). `landing_page` é o site.
  */
 export const LEAD_SOURCES = [
   'landing_page',
   'meta_ads',
   'google_ads',
+  'google',
   'link_bio',
   'instagram',
   'facebook',
+  'marketplace',
   'whatsapp',
   'portal',
   'indicacao',
@@ -105,12 +111,15 @@ export type LeadSource = (typeof LEAD_SOURCES)[number];
  * duas telas parecerem falar de canais diferentes.
  */
 export const LEAD_SOURCE_LABEL: Record<LeadSource, string> = {
-  landing_page: 'Landing page',
+  // Na origem eram as páginas de anúncio; aqui é o site da Juliana.
+  landing_page: 'Site',
   meta_ads: 'Meta Ads',
   google_ads: 'Google Ads',
+  google: 'Google orgânico',
   link_bio: 'Link da bio',
   instagram: 'Instagram orgânico',
   facebook: 'Facebook orgânico',
+  marketplace: 'Marketplace',
   whatsapp: 'WhatsApp',
   portal: 'Portal',
   indicacao: 'Indicação',
@@ -122,6 +131,7 @@ export const LEAD_SOURCE_LABEL: Record<LeadSource, string> = {
 /** Curto, para caber em selo dentro de linha de lista. */
 export const LEAD_SOURCE_LABEL_CURTO: Record<LeadSource, string> = {
   ...LEAD_SOURCE_LABEL,
+  google: 'Google',
   instagram: 'Instagram',
   facebook: 'Facebook',
   manual: 'Manual',
@@ -144,6 +154,10 @@ export const LEAD_SOURCE_HUE: Record<LeadSource, number> = {
   instagram: 322,
   link_bio: 288,
   google_ads: 8,
+  // Longe dos vizinhos: o verde-amarelo entre a placa e o WhatsApp, e o
+  // vermelho-rosa entre o Instagram e o Google Ads.
+  google: 90,
+  marketplace: 345,
   whatsapp: 145,
   landing_page: 266,
   portal: 28,

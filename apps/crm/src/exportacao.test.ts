@@ -128,7 +128,9 @@ describe('as colunas da exportação', () => {
 
   it('origem e motivo saem com os rótulos da tela, não com o código', () => {
     expect(origemLegivel('meta_ads', 'whatsapp_inbound')).toBe('Meta Ads · WhatsApp');
-    expect(origemLegivel('landing_page', 'landing_form')).toBe('Landing page · formulário da página');
+    // `landing_page` é o site da Juliana (o rótulo mudou em 05/10).
+    expect(origemLegivel('landing_page', 'landing_form')).toBe('Site · formulário da página');
+    expect(origemLegivel('google', 'whatsapp_inbound')).toBe('Google orgânico · WhatsApp');
     expect(origemLegivel('indicacao', null)).toBe('Indicação');
     expect(motivoLegivel('sem_resposta', ' sumiu depois da visita ')).toBe(
       'Parou de responder — sumiu depois da visita',

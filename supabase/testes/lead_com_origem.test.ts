@@ -109,7 +109,10 @@ describe('mensagem que chega', () => {
          from public.leads l where l.phone_e164 = '+5547988880002'`,
     );
     expect(lead.linhas.length).toBe(1);
-    expect(lead.linhas[0]?.source).toBe('whatsapp');
+    // A origem é o site, e não `whatsapp`, desde a 20261005000000: o WhatsApp é
+    // o caminho de todos e não diz de onde a pessoa veio. `BR` no meio do código
+    // não é canal conhecido, e canal desconhecido conta como site.
+    expect(lead.linhas[0]?.source).toBe('landing_page');
     // A variante é o que o painel de A/B lê. Sem ela o lead existe e não conta
     // para nenhuma das três páginas.
     expect(lead.linhas[0]?.ft_variant).toBe('a');

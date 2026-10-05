@@ -4,6 +4,7 @@ import { Inter, Playfair_Display } from 'next/font/google';
 import { BarraInferior } from '@/components/BarraInferior';
 import { Cabecalho } from '@/components/Cabecalho';
 import { JsonLd } from '@/components/JsonLd';
+import { OrigemDaVisita } from '@/components/OrigemDaVisita';
 import { Rodape } from '@/components/Rodape';
 import { SITE, SITE_INDEXAVEL } from '@/config/site';
 import { schemaDaCorretora } from '@/lib/seo/schema';
@@ -56,6 +57,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <main className="flex-1">{children}</main>
         <Rodape />
         <BarraInferior />
+        <OrigemDaVisita />
       </body>
     </html>
   );

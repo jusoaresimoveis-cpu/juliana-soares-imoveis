@@ -40,6 +40,7 @@ import { diasDesde, tempoAte } from '@/hooks/useLeadPreview';
 import type { PipelineStage, TeamMember } from '@/types/db';
 import { brl, cn, initials } from '@/lib/utils';
 import {
+  LEAD_SOURCE_LABEL_CURTO,
   LOSS_REASON_LABEL,
   atendeLead,
   parseReminderHint,
@@ -65,17 +66,9 @@ const FUSO = 'America/Sao_Paulo';
 
 type Aba = 'geral' | 'historico' | 'imoveis';
 
-const ORIGEM: Record<string, string> = {
-  landing_page: 'Landing page',
-  meta_ads: 'Meta Ads',
-  google_ads: 'Google Ads',
-  whatsapp: 'WhatsApp',
-  instagram: 'Instagram',
-  portal: 'Portal',
-  indicacao: 'Indicação',
-  manual: 'Manual',
-  outro: 'Outro',
-};
+// A lista dos contratos. A cópia que morava aqui tinha ficado sem cinco origens
+// (bio, Facebook, placa, Google, Marketplace), que apareciam com o código cru.
+const ORIGEM: Record<string, string> = LEAD_SOURCE_LABEL_CURTO;
 
 export default function LeadDetail() {
   const { id = '' } = useParams();
