@@ -32,6 +32,7 @@ import {
   PROPERTY_TYPE_LABEL,
   PROPERTY_STATUS_LABEL,
   RENTAL_GUARANTEE_LABEL,
+  precoDeTabela,
   rotuloDoRegime,
   type RentalGuarantee,
 } from '@contracts';
@@ -75,6 +76,8 @@ export default function PropertyDetail() {
 
   const imagens = (midia ?? []).filter((m) => m.kind === 'image');
   const capa = imagens[foto] ?? imagens[0];
+  // O "de" do "de R$ X por R$ Y" que o site mostra.
+  const tabela = imovel.for_sale ? precoDeTabela(imovel.price_cents, imovel.original_price_cents) : null;
 
   return (
     <div className="flex flex-col gap-4 pb-4">
@@ -178,6 +181,11 @@ export default function PropertyDetail() {
               {valoresDoImovel(imovel).join(' · ') || 'Sob consulta'}
             </p>
             <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-base text-tx-2">
+              {tabela ? (
+                <span>
+                  Preço de tabela <s>{brlCents(tabela)}</s>
+                </span>
+              ) : null}
               {imovel.condo_fee_cents ? <span>Condomínio {brlCents(imovel.condo_fee_cents)}</span> : null}
               {imovel.iptu_year_cents ? <span>IPTU {brlCents(imovel.iptu_year_cents)}/ano</span> : null}
             </div>

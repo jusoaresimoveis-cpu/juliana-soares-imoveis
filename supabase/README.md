@@ -40,6 +40,9 @@ supabase/
 - `20261005000000_canal_do_lead.sql`: o canal no meio do código do WhatsApp
   (`Ref. 1004-GO-A`) vira a origem do lead (`origem_do_canal`); sem canal, a
   origem é o site. Origens novas: `google` e `marketplace`.
+- `20261006000000_preco_de_tabela.sql`: o preço de tabela da venda com
+  desconto (`original_price_cents`), que o site mostra como "De R$ X por
+  R$ Y". Só existe acima do preço de venda.
 
 Dado de cliente não entra em migration: fica em `seeds/`, para o mesmo schema
 servir a outro cliente sem limpeza.

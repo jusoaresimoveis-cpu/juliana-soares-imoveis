@@ -2,6 +2,7 @@ import {
   PROPERTY_STATUSES,
   PROPERTY_TYPE_LABEL,
   PROPERTY_TYPES,
+  precoDeTabela,
   type FinalidadeDoSite,
   type PropertyStatus,
   type PropertyType,
@@ -30,6 +31,8 @@ export interface LinhaDoSite {
   for_rent: boolean;
   status: string;
   price_cents: number | null;
+  /** O preço de tabela da venda com desconto (o "de" do "de R$ X por R$ Y"). */
+  original_price_cents: number | null;
   rent_cents: number | null;
   condo_fee_cents: number | null;
   iptu_year_cents: number | null;
@@ -110,6 +113,7 @@ export function imovelDaLinha(linha: LinhaDoSite, urlDoBanco: string): Imovel {
     // Preço de um regime que o imóvel não tem não aparece, mesmo que tenha
     // ficado gravado de quando ele estava à venda.
     precoVendaCents: linha.for_sale ? linha.price_cents : null,
+    precoDeTabelaCents: linha.for_sale ? precoDeTabela(linha.price_cents, linha.original_price_cents) : null,
     aluguelCents: linha.for_rent ? linha.rent_cents : null,
     condominioCents: linha.condo_fee_cents,
     iptuAnualCents: linha.iptu_year_cents,

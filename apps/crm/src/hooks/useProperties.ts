@@ -75,6 +75,8 @@ export interface Property {
   payment_notes?: string | null;
 
   /* Os campos que a ficha carrega e a lista não: o formulário abre dela. */
+  /** Preço de TABELA da venda com desconto: o "de" do "de R$ X por R$ Y". */
+  original_price_cents?: number | null;
   public_title?: string | null;
   suites?: number | null;
   area_built?: number | null;

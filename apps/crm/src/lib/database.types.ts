@@ -2093,6 +2093,7 @@ export type Database = {
           longitude: number | null
           neighborhood: string | null
           organization_id: string
+          original_price_cents: number | null
           owner_id: string | null
           parking_spots: number | null
           payment_methods: string[]
@@ -2155,6 +2156,7 @@ export type Database = {
           longitude?: number | null
           neighborhood?: string | null
           organization_id: string
+          original_price_cents?: number | null
           owner_id?: string | null
           parking_spots?: number | null
           payment_methods?: string[]
@@ -2217,6 +2219,7 @@ export type Database = {
           longitude?: number | null
           neighborhood?: string | null
           organization_id?: string
+          original_price_cents?: number | null
           owner_id?: string | null
           parking_spots?: number | null
           payment_methods?: string[]

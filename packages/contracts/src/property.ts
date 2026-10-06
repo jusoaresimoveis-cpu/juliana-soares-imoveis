@@ -99,6 +99,23 @@ export const PROPERTY_PURPOSE_LABEL: Record<PropertyPurpose, string> = {
   temporada: 'Temporada',
 };
 
+/**
+ * O "de" do "de R$ X por R$ Y": o preço de tabela de um imóvel à venda com
+ * desconto, ou nulo.
+ *
+ * Só vale ACIMA do preço de venda, que é o que se paga. Igual ou abaixo não é
+ * desconto, e "de R$ 900 mil por R$ 950 mil" na vitrine faz a página parecer
+ * erro. O banco recusa o mesmo caso (`properties_original_price_ck`); a regra
+ * mora aqui para o formulário avisar antes de salvar e o site seguir a mesma.
+ */
+export function precoDeTabela(
+  vendaCents: number | null | undefined,
+  tabelaCents: number | null | undefined,
+): number | null {
+  if (typeof vendaCents !== 'number' || typeof tabelaCents !== 'number') return null;
+  return vendaCents > 0 && tabelaCents > vendaCents ? tabelaCents : null;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Plano de pagamento                                                         */
 /* -------------------------------------------------------------------------- */

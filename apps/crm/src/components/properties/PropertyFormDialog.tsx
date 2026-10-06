@@ -12,6 +12,7 @@ import {
   REINFORCEMENT_PERIOD_LABEL,
   RENTAL_GUARANTEES,
   RENTAL_GUARANTEE_LABEL,
+  precoDeTabela,
   resumoDoPlano,
   type PaymentMethod,
   type RentalGuarantee,
@@ -26,7 +27,7 @@ import {
 import { telefoneLegivel } from '@/exportacao';
 import { MediaManager } from './MediaManager';
 import { Switch } from '@/components/Switch';
-import { cn } from '@/lib/utils';
+import { brlCents, cn } from '@/lib/utils';
 
 export type AbaDoImovel = 'dados' | 'local' | 'pagamento' | 'proprietario' | 'midia';
 
@@ -104,6 +105,7 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
     for_rent: imovel?.for_rent ?? false,
     status: imovel?.status ?? 'disponivel',
     preco: imovel?.price_cents ? String(Math.round(imovel.price_cents / 100)) : '',
+    tabela: imovel?.original_price_cents ? String(Math.round(imovel.original_price_cents / 100)) : '',
     aluguel: imovel?.rent_cents ? String(Math.round(imovel.rent_cents / 100)) : '',
     condominio: imovel?.condo_fee_cents ? String(Math.round(imovel.condo_fee_cents / 100)) : '',
     iptu: imovel?.iptu_year_cents ? String(Math.round(imovel.iptu_year_cents / 100)) : '',
@@ -157,9 +159,24 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
     set(k)(v);
   };
 
+  /*
+   * O "de R$ X por R$ Y" da venda com desconto. Preço de tabela que não fica
+   * acima do de venda não é desconto: o banco recusaria, e aqui ele vira aviso
+   * antes de salvar, e não um erro do Postgres.
+   */
+  const precoCents = campoParaCents(f.preco);
+  const tabelaCents = f.for_sale ? campoParaCents(f.tabela) : null;
+  const deCents = precoDeTabela(precoCents, tabelaCents);
+  const tabelaSemDesconto = tabelaCents !== null && deCents === null;
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!f.title.trim()) return;
+    if (tabelaSemDesconto) {
+      // O aviso está na aba de dados; salvar de outra aba precisa mostrá-lo.
+      setAba('dados');
+      return;
+    }
 
     const dados: PropertyUpdate = {
       title: f.title.trim(),
@@ -170,7 +187,8 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
       status: f.status,
       // Centavos, sempre inteiro. O valor de um regime desligado vai nulo: o
       // campo some da tela, e um preço que ninguém vê não pode ficar gravado.
-      price_cents: f.for_sale ? campoParaCents(f.preco) : null,
+      price_cents: f.for_sale ? precoCents : null,
+      original_price_cents: tabelaCents,
       rent_cents: f.for_rent ? campoParaCents(f.aluguel) : null,
       rental_guarantees: f.for_rent ? garantias : [],
       condo_fee_cents: campoParaCents(f.condominio),
@@ -362,15 +380,46 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
             </div>
 
             {f.for_sale && (
-              <Campo className="col-span-2" rotulo="Preço de venda (R$)">
-                <input
-                  inputMode="numeric"
-                  value={mascaraBRL(f.preco)}
-                  onChange={(e) => set('preco')(apenasDigitos(e.target.value))}
-                  placeholder="1.850.000"
-                  className={inputCls}
-                />
-              </Campo>
+              <>
+                <Campo className="col-span-2" rotulo="Preço de venda (R$)">
+                  <input
+                    inputMode="numeric"
+                    value={mascaraBRL(f.preco)}
+                    onChange={(e) => set('preco')(apenasDigitos(e.target.value))}
+                    placeholder="1.850.000"
+                    className={inputCls}
+                  />
+                </Campo>
+                <Campo className="col-span-2" rotulo="Preço de tabela (R$)">
+                  <input
+                    inputMode="numeric"
+                    value={mascaraBRL(f.tabela)}
+                    onChange={(e) => set('tabela')(apenasDigitos(e.target.value))}
+                    placeholder="Vazio: sem desconto"
+                    aria-invalid={tabelaSemDesconto || undefined}
+                    className={cn(inputCls, tabelaSemDesconto && 'border-dng focus:border-dng')}
+                  />
+                </Campo>
+                {tabelaCents !== null && (
+                  <p
+                    role={tabelaSemDesconto ? 'alert' : undefined}
+                    className={cn(
+                      'col-span-2 rounded-xl p-3 text-sm sm:col-span-4',
+                      tabelaSemDesconto ? 'bg-dng-soft font-semibold text-dng' : 'bg-card-2 text-tx-2',
+                    )}
+                  >
+                    {deCents !== null && precoCents !== null ? (
+                      <>
+                        No site: De <s>{brlCents(deCents)}</s> por <b>{brlCents(precoCents)}</b>.
+                      </>
+                    ) : precoCents === null ? (
+                      'Preencha o preço de venda: é o “por” do “de R$ X por R$ Y”.'
+                    ) : (
+                      'O preço de tabela tem que ser maior que o de venda. Sem desconto, deixe vazio.'
+                    )}
+                  </p>
+                )}
+              </>
             )}
             {f.for_rent && (
               <Campo className="col-span-2" rotulo="Aluguel mensal (R$)">

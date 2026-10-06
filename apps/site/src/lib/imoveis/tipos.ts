@@ -35,6 +35,11 @@ export interface Imovel {
   status: PropertyStatus;
 
   precoVendaCents: number | null;
+  /**
+   * O preço de tabela da venda com desconto: o "de" do "de R$ X por R$ Y". Busca
+   * e ordem usam o preço de venda, que é o que se paga.
+   */
+  precoDeTabelaCents: number | null;
   /** Aluguel mensal. */
   aluguelCents: number | null;
   condominioCents: number | null;

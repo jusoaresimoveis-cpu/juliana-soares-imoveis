@@ -32,7 +32,7 @@ import {
   mensagemDoErro, META_ERROS_DE_TOKEN, META_ERROS_DE_PERMISSAO, META_ERROS_DE_LIMITE,
   tipoDeResultado, resultadoDaLinha, custoPorResultado,
   MERCADOS, MERCADO_CODES, localeDoMercado, areaNoMercado, caminhoDaPagina,
-  PAYMENT_METHODS, resumoDoPlano,
+  PAYMENT_METHODS, resumoDoPlano, precoDeTabela,
   ANGULOS, LAYOUTS, CTA_KINDS, ANGULO_META, LAYOUT_META, CTA_META,
   ANGULOS_DE_CRIATIVO, ANGULO_DE_CRIATIVO_META,
   VARIANTES_GERADAS, MIN_VISITAS_CONFIAVEL, conversaoDaVariante,
@@ -1368,5 +1368,29 @@ describe('plano de pagamento', () => {
     // inventar "1 parcela" a partir de um valor solto.
     expect(resumoDoPlano({ parcelaCents: 240_000 }).somaCents).toBe(0);
     expect(resumoDoPlano({ parcelas: 60 }).somaCents).toBe(0);
+  });
+});
+
+describe('preço de tabela', () => {
+  it('só existe acima do preço de venda', () => {
+    expect(precoDeTabela(185_000_000, 195_000_000)).toBe(195_000_000);
+    // Igual ou abaixo não é desconto: na vitrine, pareceria erro.
+    expect(precoDeTabela(185_000_000, 185_000_000)).toBeNull();
+    expect(precoDeTabela(185_000_000, 180_000_000)).toBeNull();
+  });
+
+  it('sem preço de venda não há o "por", e então não há o "de"', () => {
+    expect(precoDeTabela(null, 195_000_000)).toBeNull();
+    expect(precoDeTabela(0, 195_000_000)).toBeNull();
+    expect(precoDeTabela(185_000_000, null)).toBeNull();
+    expect(precoDeTabela(185_000_000, undefined)).toBeNull();
+  });
+
+  it('o banco recusa o mesmo caso, em centavos inteiros', () => {
+    expect(colunasDaTabela('properties').get('original_price_cents')).toMatch(/^bigint\b/);
+    const regra = definicaoDaRestricao('properties_original_price_ck').definicao;
+    expect(regra).toContain('price_cents is not null');
+    expect(regra).toContain('price_cents > 0');
+    expect(regra).toContain('original_price_cents > price_cents');
   });
 });

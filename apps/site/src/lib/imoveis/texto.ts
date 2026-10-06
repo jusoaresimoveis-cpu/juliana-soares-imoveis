@@ -27,15 +27,25 @@ export function resumoDoImovel(imovel: Imovel): string {
   const onde = [imovel.bairro, imovel.cidade].filter(Boolean).join(', ');
   const caracteristicas = textoDasCaracteristicas(imovel).join(', ');
 
+  const venda = imovel.finalidades.includes('venda') ? imovel.precoVendaCents : null;
   const valores = [
     imovel.finalidades.includes('aluguel') && imovel.aluguelCents ? `${reais(imovel.aluguelCents)}/mês` : null,
-    imovel.finalidades.includes('venda') && imovel.precoVendaCents ? reais(imovel.precoVendaCents) : null,
+    // O desconto também no resultado do Google e na prévia do link no WhatsApp.
+    venda
+      ? imovel.precoDeTabelaCents
+        ? `de ${reais(imovel.precoDeTabelaCents)} por ${reais(venda)}`
+        : reais(venda)
+      : null,
   ].filter((valor) => valor !== null);
 
   let frase = `${PROPERTY_TYPE_LABEL[imovel.tipo]} ${finalidades}`;
   if (onde) frase += ` em ${onde}`;
   if (caracteristicas) frase += `: ${caracteristicas}`;
   frase += '.';
-  if (valores.length > 0) frase += ` ${valores.join(' ou ')}.`;
+  if (valores.length > 0) {
+    const preco = valores.join(' ou ');
+    // Depois do ponto, o "de" do desconto começa a frase.
+    frase += ` ${preco.charAt(0).toUpperCase()}${preco.slice(1)}.`;
+  }
   return `${frase} Cód. ${imovel.codigo}.`;
 }

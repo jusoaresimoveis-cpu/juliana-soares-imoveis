@@ -16,6 +16,7 @@ const linha = (mudancas: Partial<LinhaDoSite> = {}): LinhaDoSite => ({
   for_rent: true,
   status: 'disponivel',
   price_cents: null,
+  original_price_cents: null,
   rent_cents: 350_000,
   condo_fee_cents: 60_000,
   iptu_year_cents: 120_000,
@@ -64,6 +65,16 @@ describe('imovelDaLinha', () => {
     const osDois = imovelDaLinha(linha({ for_sale: true, price_cents: 90_000_000 }), BANCO);
     expect(osDois.finalidades).toEqual(['aluguel', 'venda']);
     expect(osDois.precoVendaCents).toBe(90_000_000);
+  });
+
+  it('o preço de tabela sai só na venda, e só acima do preço de venda', () => {
+    const comDesconto = linha({ for_sale: true, price_cents: 185_000_000, original_price_cents: 195_000_000 });
+    expect(imovelDaLinha(comDesconto, BANCO)).toMatchObject({ precoVendaCents: 185_000_000, precoDeTabelaCents: 195_000_000 });
+
+    // Imóvel que deixou de estar à venda: nem o "por" nem o "de" aparecem.
+    expect(imovelDaLinha({ ...comDesconto, for_sale: false }, BANCO).precoDeTabelaCents).toBeNull();
+    // "De" que não fica acima do "por" não é desconto.
+    expect(imovelDaLinha(linha({ for_sale: true, price_cents: 185_000_000, original_price_cents: 185_000_000 }), BANCO).precoDeTabelaCents).toBeNull();
   });
 
   it('foto sem medida e sem texto alternativo ainda sai utilizável', () => {
