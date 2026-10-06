@@ -3766,6 +3766,10 @@ export type Database = {
         Args: { _dono?: string; _lead_id?: string; _org: string }
         Returns: string[]
       }
+      ordenar_midia: {
+        Args: { _imovel: string; _ordem: string[] }
+        Returns: undefined
+      }
       painel_funil: {
         Args: { _ate: string; _de: string; _org: string }
         Returns: Json

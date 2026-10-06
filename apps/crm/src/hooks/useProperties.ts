@@ -191,7 +191,11 @@ export function usePropertyMedia(propertyId: string | null) {
           'id, property_id, kind, storage_path, position, is_cover, caption, alt_text, bytes, width, height, mime_type, marca_dagua, original_sem_marca',
         )
         .eq('property_id', propertyId!)
-        .order('position');
+        // A ordem do site (`site_imoveis`): a capa primeiro, depois a posição.
+        // Fotos de antes de `ordenar_midia` podem ter a capa no meio.
+        .order('is_cover', { ascending: false })
+        .order('position')
+        .order('created_at');
       if (error) throw error;
       return (data ?? []) as unknown as PropertyMedia[];
     },
@@ -295,27 +299,43 @@ export function useMediaActions(orgId: string | undefined, propertyId: string | 
     onSuccess: invalidar,
   });
 
-  const definirCapa = useMutation({
-    mutationFn: async (mediaId: string) => {
+  /*
+   * A ordem nova, inteira, numa chamada só ao banco (`ordenar_midia`, migration
+   * 20261006000100), que também faz da primeira foto a capa.
+   *
+   * `scope`: uma gravação por vez, na ordem em que a pessoa soltou. Duas
+   * arrastadas rápidas não podem chegar trocadas, senão a penúltima vence.
+   */
+  const ordenar = useMutation({
+    scope: { id: `ordenar-midia-${propertyId}` },
+    mutationFn: async (ids: string[]) => {
       if (!propertyId) return;
-      // Em duas etapas de propósito. O índice único garante uma capa por
-      // imóvel, e um UPDATE só poderia esbarrar nele no meio da varredura,
-      // dependendo da ordem em que as linhas fossem processadas.
-      const { error: e1 } = await supabase
-        .from('property_media')
-        .update({ is_cover: false })
-        .eq('property_id', propertyId)
-        .eq('is_cover', true);
-      if (e1) throw e1;
-
-      const { error: e2 } = await supabase
-        .from('property_media')
-        .update({ is_cover: true })
-        .eq('id', mediaId);
-      if (e2) throw e2;
+      const { error } = await supabase.rpc('ordenar_midia', { _imovel: propertyId, _ordem: ids });
+      if (error) throw error;
     },
-    onSuccess: invalidar,
+    // Recusado: a tela volta a mostrar a ordem que o banco tem.
+    onError: invalidar,
+    // A capa pode ter mudado, e a lista de imóveis mostra a capa.
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['property-covers'] }),
   });
+
+  /**
+   * Põe as mídias nesta ordem. A tela muda NA HORA, sem esperar o banco: a foto
+   * fica onde a pessoa soltou, em vez de voltar ao lugar antigo até a resposta.
+   */
+  function reordenar(lista: PropertyMedia[]) {
+    const chave = ['property-media', propertyId];
+    // Uma leitura em andamento traria a ordem antiga por cima desta. Cancelar
+    // é síncrono (devolve o estado de antes da leitura), então o que vale é o
+    // que se grava logo abaixo.
+    void qc.cancelQueries({ queryKey: chave });
+    const capa = lista.find((m) => m.kind === 'image')?.id;
+    qc.setQueryData<PropertyMedia[]>(
+      chave,
+      lista.map((m, i) => ({ ...m, position: i, is_cover: m.id === capa })),
+    );
+    ordenar.mutate(lista.map((m) => m.id));
+  }
 
   const remover = useMutation({
     mutationFn: async (media: PropertyMedia) => {
@@ -324,19 +344,12 @@ export function useMediaActions(orgId: string | undefined, propertyId: string | 
       // O arquivo sai junto. O sistema atual só apaga a linha e deixa o
       // arquivo órfão no bucket para sempre.
       await supabase.storage.from(BUCKET).remove([media.storage_path]);
-    },
-    onSuccess: invalidar,
-  });
-
-  const mover = useMutation({
-    mutationFn: async ({ lista, de, para }: { lista: PropertyMedia[]; de: number; para: number }) => {
-      const nova = [...lista];
-      const [item] = nova.splice(de, 1);
-      if (!item) return;
-      nova.splice(para, 0, item);
-      await Promise.all(
-        nova.map((m, i) => supabase.from('property_media').update({ position: i }).eq('id', m.id)),
-      );
+      // Sem a capa, a primeira foto que sobrou vira a capa (lista vazia: o
+      // banco só arruma a ordem que já existe). Se falhar, a foto já saiu, e a
+      // capa se acerta na próxima vez que alguém mexer na ordem.
+      if (media.is_cover && propertyId) {
+        await supabase.rpc('ordenar_midia', { _imovel: propertyId, _ordem: [] });
+      }
     },
     onSuccess: invalidar,
   });
@@ -440,7 +453,7 @@ export function useMediaActions(orgId: string | undefined, propertyId: string | 
     onSettled: invalidar,
   });
 
-  return { enviar, definirCapa, remover, mover, porMarca, tirarMarca };
+  return { enviar, reordenar, ordenar, remover, porMarca, tirarMarca };
 }
 
 /**

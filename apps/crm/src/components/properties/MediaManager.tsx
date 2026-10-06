@@ -1,5 +1,21 @@
-import { useRef, useState } from 'react';
-import { Upload, Star, Trash2, ArrowLeft, ArrowRight, FileText, Video, Loader2 } from 'lucide-react';
+import { useRef, useState, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type Announcements,
+  type DragEndEvent,
+  type UniqueIdentifier,
+} from '@dnd-kit/core';
+import { SortableContext, arrayMove, rectSortingStrategy, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Upload, Star, Trash2, FileText, Video, Loader2 } from 'lucide-react';
 import { usePropertyMedia, useMediaActions, urlPublica, type PropertyMedia } from '@/hooks/useProperties';
 import { useMarcaDagua, useSalvarMarcaDagua } from '@/hooks/useSettings';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,9 +29,22 @@ interface Props {
 
 export function MediaManager({ orgId, propertyId }: Props) {
   const { data: midias } = usePropertyMedia(propertyId);
-  const { enviar, definirCapa, remover, mover, porMarca, tirarMarca } = useMediaActions(orgId, propertyId);
+  const { enviar, reordenar, ordenar, remover, porMarca, tirarMarca } = useMediaActions(orgId, propertyId);
   const inputRef = useRef<HTMLInputElement>(null);
   const [arrastando, setArrastando] = useState(false);
+  // A foto que está sendo arrastada para outro lugar da lista.
+  const [pega, setPega] = useState<UniqueIdentifier | null>(null);
+
+  const sensores = useSensors(
+    // Mouse: o arraste começa depois de andar uns pixels, e o clique nos botões
+    // da foto (capa, remover) continua sendo clique.
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    // Dedo: segurar um instante. Sem a espera, encostar na foto para rolar a
+    // tela já a arrastaria.
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+    // Teclado: espaço pega, setas movem, espaço solta.
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
   const { isAdminOrAbove } = useAuth();
   const marca = useMarcaDagua(orgId);
   const salvarMarca = useSalvarMarcaDagua(orgId);
@@ -44,6 +73,24 @@ export function MediaManager({ orgId, propertyId }: Props) {
   const semMarca = lista.filter((m) => m.kind === 'image' && !m.marca_dagua);
   const comOriginal = lista.filter((m) => m.original_sem_marca);
   const ocupado = porMarca.isPending || tirarMarca.isPending;
+
+  const lugarDe = (id: UniqueIdentifier) => lista.findIndex((m) => m.id === id) + 1;
+  const anuncios: Announcements = {
+    onDragStart: ({ active }) => `Foto ${lugarDe(active.id)} pega.`,
+    onDragOver: ({ over }) => (over ? `Sobre o lugar ${lugarDe(over.id)}.` : 'Fora da lista.'),
+    onDragEnd: ({ over }) => (over ? `Foto solta no lugar ${lugarDe(over.id)}.` : 'Foto solta fora da lista.'),
+    onDragCancel: () => 'Cancelado. A foto voltou ao lugar.',
+  };
+
+  function soltar({ active, over }: DragEndEvent) {
+    setPega(null);
+    if (!over || active.id === over.id) return;
+    const de = lista.findIndex((m) => m.id === active.id);
+    const para = lista.findIndex((m) => m.id === over.id);
+    if (de >= 0 && para >= 0) reordenar(arrayMove(lista, de, para));
+  }
+
+  const midiaPega = pega ? lista.find((m) => m.id === pega) : undefined;
 
   return (
     <div className="flex flex-col gap-3">
@@ -168,23 +215,68 @@ export function MediaManager({ orgId, propertyId }: Props) {
       {lista.length > 0 && (
         <>
           <p className="text-sm text-tx-3">
-            A primeira imagem é a capa. Ela é o que aparece no card, no anúncio e no preview do link
-            compartilhado — vale escolher com cuidado.
+            Segure a foto e arraste até o lugar: o site mostra nesta ordem. A primeira é a capa, que
+            aparece no card, no anúncio e no preview do link compartilhado.
           </p>
 
-          <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
-            {lista.map((m, i) => (
-              <MediaCard
-                key={m.id}
-                media={m}
-                primeiro={i === 0}
-                ultimo={i === lista.length - 1}
-                onCapa={() => definirCapa.mutate(m.id)}
-                onRemover={() => remover.mutate(m)}
-                onMover={(dir) => mover.mutate({ lista, de: i, para: i + dir })}
-              />
-            ))}
-          </ul>
+          <DndContext
+            sensors={sensores}
+            collisionDetection={closestCenter}
+            // Rola sozinho perto da borda de cima ou de baixo. O padrão (20% da
+            // tela de cada lado) num celular rola quando a pessoa só quer soltar
+            // a foto na primeira ou na última fileira visível.
+            autoScroll={{ threshold: { x: 0, y: 0.1 } }}
+            accessibility={{
+              announcements: anuncios,
+              screenReaderInstructions: {
+                draggable:
+                  'Para mudar a foto de lugar, aperte espaço, mova com as setas e aperte espaço de novo para soltar. Esc cancela.',
+              },
+            }}
+            onDragStart={({ active, activatorEvent }) => {
+              setPega(active.id);
+              // No celular, uma tremidinha avisa que a foto "pegou" (o iPhone não tem).
+              if (activatorEvent && 'touches' in activatorEvent && 'vibrate' in navigator) navigator.vibrate(10);
+            }}
+            onDragEnd={soltar}
+            onDragCancel={() => setPega(null)}
+          >
+            <SortableContext items={lista.map((m) => m.id)} strategy={rectSortingStrategy}>
+              <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
+                {lista.map((m, i) => (
+                  <MediaCard
+                    key={m.id}
+                    media={m}
+                    lugar={i + 1}
+                    onCapa={() => reordenar([m, ...lista.filter((x) => x.id !== m.id)])}
+                    onRemover={() => remover.mutate(m)}
+                  />
+                ))}
+              </ul>
+            </SortableContext>
+
+            {/* No `body`: a foto que acompanha o dedo não pode ficar presa
+                atrás do formulário nem cortada pela rolagem dele. */}
+            {createPortal(
+              <DragOverlay zIndex={60}>
+                {/* A caixa de fora não cresce: o dnd-kit mede o primeiro filho
+                    para achar o vizinho nas setas do teclado, e a foto ampliada
+                    fazia a seta para a direita mirar a foto de baixo. */}
+                {midiaPega ? (
+                  <div>
+                    <Miniatura media={midiaPega} levantada />
+                  </div>
+                ) : null}
+              </DragOverlay>,
+              document.body,
+            )}
+          </DndContext>
+
+          {ordenar.isError && (
+            <p className="rounded-md bg-dng-soft px-3 py-2 text-base text-dng">
+              A nova ordem não foi gravada, e a lista voltou à que estava salva. Tente de novo.
+            </p>
+          )}
         </>
       )}
     </div>
@@ -193,37 +285,44 @@ export function MediaManager({ orgId, propertyId }: Props) {
 
 function MediaCard({
   media,
-  primeiro,
-  ultimo,
+  lugar,
   onCapa,
   onRemover,
-  onMover,
 }: {
   media: PropertyMedia;
-  primeiro: boolean;
-  ultimo: boolean;
+  lugar: number;
   onCapa: () => void;
   onRemover: () => void;
-  onMover: (direcao: -1 | 1) => void;
 }) {
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
+    id: media.id,
+    attributes: { roleDescription: 'foto que muda de lugar' },
+  });
+  const estilo: CSSProperties = { transform: CSS.Translate.toString(transform), transition };
+
   return (
-    <li className="group relative overflow-hidden rounded-md border border-line bg-card-2">
-      {/* A foto por cima da caixa (absolute): no fluxo, uma foto em pé esticaria
-          a miniatura além do 4:3 (ver a mesma nota em `pages/Properties.tsx`). */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden">
-        {media.kind === 'image' ? (
-          <img
-            src={urlPublica(media.storage_path)}
-            alt={media.alt_text ?? ''}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 grid place-items-center text-tx-3">
-            {media.kind === 'video' ? <Video className="h-6 w-6" /> : <FileText className="h-6 w-6" />}
-          </div>
-        )}
-      </div>
+    <li
+      // O cartão inteiro é a alça. Registrado também como "ativador", o teclado
+      // só pega a foto quando o foco está nela: espaço num botão de dentro
+      // continua apertando o botão.
+      ref={(no) => {
+        setNodeRef(no);
+        setActivatorNodeRef(no);
+      }}
+      style={estilo}
+      {...attributes}
+      {...listeners}
+      aria-label={`Foto ${lugar}${media.is_cover ? ', capa' : ''}`}
+      className={cn(
+        // `touch-manipulation`: o dedo ainda rola a tela, e o arraste só pega
+        // quem segura. Sem o menu de "salvar imagem" do toque longo, que
+        // chegaria antes do arraste.
+        'group relative cursor-grab touch-manipulation select-none overflow-hidden rounded-md border border-line bg-card-2 outline-none [-webkit-touch-callout:none] focus-visible:ring-2 focus-visible:ring-pri active:cursor-grabbing',
+        // O lugar de onde a foto saiu fica marcado enquanto ela anda.
+        isDragging && 'opacity-40',
+      )}
+    >
+      <Miniatura media={media} />
 
       {media.is_cover && (
         <span className="absolute left-1.5 top-1.5 rounded bg-pri px-1.5 py-0.5 text-2xs font-bold uppercase text-pri-fg">
@@ -231,27 +330,47 @@ function MediaCard({
         </span>
       )}
 
-      <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/70 to-transparent p-1.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
-        <div className="flex gap-1">
-          <BotaoMini rotulo="Mover para trás" disabled={primeiro} onClick={() => onMover(-1)}>
-            <ArrowLeft className="h-3 w-3" />
+      <div className="absolute inset-x-0 bottom-0 flex items-center justify-end gap-1 bg-gradient-to-t from-black/70 to-transparent p-1.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+        {media.kind === 'image' && !media.is_cover && (
+          <BotaoMini rotulo="Usar como capa (vai para o primeiro lugar)" onClick={onCapa}>
+            <Star className="h-3 w-3" />
           </BotaoMini>
-          <BotaoMini rotulo="Mover para frente" disabled={ultimo} onClick={() => onMover(1)}>
-            <ArrowRight className="h-3 w-3" />
-          </BotaoMini>
-        </div>
-        <div className="flex gap-1">
-          {media.kind === 'image' && !media.is_cover && (
-            <BotaoMini rotulo="Definir como capa" onClick={onCapa}>
-              <Star className="h-3 w-3" />
-            </BotaoMini>
-          )}
-          <BotaoMini rotulo="Remover" onClick={onRemover} perigo>
-            <Trash2 className="h-3 w-3" />
-          </BotaoMini>
-        </div>
+        )}
+        <BotaoMini rotulo="Remover" onClick={onRemover} perigo>
+          <Trash2 className="h-3 w-3" />
+        </BotaoMini>
       </div>
     </li>
+  );
+}
+
+/** A foto em 4:3. Também é a que acompanha o dedo (`levantada`) durante o arraste. */
+function Miniatura({ media, levantada = false }: { media: PropertyMedia; levantada?: boolean }) {
+  return (
+    // A foto por cima da caixa (absolute): no fluxo, uma foto em pé esticaria
+    // a miniatura além do 4:3 (ver a mesma nota em `pages/Properties.tsx`).
+    <div
+      className={cn(
+        'relative aspect-[4/3] w-full overflow-hidden bg-card-2',
+        levantada && 'scale-105 cursor-grabbing rounded-md shadow-sheet ring-2 ring-pri',
+      )}
+    >
+      {media.kind === 'image' ? (
+        <img
+          src={urlPublica(media.storage_path)}
+          alt={media.alt_text ?? ''}
+          loading="lazy"
+          // Quem arrasta é o cartão: o arraste nativo de imagem do navegador
+          // levaria uma cópia fantasma em vez de mudar a ordem.
+          draggable={false}
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        />
+      ) : (
+        <div className="absolute inset-0 grid place-items-center text-tx-3">
+          {media.kind === 'video' ? <Video className="h-6 w-6" /> : <FileText className="h-6 w-6" />}
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -43,6 +43,8 @@ supabase/
 - `20261006000000_preco_de_tabela.sql`: o preço de tabela da venda com
   desconto (`original_price_cents`), que o site mostra como "De R$ X por
   R$ Y". Só existe acima do preço de venda.
+- `20261006000100_ordem_das_fotos.sql`: a ordem das fotos gravada de uma vez
+  (`ordenar_midia`), depois de cada arrastada no CRM; a primeira foto é a capa.
 
 Dado de cliente não entra em migration: fica em `seeds/`, para o mesmo schema
 servir a outro cliente sem limpeza.

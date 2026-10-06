@@ -183,6 +183,16 @@ relação ao briefing, já combinado:
   - Enquanto o original fica guardado para desfazer, ele continua acessível
     pelo endereço antigo. Primeiro teste no imóvel 1004 (26/09), com cópia das
     fotos em `conteudo/backup-fotos`.
+- **Ordem das fotos: segurar e arrastar** (06/10), no lugar das setinhas que
+  andavam uma casa por clique. Mouse, dedo (segurar um instante; deslizar só
+  rola) e teclado (espaço, setas, espaço), com `@dnd-kit`.
+  - A lista do CRM é a ordem do site, e **a primeira foto é a capa**. Antes a
+    capa era uma marca à parte, e a foto marcada abria o site mesmo estando no
+    meio da lista do CRM. A estrela agora leva a foto para o primeiro lugar.
+  - Cada soltura grava a lista inteira numa chamada (`ordenar_midia`): nada de
+    meia ordem se a rede cair, duas arrastadas não chegam trocadas, e o site é
+    avisado uma vez, não uma por foto. Apagar a capa passa a capa para a
+    primeira foto que sobrou.
 
 ## Leads e WhatsApp
 
