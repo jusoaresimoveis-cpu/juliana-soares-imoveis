@@ -6,6 +6,8 @@ import { useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 
 import type { FotoDoImovel } from '@/lib/imoveis/tipos';
 
+import { AvisoIlustrativa } from './AvisoIlustrativa';
+
 /**
  * As fotos do imóvel, e a foto em destaque ao clicar.
  *
@@ -80,7 +82,7 @@ export function GaleriaDoImovel({ fotos, titulo }: { fotos: FotoDoImovel[]; titu
         <button
           type="button"
           onClick={() => abrir(0)}
-          aria-label={`Ver as fotos em destaque, a partir da capa`}
+          aria-label={`Ver as fotos em destaque, a partir da capa${capa.ilustrativa ? ' (imagem ilustrativa)' : ''}`}
           className={`group relative block aspect-[4/3] w-full overflow-hidden rounded-lg bg-areia sm:aspect-[16/9] lg:aspect-auto lg:h-full ${FOCO}`}
         >
           {/* A capa é sempre o maior elemento desta página: é o caso de `preload`. */}
@@ -92,6 +94,7 @@ export function GaleriaDoImovel({ fotos, titulo }: { fotos: FotoDoImovel[]; titu
             sizes={demais.length > 0 ? '(min-width: 1280px) 808px, (min-width: 1024px) 66vw, 100vw' : '(min-width: 1280px) 1216px, 100vw'}
             className="object-cover transition duration-300 group-hover:scale-[1.02]"
           />
+          {capa.ilustrativa && <AvisoIlustrativa posicao="bottom-3 left-3" />}
           <span className="absolute right-3 bottom-3 inline-flex items-center gap-1.5 rounded-md bg-white/90 px-2.5 py-1 text-sm font-medium text-tinta shadow-sm">
             <Images aria-hidden className="size-4" />
             {fotos.length} {fotos.length === 1 ? 'foto' : 'fotos'}
@@ -112,7 +115,7 @@ export function GaleriaDoImovel({ fotos, titulo }: { fotos: FotoDoImovel[]; titu
                 <button
                   type="button"
                   onClick={() => abrir(i + 1)}
-                  aria-label={`Ver a foto ${i + 2} de ${fotos.length} em destaque`}
+                  aria-label={`Ver a foto ${i + 2} de ${fotos.length} em destaque${foto.ilustrativa ? ' (imagem ilustrativa)' : ''}`}
                   className={`group relative block size-full overflow-hidden rounded-lg bg-areia ${FOCO}`}
                 >
                   <Image
@@ -122,6 +125,7 @@ export function GaleriaDoImovel({ fotos, titulo }: { fotos: FotoDoImovel[]; titu
                     sizes="(min-width: 1024px) 200px, 256px"
                     className="object-cover transition duration-300 group-hover:scale-105"
                   />
+                  {foto.ilustrativa && <AvisoIlustrativa />}
                   {i === NA_GRADE - 1 && ficaramDeFora > 0 && (
                     <span className="absolute inset-0 hidden items-center justify-center bg-noite/55 text-lg font-medium text-white lg:flex">
                       +{ficaramDeFora}
@@ -144,9 +148,14 @@ export function GaleriaDoImovel({ fotos, titulo }: { fotos: FotoDoImovel[]; titu
         {atual !== null && (
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between px-4 py-3 text-sm">
-              <span aria-live="polite">
-                {atual + 1} / {fotos.length}
-              </span>
+              {/* O aviso fica com o contador, e não sobre a foto: ver `AvisoIlustrativa`.
+                  Dentro da região viva, o leitor de tela o anuncia ao trocar de foto. */}
+              <p aria-live="polite" className="flex items-center gap-3">
+                <span>
+                  {atual + 1} / {fotos.length}
+                </span>
+                {fotos[atual]?.ilustrativa && <AvisoIlustrativa naBarra />}
+              </p>
               <button
                 type="button"
                 onClick={() => dialogo.current?.close()}

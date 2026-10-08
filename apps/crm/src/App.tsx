@@ -18,6 +18,7 @@ const LeadDetail = lazy(() => import('@/pages/LeadDetail'));
 const Agenda = lazy(() => import('@/pages/Agenda'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const PropertyDetail = lazy(() => import('@/pages/PropertyDetail'));
+const Unidades = lazy(() => import('@/pages/Unidades'));
 const Conversas = lazy(() => import('@/pages/Conversas'));
 const Anuncios = lazy(() => import('@/pages/Anuncios'));
 const Documentos = lazy(() => import('@/pages/Documentos'));
@@ -171,6 +172,8 @@ export default function App() {
             <Route path="/leads/:id" element={<Protegida><LeadDetail /></Protegida>} />
             <Route path="/imoveis" element={<Protegida><Properties /></Protegida>} />
             <Route path="/imoveis/:id" element={<Protegida><PropertyDetail /></Protegida>} />
+            {/* As plantas, as unidades e a tabela do mês de um empreendimento. */}
+            <Route path="/imoveis/:id/unidades" element={<Protegida><Unidades /></Protegida>} />
             <Route path="/conversas" element={<Protegida><Conversas /></Protegida>} />
             <Route path="/agenda" element={<Protegida><Agenda /></Protegida>} />
             <Route path="/anuncios" element={<Protegida><Anuncios /></Protegida>} />

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'rea
 import { X, Loader2 } from 'lucide-react';
 import {
   CIDADES_ATENDIDAS,
+  CONSTRUCTION_STATUSES,
+  CONSTRUCTION_STATUS_LABEL,
   PROPERTY_TYPES,
   PROPERTY_TYPE_LABEL,
   PROPERTY_STATUSES,
@@ -12,8 +14,11 @@ import {
   REINFORCEMENT_PERIOD_LABEL,
   RENTAL_GUARANTEES,
   RENTAL_GUARANTEE_LABEL,
+  aPartirDe,
   normalizarCaracteristicas,
   precoDeTabela,
+  reaisComCentavos,
+  resumoDoEmpreendimento,
   resumoDoPlano,
   type CaracteristicasDoImovel,
   type PaymentMethod,
@@ -27,6 +32,7 @@ import {
   type PropertyUpdate,
   type Proprietario,
 } from '@/hooks/useProperties';
+import { useUnidades } from '@/hooks/useUnidades';
 import { telefoneLegivel } from '@/exportacao';
 import type { Json } from '@/lib/database.types';
 import { MediaManager } from './MediaManager';
@@ -73,6 +79,16 @@ function centsParaCampo(cents: number | null | undefined): string {
 function campoParaCents(v: string): number | null {
   const d = apenasDigitos(v);
   return d ? Number(d) * 100 : null;
+}
+
+/**
+ * O ano de entrega, guardado como 1º de janeiro: só o ano sai no site. Vazio é
+ * nulo; um ano fora de 2000 a 2100 é `undefined`, para o formulário avisar.
+ */
+function campoParaEntrega(v: string): string | null | undefined {
+  if (!v) return null;
+  const ano = Number(v);
+  return /^\d{4}$/.test(v) && ano >= 2000 && ano <= 2100 ? `${v}-01-01` : undefined;
 }
 
 /** Campo de contagem. Vazio e zero são nulo: "0 parcelas" não é um plano. */
@@ -131,6 +147,14 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
     is_published: imovel?.is_published ?? false,
     is_featured: imovel?.is_featured ?? false,
 
+    // Empreendimento com várias unidades: preço e situação vêm delas.
+    has_units: imovel?.has_units ?? false,
+    construction_status: imovel?.construction_status ?? '',
+    entrega: imovel?.delivery_at?.slice(0, 4) ?? '',
+    developer: imovel?.developer ?? '',
+    incorporation_registry: imovel?.incorporation_registry ?? '',
+    incorporation_registry_office: imovel?.incorporation_registry_office ?? '',
+
     // Plano de pagamento. Guardado como TEXTO no formulário e convertido a
     // centavos só no envio, para o campo aceitar o que a pessoa digita sem
     // brigar com a máscara a cada tecla.
@@ -168,45 +192,89 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
   };
 
   /*
+   * Empreendimento é venda: o aluguel e o "de/por" são de imóvel único, e o
+   * banco recusa os dois com unidades (`properties_unidades_ck`).
+   */
+  const alternarEmpreendimento = (v: boolean) =>
+    setF((s) => ({ ...s, has_units: v, ...(v ? { for_sale: true, for_rent: false } : {}) }));
+
+  // O "a partir de" calculado, para mostrar no lugar do preço. Aberto da ficha,
+  // as unidades já estão carregadas.
+  const { data: doEmpreendimento } = useUnidades(id, f.has_units);
+  const resumo = doEmpreendimento ? resumoDoEmpreendimento(doEmpreendimento.unidades) : null;
+  const aPartir = resumo ? aPartirDe(resumo) : null;
+
+  /*
    * O "de R$ X por R$ Y" da venda com desconto. Preço de tabela que não fica
    * acima do de venda não é desconto: o banco recusaria, e aqui ele vira aviso
    * antes de salvar, e não um erro do Postgres.
    */
   const precoCents = campoParaCents(f.preco);
-  const tabelaCents = f.for_sale ? campoParaCents(f.tabela) : null;
+  const tabelaCents = f.for_sale && !f.has_units ? campoParaCents(f.tabela) : null;
   const deCents = precoDeTabela(precoCents, tabelaCents);
   const tabelaSemDesconto = tabelaCents !== null && deCents === null;
+  const entrega = campoParaEntrega(f.entrega);
+  const entregaInvalida = f.has_units && entrega === undefined;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!f.title.trim()) return;
-    if (tabelaSemDesconto) {
+    if (tabelaSemDesconto || entregaInvalida) {
       // O aviso está na aba de dados; salvar de outra aba precisa mostrá-lo.
       setAba('dados');
       return;
     }
 
+    /*
+     * Com unidades, preço, "de/por" e situação NÃO vão: o banco calcula das
+     * unidades. A situação vai só como "suspenso" ou não, que é a única
+     * decisão de quem cadastra; com tabela aplicada o gatilho a recalcula, e
+     * antes da primeira ele guarda a que vier. "disponivel" é a que o
+     * empreendimento já tinha (sem tabela, só este formulário grava a situação
+     * dele) e o deixa no ar com "Consulte". Quartos, suítes, banheiros, vagas e
+     * área ficam como estão: vêm das plantas.
+     */
+    const doImovelUnico: PropertyUpdate = f.has_units
+      ? { status: f.status === 'suspenso' ? 'suspenso' : 'disponivel' }
+      : {
+          status: f.status,
+          // Centavos, sempre inteiro. O valor de um regime desligado vai nulo: o
+          // campo some da tela, e um preço que ninguém vê não pode ficar gravado.
+          price_cents: f.for_sale ? precoCents : null,
+          original_price_cents: tabelaCents,
+          bedrooms: f.bedrooms ? Number(f.bedrooms) : null,
+          suites: f.suites ? Number(f.suites) : null,
+          bathrooms: f.bathrooms ? Number(f.bathrooms) : null,
+          parking_spots: f.parking_spots ? Number(f.parking_spots) : null,
+          area_built: f.area_built ? Number(f.area_built.replace(',', '.')) : null,
+          area_total: f.area_total ? Number(f.area_total.replace(',', '.')) : null,
+        };
+
+    // Os campos do empreendimento só vão com ele ligado: desligado, a tela não
+    // os mostra, e o que ninguém vê não se apaga.
+    const doEmpreendimentoNovo: PropertyUpdate = f.has_units
+      ? {
+          construction_status: f.construction_status || null,
+          delivery_at: entrega ?? null,
+          developer: f.developer.trim() || null,
+          incorporation_registry: f.incorporation_registry.trim() || null,
+          incorporation_registry_office: f.incorporation_registry_office.trim() || null,
+        }
+      : {};
+
     const dados: PropertyUpdate = {
       title: f.title.trim(),
       public_title: f.public_title.trim() || null,
       property_type: f.property_type,
+      has_units: f.has_units,
       for_sale: f.for_sale,
       for_rent: f.for_rent,
-      status: f.status,
-      // Centavos, sempre inteiro. O valor de um regime desligado vai nulo: o
-      // campo some da tela, e um preço que ninguém vê não pode ficar gravado.
-      price_cents: f.for_sale ? precoCents : null,
-      original_price_cents: tabelaCents,
+      ...doImovelUnico,
+      ...doEmpreendimentoNovo,
       rent_cents: f.for_rent ? campoParaCents(f.aluguel) : null,
       rental_guarantees: f.for_rent ? garantias : [],
       condo_fee_cents: campoParaCents(f.condominio),
       iptu_year_cents: campoParaCents(f.iptu),
-      bedrooms: f.bedrooms ? Number(f.bedrooms) : null,
-      suites: f.suites ? Number(f.suites) : null,
-      bathrooms: f.bathrooms ? Number(f.bathrooms) : null,
-      parking_spots: f.parking_spots ? Number(f.parking_spots) : null,
-      area_built: f.area_built ? Number(f.area_built.replace(',', '.')) : null,
-      area_total: f.area_total ? Number(f.area_total.replace(',', '.')) : null,
       neighborhood: f.neighborhood.trim() || null,
       city: f.city.trim() || null,
       state: f.state.trim().toUpperCase() || null,
@@ -361,6 +429,13 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
                 placeholder="Vazio: o site monta, como “Apartamento com 2 quartos em Meia Praia, Itapema”"
                 className={inputCls}
               />
+              {/* No empreendimento, o título que o site monta sai das plantas com
+                  unidade à venda (`tituloPadrao`): a planta que esgota muda o título. */}
+              {f.has_units && !f.public_title.trim() && (
+                <span className="text-sm font-semibold text-warn">
+                  Dê um nome no site: sem ele, o título do anúncio muda sozinho conforme as plantas se esgotam.
+                </span>
+              )}
             </Campo>
 
             {/* Moravam numa aba só para elas; são três campos e cabem aqui. */}
@@ -392,21 +467,77 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
             </Campo>
 
             <Campo className="col-span-2" rotulo="Situação">
-              <select value={f.status} onChange={(e) => set('status')(e.target.value)} className={inputCls}>
-                {PROPERTY_STATUSES.map((s) => (
-                  <option key={s} value={s}>
-                    {PROPERTY_STATUS_LABEL[s]}
+              {/* Com unidades, a situação é a delas (o banco calcula); a única
+                  decisão de quem cadastra é tirar da vitrine. */}
+              {f.has_units ? (
+                <select
+                  value={f.status === 'suspenso' ? 'suspenso' : 'unidades'}
+                  onChange={(e) => set('status')(e.target.value === 'suspenso' ? 'suspenso' : 'disponivel')}
+                  className={inputCls}
+                >
+                  <option value="unidades">
+                    {imovel?.has_units && !imovel.units_table_month ? 'Pelas unidades, a partir da 1ª tabela' : 'Pelas unidades'}
+                    {imovel?.has_units && imovel.status !== 'suspenso' ? ` (${PROPERTY_STATUS_LABEL[imovel.status]})` : ''}
                   </option>
-                ))}
-              </select>
+                  <option value="suspenso">Suspenso</option>
+                </select>
+              ) : (
+                <select value={f.status} onChange={(e) => set('status')(e.target.value)} className={inputCls}>
+                  {PROPERTY_STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {PROPERTY_STATUS_LABEL[s]}
+                    </option>
+                  ))}
+                </select>
+              )}
             </Campo>
 
-            <div className="col-span-2 flex items-center gap-4 sm:col-span-4">
-              <Switch marcado={f.for_sale} onMudar={alternarRegime('for_sale')} rotulo="À venda" />
-              <Switch marcado={f.for_rent} onMudar={alternarRegime('for_rent')} rotulo="Para alugar (anual)" />
+            <div className="col-span-2 flex flex-col gap-1 rounded-md border border-line bg-card-2 px-3.5 py-3 sm:col-span-4">
+              <Switch marcado={f.has_units} onMudar={alternarEmpreendimento} rotulo="Empreendimento com várias unidades" />
+              <p className="pl-[46px] text-sm text-tx-3">
+                {f.has_units
+                  ? 'Um imóvel só no site (uma página, um código, os mesmos leads), com as unidades embaixo, cada uma com planta, preço e situação. É venda: sem aluguel.'
+                  : 'Prédio na planta ou em obras com várias unidades à venda. As salas comerciais de um prédio são outro cadastro, do tipo Sala comercial.'}
+              </p>
+              {!f.has_units && imovel?.has_units && (
+                <p className="pl-[46px] text-sm font-semibold text-warn">
+                  As unidades continuam cadastradas, mas o preço e a situação voltam a ser digitados aqui.
+                </p>
+              )}
             </div>
 
-            {f.for_sale && (
+            {!f.has_units && (
+              <div className="col-span-2 flex items-center gap-4 sm:col-span-4">
+                <Switch marcado={f.for_sale} onMudar={alternarRegime('for_sale')} rotulo="À venda" />
+                <Switch marcado={f.for_rent} onMudar={alternarRegime('for_rent')} rotulo="Para alugar (anual)" />
+              </div>
+            )}
+
+            {f.has_units && (
+              <p className="col-span-2 rounded-xl bg-card-2 p-3 text-sm text-tx-2 sm:col-span-4">
+                {resumo && resumo.total > 0 ? (
+                  // Antes da primeira tabela o banco não calcula nada das
+                  // unidades (todas nascem vendidas).
+                  imovel?.has_units && !imovel.units_table_month ? (
+                    'Nenhuma tabela aplicada ainda: o imóvel fica com a situação que tinha, e o site mostra “Consulte” no lugar do preço, sem a lista de unidades. Aplique a tabela do mês em “Unidades”, na ficha do imóvel.'
+                  ) : aPartir !== null ? (
+                    <>
+                      Calculado das unidades: a partir de <b>{reaisComCentavos(aPartir)}</b> ·{' '}
+                      {resumo.disponiveis === 1 ? '1 disponível' : `${resumo.disponiveis} disponíveis`}
+                      {resumo.disponiveis === 0 && ' (só reservadas)'}
+                    </>
+                  ) : (
+                    'Calculado das unidades: nenhuma disponível nem reservada.'
+                  )
+                ) : imovel?.has_units ? (
+                  'Sem unidades ainda: cadastre as plantas e as unidades em “Unidades”, na ficha do imóvel.'
+                ) : (
+                  'Cadastre as plantas e as unidades depois de salvar.'
+                )}
+              </p>
+            )}
+
+            {f.for_sale && !f.has_units && (
               <>
                 <Campo className="col-span-2" rotulo="Preço de venda (R$)">
                   <input
@@ -478,26 +609,99 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
               />
             </Campo>
 
-            <Campo rotulo="Área privativa (m²)">
-              <input inputMode="decimal" value={f.area_built} onChange={(e) => set('area_built')(e.target.value)} className={inputCls} />
-            </Campo>
-            <Campo rotulo="Área total (m²)">
-              <input inputMode="decimal" value={f.area_total} onChange={(e) => set('area_total')(e.target.value)} className={inputCls} />
-            </Campo>
-            {/* Os quartos que NÃO são suíte: o site soma os dois (2 quartos e
-                1 suíte são 3 dormitórios) e mostra os dois lado a lado. */}
-            <Campo rotulo="Quartos (sem as suítes)">
-              <input inputMode="numeric" value={f.bedrooms} onChange={(e) => set('bedrooms')(apenasDigitos(e.target.value))} className={inputCls} />
-            </Campo>
-            <Campo rotulo="Suítes">
-              <input inputMode="numeric" value={f.suites} onChange={(e) => set('suites')(apenasDigitos(e.target.value))} className={inputCls} />
-            </Campo>
-            <Campo rotulo="Banheiros">
-              <input inputMode="numeric" value={f.bathrooms} onChange={(e) => set('bathrooms')(apenasDigitos(e.target.value))} className={inputCls} />
-            </Campo>
-            <Campo rotulo="Vagas">
-              <input inputMode="numeric" value={f.parking_spots} onChange={(e) => set('parking_spots')(apenasDigitos(e.target.value))} className={inputCls} />
-            </Campo>
+            {f.has_units ? (
+              <p className="col-span-2 text-sm text-tx-3 sm:col-span-4">
+                Quartos, suítes, banheiros, vagas e área vêm das plantas, cadastradas em “Unidades”.
+              </p>
+            ) : (
+              <>
+                <Campo rotulo="Área privativa (m²)">
+                  <input inputMode="decimal" value={f.area_built} onChange={(e) => set('area_built')(e.target.value)} className={inputCls} />
+                </Campo>
+                <Campo rotulo="Área total (m²)">
+                  <input inputMode="decimal" value={f.area_total} onChange={(e) => set('area_total')(e.target.value)} className={inputCls} />
+                </Campo>
+                {/* Os quartos que NÃO são suíte: o site soma os dois (2 quartos e
+                    1 suíte são 3 dormitórios) e mostra os dois lado a lado. */}
+                <Campo rotulo="Quartos (sem as suítes)">
+                  <input inputMode="numeric" value={f.bedrooms} onChange={(e) => set('bedrooms')(apenasDigitos(e.target.value))} className={inputCls} />
+                </Campo>
+                <Campo rotulo="Suítes">
+                  <input inputMode="numeric" value={f.suites} onChange={(e) => set('suites')(apenasDigitos(e.target.value))} className={inputCls} />
+                </Campo>
+                <Campo rotulo="Banheiros">
+                  <input inputMode="numeric" value={f.bathrooms} onChange={(e) => set('bathrooms')(apenasDigitos(e.target.value))} className={inputCls} />
+                </Campo>
+                <Campo rotulo="Vagas">
+                  <input inputMode="numeric" value={f.parking_spots} onChange={(e) => set('parking_spots')(apenasDigitos(e.target.value))} className={inputCls} />
+                </Campo>
+              </>
+            )}
+
+            {/*
+              O empreendimento. Entrega (só o ano), obra e registro saem no site;
+              a construtora NÃO (decisão do usuário, 08/10): o cliente iria
+              comprar direto com ela.
+            */}
+            {f.has_units && (
+              <>
+                <Campo className="col-span-2" rotulo="Situação da obra">
+                  <select
+                    value={f.construction_status}
+                    onChange={(e) => set('construction_status')(e.target.value)}
+                    className={inputCls}
+                  >
+                    <option value="">Não informada</option>
+                    {CONSTRUCTION_STATUSES.map((c) => (
+                      <option key={c} value={c}>
+                        {CONSTRUCTION_STATUS_LABEL[c]}
+                      </option>
+                    ))}
+                  </select>
+                </Campo>
+                <Campo className="col-span-2" rotulo="Entrega (ano)">
+                  <input
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={f.entrega}
+                    onChange={(e) => set('entrega')(apenasDigitos(e.target.value).slice(0, 4))}
+                    placeholder="2030"
+                    aria-invalid={entregaInvalida || undefined}
+                    className={cn(inputCls, entregaInvalida && 'border-dng focus:border-dng')}
+                  />
+                  {entregaInvalida && (
+                    <span role="alert" className="text-sm font-semibold text-dng">
+                      O ano, com quatro dígitos: 2030.
+                    </span>
+                  )}
+                </Campo>
+                <Campo className="col-span-2 sm:col-span-4" rotulo="Construtora" nota="Só no CRM: nunca aparece no site.">
+                  <input value={f.developer} onChange={(e) => set('developer')(e.target.value)} autoComplete="off" className={inputCls} />
+                </Campo>
+                <Campo className="col-span-2" rotulo="Registro de incorporação">
+                  <input
+                    maxLength={80}
+                    value={f.incorporation_registry}
+                    onChange={(e) => set('incorporation_registry')(e.target.value)}
+                    placeholder="R-8 96.726"
+                    className={inputCls}
+                  />
+                </Campo>
+                <Campo className="col-span-2" rotulo="Cartório do registro">
+                  <input
+                    maxLength={120}
+                    value={f.incorporation_registry_office}
+                    onChange={(e) => set('incorporation_registry_office')(e.target.value)}
+                    placeholder="Registro de Imóveis de Itapema"
+                    className={inputCls}
+                  />
+                </Campo>
+                <p className="col-span-2 text-sm text-tx-3 sm:col-span-4">
+                  Entrega, situação da obra e o registro com o cartório saem no site. O registro de incorporação é
+                  obrigatório no anúncio de imóvel na planta (Lei 4.591/64, art. 32, § 3º).
+                </p>
+              </>
+            )}
 
             <Campo className="col-span-2 sm:col-span-4" rotulo="Descrição">
               <textarea
@@ -554,6 +758,23 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
             {/* O plano de pagamento é de venda: entrada, parcelas e chaves não existem num aluguel. */}
             {f.for_sale && (
               <>
+            {/* A condição da construtora vem em percentual e vale para todas as
+                unidades: no empreendimento ela é o texto, e sai no site. */}
+            {f.has_units && (
+              <Campo
+                rotulo="Condição de pagamento"
+                nota="Como a construtora escreve, para todas as unidades. Sai no site, na página do empreendimento."
+              >
+                <textarea
+                  rows={2}
+                  value={f.payment_notes}
+                  onChange={(e) => set('payment_notes')(e.target.value)}
+                  placeholder="10% de entrada + 100 mensais + 7 anuais"
+                  className={cn(inputCls, 'resize-none')}
+                />
+              </Campo>
+            )}
+
             <div>
               <p className="text-sm font-semibold text-tx-2">Formas aceitas</p>
               <p className="mt-0.5 text-sm text-tx-3">
@@ -663,25 +884,31 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
                 </Campo>
               )}
 
-              <Campo className="col-span-2 sm:col-span-4" rotulo="Observações da condição">
-                <input
-                  value={f.payment_notes}
-                  onChange={(e) => set('payment_notes')(e.target.value)}
-                  placeholder="Saldo corrigido pelo INCC. Desconto de 5% à vista."
-                  className={inputCls}
-                />
-              </Campo>
+              {!f.has_units && (
+                <Campo className="col-span-2 sm:col-span-4" rotulo="Observações da condição">
+                  <input
+                    value={f.payment_notes}
+                    onChange={(e) => set('payment_notes')(e.target.value)}
+                    placeholder="Saldo corrigido pelo INCC. Desconto de 5% à vista."
+                    className={inputCls}
+                  />
+                </Campo>
+              )}
             </div>
 
-            <Conferencia
-              precoCents={f.preco ? Number(apenasDigitos(f.preco)) * 100 : null}
-              entradaCents={campoParaCents(f.entrada)}
-              parcelas={campoParaInteiro(f.parcelas)}
-              parcelaCents={campoParaCents(f.parcela)}
-              reforcos={campoParaInteiro(f.reforcos)}
-              reforcoCents={campoParaCents(f.reforco)}
-              chavesCents={campoParaCents(f.chaves)}
-            />
+            {/* Com unidades, cada uma tem o seu preço: a soma do plano não tem
+                com que fechar. */}
+            {!f.has_units && (
+              <Conferencia
+                precoCents={f.preco ? Number(apenasDigitos(f.preco)) * 100 : null}
+                entradaCents={campoParaCents(f.entrada)}
+                parcelas={campoParaInteiro(f.parcelas)}
+                parcelaCents={campoParaCents(f.parcela)}
+                reforcos={campoParaInteiro(f.reforcos)}
+                reforcoCents={campoParaCents(f.reforco)}
+                chavesCents={campoParaCents(f.chaves)}
+              />
+            )}
               </>
             )}
           </div>
@@ -751,11 +978,23 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
 const inputCls =
   'w-full rounded-xl border border-line-2 bg-card px-3 py-2.5 text-md outline-none transition-colors focus:border-pri';
 
-function Campo({ rotulo, children, className }: { rotulo: string; children: ReactNode; className?: string }) {
+function Campo({
+  rotulo,
+  nota,
+  children,
+  className,
+}: {
+  rotulo: string;
+  /** Uma linha embaixo do campo, como o "Só no CRM" da construtora. */
+  nota?: string;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <label className={cn('flex flex-col gap-1.5', className)}>
       <span className="text-sm font-semibold text-tx-2">{rotulo}</span>
       {children}
+      {nota && <span className="text-sm text-tx-3">{nota}</span>}
     </label>
   );
 }

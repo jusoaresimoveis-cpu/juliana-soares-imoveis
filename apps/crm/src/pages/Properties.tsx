@@ -191,12 +191,18 @@ export default function Properties() {
 
                   <div className="mt-auto flex flex-wrap items-center gap-3 border-t border-line pt-2.5 text-sm text-tx-2">
                     {/* Quartos e suítes lado a lado, com os ícones do site: no cadastro,
-                        os quartos não contam as suítes (2 quartos e 1 suíte são 3). */}
-                    {!!p.bedrooms && <Ficha icone={BedSingle} valor={`${p.bedrooms}`} rotulo={p.bedrooms === 1 ? 'quarto' : 'quartos'} />}
-                    {!!p.suites && <Ficha icone={BedDouble} valor={`${p.suites}`} rotulo={p.suites === 1 ? 'suíte' : 'suítes'} />}
-                    {p.bathrooms != null && <Ficha icone={Bath} valor={`${p.bathrooms}`} rotulo="banh" />}
-                    {p.parking_spots != null && <Ficha icone={Car} valor={`${p.parking_spots}`} rotulo={p.parking_spots === 1 ? 'vaga' : 'vagas'} />}
-                    {p.area_total != null && <Ficha icone={Ruler} valor={`${p.area_total}`} rotulo="m²" />}
+                        os quartos não contam as suítes (2 quartos e 1 suíte são 3).
+                        No empreendimento os números são das plantas; os do imóvel
+                        podem ser de quando ele era imóvel único, e ficam de fora. */}
+                    {!p.has_units && (
+                      <>
+                        {!!p.bedrooms && <Ficha icone={BedSingle} valor={`${p.bedrooms}`} rotulo={p.bedrooms === 1 ? 'quarto' : 'quartos'} />}
+                        {!!p.suites && <Ficha icone={BedDouble} valor={`${p.suites}`} rotulo={p.suites === 1 ? 'suíte' : 'suítes'} />}
+                        {p.bathrooms != null && <Ficha icone={Bath} valor={`${p.bathrooms}`} rotulo="banh" />}
+                        {p.parking_spots != null && <Ficha icone={Car} valor={`${p.parking_spots}`} rotulo={p.parking_spots === 1 ? 'vaga' : 'vagas'} />}
+                        {p.area_total != null && <Ficha icone={Ruler} valor={`${p.area_total}`} rotulo="m²" />}
+                      </>
+                    )}
                     <span className="ml-auto font-mono text-xs text-tx-3">{p.public_code}</span>
                   </div>
                 </div>

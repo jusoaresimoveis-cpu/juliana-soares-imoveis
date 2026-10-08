@@ -1,6 +1,7 @@
 import { PROPERTY_TYPE_LABEL, caracteristicasParaMostrar, type PropertyType } from '@juliana/contracts';
 
 import { SITE } from '@/config/site';
+import { dormitoriosDoImovel, numerosDasPlantas, plantasAVenda, precosDisponiveis } from '@/lib/imoveis/empreendimento';
 import { STATUS_NA_VITRINE, type Imovel } from '@/lib/imoveis/tipos';
 
 /**
@@ -55,6 +56,36 @@ function tipoNoSchema(tipo: PropertyType): string {
   }
 }
 
+/** Um número só vira `value`; vários, `minValue` e `maxValue` (a área das plantas, "65 a 90 m²"). */
+function faixaNoSchema(valores: readonly number[]): Schema {
+  const menor = Math.min(...valores);
+  const maior = Math.max(...valores);
+  return menor === maior
+    ? { '@type': 'QuantitativeValue', value: menor }
+    : { '@type': 'QuantitativeValue', minValue: menor, maxValue: maior };
+}
+
+/**
+ * O empreendimento é uma oferta com várias unidades: `AggregateOffer`, do menor
+ * ao maior preço entre as DISPONÍVEIS. Sem a tabela do mês, a oferta sai sem
+ * preço: o site mostra "Consulte", e o Google não pode ler um preço vencido.
+ * Sem disponível (só reservadas, suspenso), sem preço e sem `offerCount`: a
+ * reservada não chega com preço e não é oferta, e a contagem é `units_available`.
+ */
+function ofertaDoEmpreendimento(imovel: Imovel, disponibilidade: string): Schema {
+  const precos = precosDisponiveis(imovel);
+  const unidades = imovel.empreendimento?.unidadesDisponiveis ?? 0;
+  return {
+    '@type': 'AggregateOffer',
+    businessFunction: 'http://purl.org/goodrelations/v1#Sell',
+    availability: disponibilidade,
+    ...(unidades > 0 ? { offerCount: unidades } : {}),
+    ...(precos.length
+      ? { lowPrice: Math.min(...precos) / 100, highPrice: Math.max(...precos) / 100, priceCurrency: 'BRL' }
+      : {}),
+  };
+}
+
 export function schemaDoImovel(imovel: Imovel, url: string): Schema {
   const disponibilidade = STATUS_NA_VITRINE.includes(imovel.status)
     ? 'https://schema.org/InStock'
@@ -74,7 +105,9 @@ export function schemaDoImovel(imovel: Imovel, url: string): Schema {
       },
     });
   }
-  if (imovel.finalidades.includes('venda') && imovel.precoVendaCents) {
+  if (imovel.empreendimento) {
+    ofertas.push(ofertaDoEmpreendimento(imovel, disponibilidade));
+  } else if (imovel.finalidades.includes('venda') && imovel.precoVendaCents) {
     ofertas.push({
       '@type': 'Offer',
       businessFunction: 'http://purl.org/goodrelations/v1#Sell',
@@ -90,6 +123,14 @@ export function schemaDoImovel(imovel: Imovel, url: string): Schema {
     .filter((categoria) => categoria.categoria !== 'adicionais')
     .flatMap((categoria) => categoria.itens);
 
+  // No cadastro, os quartos não contam as suítes: o total é a soma. No
+  // empreendimento, a faixa das plantas à venda ("2 ou 3 dormitórios").
+  const dormitorios = [...new Set(dormitoriosDoImovel(imovel))];
+  const plantas = plantasAVenda(imovel);
+  const dasPlantas = plantas.length > 0 ? numerosDasPlantas(plantas) : null;
+  const areas = dasPlantas ? dasPlantas.areas : imovel.areaM2 ? [imovel.areaM2] : [];
+  const banheiros = [...new Set(dasPlantas ? dasPlantas.banheiros : imovel.banheiros ? [imovel.banheiros] : [])];
+
   return {
     '@context': 'https://schema.org',
     '@type': 'RealEstateListing',
@@ -102,14 +143,11 @@ export function schemaDoImovel(imovel: Imovel, url: string): Schema {
     about: {
       '@type': tipoNoSchema(imovel.tipo),
       name: PROPERTY_TYPE_LABEL[imovel.tipo],
-      // No cadastro, os quartos não contam as suítes: o total é a soma.
-      ...((imovel.quartos ?? 0) + (imovel.suites ?? 0) > 0
-        ? { numberOfBedrooms: (imovel.quartos ?? 0) + (imovel.suites ?? 0) }
-        : {}),
-      ...(imovel.banheiros ? { numberOfBathroomsTotal: imovel.banheiros } : {}),
-      ...(imovel.areaM2
-        ? { floorSize: { '@type': 'QuantitativeValue', value: imovel.areaM2, unitCode: 'MTK' } }
-        : {}),
+      ...(dormitorios.length === 1 ? { numberOfBedrooms: dormitorios[0] } : {}),
+      ...(dormitorios.length > 1 ? { numberOfBedrooms: faixaNoSchema(dormitorios) } : {}),
+      // O schema.org só aceita um número inteiro aqui: com plantas diferentes, fica de fora.
+      ...(banheiros.length === 1 ? { numberOfBathroomsTotal: banheiros[0] } : {}),
+      ...(areas.length ? { floorSize: { ...faixaNoSchema(areas), unitCode: 'MTK' } } : {}),
       ...(comodidades.length
         ? {
             amenityFeature: comodidades.map((nome) => ({

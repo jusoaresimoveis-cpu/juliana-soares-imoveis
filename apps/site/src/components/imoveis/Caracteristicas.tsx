@@ -3,10 +3,15 @@ import { Bath, BedDouble, BedSingle, Car, Maximize2, type LucideIcon } from 'luc
 import { numerosDoImovel, type TipoDeNumero } from '@/lib/imoveis/numeros';
 import type { Imovel } from '@/lib/imoveis/tipos';
 
-/** Os ícones dos números, na página e nos cartões da listagem. Suíte e quarto têm camas diferentes, para os dois não parecerem repetidos lado a lado. */
+/**
+ * Os ícones dos números, na página e nos cartões da listagem. Suíte e quarto (ou
+ * dormitório, no empreendimento) têm camas diferentes, para os dois não
+ * parecerem repetidos lado a lado.
+ */
 export const ICONE_DO_NUMERO: Record<TipoDeNumero, LucideIcon> = {
   area: Maximize2,
   quartos: BedSingle,
+  dormitorios: BedSingle,
   suites: BedDouble,
   banheiros: Bath,
   vagas: Car,

@@ -1,4 +1,4 @@
-import { CANAIS, canalDoSlug, parseRefCode, refDoSite } from '@juliana/contracts';
+import { CANAIS, canalDoSlug, parseRefCode, refDoSite, rotuloDaUnidade, type PropertyType } from '@juliana/contracts';
 
 import { SITE } from '@/config/site';
 
@@ -15,6 +15,30 @@ import { SITE } from '@/config/site';
 /** A saudação do botão de um imóvel: o link dele e o código que liga o contato a ele no CRM. */
 export function mensagemDoImovel(imovel: { codigo: string; slug: string }): string {
   return `Olá, Juliana! Tenho interesse neste imóvel: ${SITE.url}/imovel/${imovel.slug} (${refDoSite(imovel.codigo)})`;
+}
+
+/**
+ * A saudação do botão de uma unidade do empreendimento:
+ * "Olá, Juliana! Tenho interesse no Apto 804 (2 suítes + lavabo). Anúncio: New
+ * York Residence https://…/imovel/…?unidade=804 (Ref. 1004-A)".
+ *
+ * O título vai depois de "Anúncio:", sem artigo: é texto livre da Juliana, ou o
+ * padrão no plural ("Apartamentos com 2 ou 3 dormitórios…"), e um "do" fixo
+ * saía errado no plural e no feminino.
+ *
+ * O código é o do empreendimento (a unidade não tem código próprio), e o lead
+ * cai nele; a unidade vai escrita e no link, que abre a página já nela. Sem
+ * preço: a mensagem pode ser enviada dias depois, com a tabela de outro mês.
+ */
+export function mensagemDaUnidade(
+  imovel: { codigo: string; slug: string; titulo: string; tipo: PropertyType },
+  unidade: { rotulo: string; planta: string },
+): string {
+  const nome = rotuloDaUnidade(imovel.tipo, unidade.rotulo);
+  // "Sala", "Loja" e "Casa" pedem "na"; "Apto" e "Lote", "no".
+  const artigo = /^(Sala|Loja|Casa)\b/.test(nome) ? 'na' : 'no';
+  const link = `${SITE.url}/imovel/${imovel.slug}?unidade=${encodeURIComponent(unidade.rotulo)}`;
+  return `Olá, Juliana! Tenho interesse ${artigo} ${nome} (${unidade.planta}). Anúncio: ${imovel.titulo} ${link} (${refDoSite(imovel.codigo)})`;
 }
 
 /**

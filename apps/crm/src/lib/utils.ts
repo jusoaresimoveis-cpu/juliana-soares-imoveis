@@ -39,13 +39,27 @@ export const brlCents = (centavos: number) => brl.format(centavos / 100);
  * O valor de cada regime em que o imóvel está: "R$ 1.850.000", "R$ 3.500/mês"
  * ou os dois. O "/mês" é o que impede um aluguel de ser lido como preço de
  * venda numa lista que mistura os dois.
+ *
+ * Empreendimento com unidades: "A partir de R$ 840.569 · 10 disponíveis". O
+ * preço é o calculado pelo banco (o menor entre as disponíveis, ou o da menor
+ * reservada quando só restam reservadas).
  */
 export function valoresDoImovel(p: {
   for_sale: boolean;
   for_rent: boolean;
   price_cents: number | null;
   rent_cents: number | null;
+  has_units?: boolean;
+  units_available?: number;
 }): string[] {
+  if (p.has_units) {
+    const disponiveis = p.units_available ?? 0;
+    if (p.price_cents == null) return ['Nenhuma unidade disponível'];
+    return [
+      `A partir de ${brlCents(p.price_cents)}`,
+      disponiveis === 0 ? 'só reservadas' : disponiveis === 1 ? '1 disponível' : `${disponiveis} disponíveis`,
+    ];
+  }
   return [
     p.for_sale && p.price_cents != null ? brlCents(p.price_cents) : null,
     p.for_rent && p.rent_cents != null ? `${brlCents(p.rent_cents)}/mês` : null,

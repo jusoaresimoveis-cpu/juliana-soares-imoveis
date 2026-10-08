@@ -1,3 +1,5 @@
+import { mesCorrente } from '@juliana/contracts';
+
 import type { Imovel } from './tipos';
 
 /**
@@ -37,6 +39,7 @@ export const IMOVEIS_DE_EXEMPLO: Imovel[] = [
     },
     destaque: true,
     atualizadoEm: '2026-09-24T12:00:00.000Z',
+    empreendimento: null,
   },
   {
     codigo: 'EX2',
@@ -65,6 +68,7 @@ export const IMOVEIS_DE_EXEMPLO: Imovel[] = [
     caracteristicas: { unidade: { itens: ['mobiliado'] } },
     destaque: false,
     atualizadoEm: '2026-09-24T12:00:00.000Z',
+    empreendimento: null,
   },
   {
     codigo: 'EX3',
@@ -96,6 +100,7 @@ export const IMOVEIS_DE_EXEMPLO: Imovel[] = [
     },
     destaque: true,
     atualizadoEm: '2026-09-24T12:00:00.000Z',
+    empreendimento: null,
   },
   {
     codigo: 'EX4',
@@ -128,5 +133,78 @@ export const IMOVEIS_DE_EXEMPLO: Imovel[] = [
     },
     destaque: false,
     atualizadoEm: '2026-09-24T12:00:00.000Z',
+    empreendimento: null,
+  },
+  {
+    // Empreendimento com unidades: o "a partir de" é a mais barata disponível
+    // (o 804), e o 1702 reservado aparece só com o selo: chega sem preço, como
+    // o banco o manda, e fica fora da busca por preço.
+    codigo: 'EX5',
+    slug: 'exemplo-apartamentos-na-planta-morretes-itapema-ex5',
+    slugsAntigos: [],
+    titulo: '[EXEMPLO] Apartamentos na planta em Morretes',
+    descricao:
+      'Empreendimento de exemplo para desenvolvimento do site. Texto, valores, unidades e registro são fictícios.',
+    tipo: 'apartamento',
+    finalidades: ['venda'],
+    status: 'disponivel',
+    precoVendaCents: 84_056_940,
+    precoDeTabelaCents: null,
+    aluguelCents: null,
+    condominioCents: null,
+    iptuAnualCents: null,
+    quartos: null,
+    suites: null,
+    banheiros: null,
+    vagas: null,
+    areaM2: null,
+    areaTotalM2: null,
+    bairro: 'Morretes',
+    cidade: 'Itapema',
+    fotos: [],
+    caracteristicas: {
+      empreendimento: { itens: ['portaria_24h', 'elevador'] },
+      lazer: { itens: ['piscina', 'academia', 'salao_festas'] },
+    },
+    destaque: true,
+    atualizadoEm: '2026-10-08T12:00:00.000Z',
+    empreendimento: {
+      // A tabela "deste mês", para o `next dev` mostrar os preços em qualquer data.
+      tabelaDoMes: mesCorrente(),
+      tabelaVigente: true,
+      unidadesDisponiveis: 4,
+      obra: 'lancamento',
+      anoDeEntrega: 2030,
+      registroDeIncorporacao: 'R-0 00.000',
+      cartorio: 'Registro de Imóveis de exemplo',
+      condicaoDePagamento: '10% de entrada + 100 mensais + 7 anuais',
+      plantas: [
+        {
+          nome: '2 suítes + lavabo',
+          quartos: 0,
+          suites: 2,
+          banheiros: 3,
+          vagas: 1,
+          areaM2: 70,
+          unidades: [
+            { rotulo: '804', andar: 8, areaM2: 70, precoCents: 84_056_940, situacao: 'disponivel' },
+            { rotulo: '1204', andar: 12, areaM2: 70, precoCents: 89_132_076, situacao: 'disponivel' },
+            { rotulo: '1702', andar: 17, areaM2: 70, precoCents: null, situacao: 'reservado' },
+          ],
+        },
+        {
+          nome: '3 dormitórios',
+          quartos: 2,
+          suites: 1,
+          banheiros: 2,
+          vagas: 1,
+          areaM2: 70,
+          unidades: [
+            { rotulo: '506', andar: 5, areaM2: 70, precoCents: 85_008_528, situacao: 'disponivel' },
+            { rotulo: '701', andar: 7, areaM2: 70, precoCents: 88_497_684, situacao: 'disponivel' },
+          ],
+        },
+      ],
+    },
   },
 ];

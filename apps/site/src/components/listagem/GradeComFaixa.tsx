@@ -6,12 +6,15 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { interpretarFaixa, precoNaFaixa, rotuloDaFaixa } from '@/lib/imoveis/preco';
+import { algumPrecoNaFaixa, interpretarFaixa, rotuloDaFaixa } from '@/lib/imoveis/preco';
 
 export interface ItemDaGrade {
   codigo: string;
-  /** Preço na finalidade da listagem, em centavos. */
-  precoCents: number | null;
+  /**
+   * Os preços na finalidade da listagem, em centavos: um no imóvel comum, o de
+   * cada unidade disponível no empreendimento, nenhum no "Consulte".
+   */
+  precosCents: number[];
   cartao: ReactNode;
 }
 
@@ -40,7 +43,7 @@ export function GradeComFaixa({ finalidade, itens }: { finalidade: FinalidadeDoS
 
   if (!faixa || !valor) return <Grade itens={itens} />;
 
-  const visiveis = itens.filter((item) => precoNaFaixa(item.precoCents, faixa));
+  const visiveis = itens.filter((item) => algumPrecoNaFaixa(item.precosCents, faixa));
   const rotulo = `${rotuloDaFaixa(finalidade, valor)}${finalidade === 'aluguel' ? ' /mês' : ''}`;
 
   return (

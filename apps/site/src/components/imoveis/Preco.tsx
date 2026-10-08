@@ -1,6 +1,6 @@
 import type { FinalidadeDoSite } from '@juliana/contracts';
 
-import { reais } from '@/lib/formato';
+import { plural, reais, reaisParaBaixo } from '@/lib/formato';
 import type { Imovel } from '@/lib/imoveis/tipos';
 
 /**
@@ -23,6 +23,9 @@ export function Preco({
   finalidade?: FinalidadeDoSite;
   tamanho?: 'normal' | 'grande';
 }) {
+  const classe = tamanho === 'grande' ? 'text-2xl' : 'text-lg';
+  if (imovel.empreendimento) return <PrecoDoEmpreendimento imovel={imovel} classe={classe} />;
+
   const aluguel = imovel.finalidades.includes('aluguel') ? imovel.aluguelCents : null;
   const venda = imovel.finalidades.includes('venda') ? imovel.precoVendaCents : null;
   const aluguelPrimeiro = finalidade ? finalidade === 'aluguel' : aluguel !== null;
@@ -36,7 +39,6 @@ export function Preco({
 
   if (!aluguelPrimeiro) linhas.reverse();
 
-  const classe = tamanho === 'grande' ? 'text-2xl' : 'text-lg';
   if (linhas.length === 0) return <p className={`${classe} font-semibold`}>Consulte</p>;
 
   const [principal, secundaria] = linhas;
@@ -62,6 +64,37 @@ export function Preco({
           {secundaria.texto}
           {secundaria.sufixo}
         </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * "A partir de R$ 840.569" e "10 unidades disponíveis".
+ *
+ * Os centavos são cortados para baixo, nunca arredondados para cima: o "a
+ * partir de" não pode passar do preço da unidade mais barata. Sem a tabela do
+ * mês, "Consulte" (a contagem continua: ela não depende do preço).
+ *
+ * Sem unidade disponível (só reservadas, antes da primeira tabela, suspenso), o
+ * banco manda o "a partir de" nulo e `units_available` zero: fica "Consulte",
+ * sem contagem. A contagem é sempre a do banco, nunca a das linhas da lista.
+ */
+function PrecoDoEmpreendimento({ imovel, classe }: { imovel: Imovel; classe: string }) {
+  const preco = imovel.precoVendaCents;
+  const disponiveis = imovel.empreendimento?.unidadesDisponiveis ?? 0;
+  return (
+    <div>
+      {preco ? (
+        <>
+          <p className="text-sm text-suave">A partir de</p>
+          <p className={`${classe} font-semibold`}>{reaisParaBaixo(preco)}</p>
+        </>
+      ) : (
+        <p className={`${classe} font-semibold`}>Consulte</p>
+      )}
+      {disponiveis > 0 && (
+        <p className="text-sm text-suave">{plural(disponiveis, 'unidade disponível', 'unidades disponíveis')}</p>
       )}
     </div>
   );

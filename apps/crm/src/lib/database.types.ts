@@ -2080,9 +2080,12 @@ export type Database = {
           floor: number | null
           for_rent: boolean
           for_sale: boolean
+          has_units: boolean
           hero_metade_path: string | null
           highlights: string[]
           id: string
+          incorporation_registry: string | null
+          incorporation_registry_office: string | null
           installment_cents: number | null
           installments_count: number | null
           internal_notes: string | null
@@ -2118,6 +2121,8 @@ export type Database = {
           status: string
           suites: number | null
           title: string
+          units_available: number
+          units_table_month: string | null
           updated_at: string
           zip_code: string | null
         }
@@ -2144,9 +2149,12 @@ export type Database = {
           floor?: number | null
           for_rent?: boolean
           for_sale?: boolean
+          has_units?: boolean
           hero_metade_path?: string | null
           highlights?: string[]
           id?: string
+          incorporation_registry?: string | null
+          incorporation_registry_office?: string | null
           installment_cents?: number | null
           installments_count?: number | null
           internal_notes?: string | null
@@ -2182,6 +2190,8 @@ export type Database = {
           status?: string
           suites?: number | null
           title: string
+          units_available?: number
+          units_table_month?: string | null
           updated_at?: string
           zip_code?: string | null
         }
@@ -2208,9 +2218,12 @@ export type Database = {
           floor?: number | null
           for_rent?: boolean
           for_sale?: boolean
+          has_units?: boolean
           hero_metade_path?: string | null
           highlights?: string[]
           id?: string
+          incorporation_registry?: string | null
+          incorporation_registry_office?: string | null
           installment_cents?: number | null
           installments_count?: number | null
           internal_notes?: string | null
@@ -2246,6 +2259,8 @@ export type Database = {
           status?: string
           suites?: number | null
           title?: string
+          units_available?: number
+          units_table_month?: string | null
           updated_at?: string
           zip_code?: string | null
         }
@@ -2273,6 +2288,69 @@ export type Database = {
           },
         ]
       }
+      property_floorplans: {
+        Row: {
+          area_built: number | null
+          bathrooms: number | null
+          bedrooms: number | null
+          created_at: string
+          finals: string[]
+          id: string
+          name: string
+          organization_id: string
+          parking_spots: number | null
+          position: number
+          property_id: string
+          suites: number | null
+          updated_at: string
+        }
+        Insert: {
+          area_built?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          finals?: string[]
+          id?: string
+          name: string
+          organization_id: string
+          parking_spots?: number | null
+          position?: number
+          property_id: string
+          suites?: number | null
+          updated_at?: string
+        }
+        Update: {
+          area_built?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          finals?: string[]
+          id?: string
+          name?: string
+          organization_id?: string
+          parking_spots?: number | null
+          position?: number
+          property_id?: string
+          suites?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_floorplans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_floorplans_property_fk"
+            columns: ["organization_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["organization_id", "id"]
+          },
+        ]
+      }
       property_media: {
         Row: {
           alt_text: string | null
@@ -2282,6 +2360,7 @@ export type Database = {
           height: number | null
           id: string
           is_cover: boolean
+          is_illustrative: boolean
           kind: string
           marca_dagua: boolean
           mime_type: string | null
@@ -2301,6 +2380,7 @@ export type Database = {
           height?: number | null
           id?: string
           is_cover?: boolean
+          is_illustrative?: boolean
           kind?: string
           marca_dagua?: boolean
           mime_type?: string | null
@@ -2320,6 +2400,7 @@ export type Database = {
           height?: number | null
           id?: string
           is_cover?: boolean
+          is_illustrative?: boolean
           kind?: string
           marca_dagua?: boolean
           mime_type?: string | null
@@ -2461,6 +2542,73 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_units: {
+        Row: {
+          area_built: number | null
+          created_at: string
+          floor: number | null
+          floorplan_id: string
+          id: string
+          label: string
+          notes: string | null
+          organization_id: string
+          price_cents: number | null
+          property_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          area_built?: number | null
+          created_at?: string
+          floor?: number | null
+          floorplan_id: string
+          id?: string
+          label: string
+          notes?: string | null
+          organization_id: string
+          price_cents?: number | null
+          property_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          area_built?: number | null
+          created_at?: string
+          floor?: number | null
+          floorplan_id?: string
+          id?: string
+          label?: string
+          notes?: string | null
+          organization_id?: string
+          price_cents?: number | null
+          property_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_units_floorplan_fk"
+            columns: ["organization_id", "property_id", "floorplan_id"]
+            isOneToOne: false
+            referencedRelation: "property_floorplans"
+            referencedColumns: ["organization_id", "property_id", "id"]
+          },
+          {
+            foreignKeyName: "property_units_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_units_property_fk"
+            columns: ["organization_id", "property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["organization_id", "id"]
           },
         ]
       }
@@ -3305,6 +3453,10 @@ export type Database = {
           organizacao: string
         }[]
       }
+      aplicar_tabela_de_unidades: {
+        Args: { _imovel: string; _linhas: Json; _mes: string }
+        Returns: number
+      }
       avisar_espera_longa: { Args: never; Returns: number }
       cc_from_e164: { Args: { _e164: string }; Returns: string }
       create_notification: {
@@ -3818,6 +3970,17 @@ export type Database = {
       registrar_visita: {
         Args: { _codigo: string; _organizacao: string }
         Returns: undefined
+      }
+      resumo_das_unidades: {
+        Args: { _imovel: string }
+        Returns: {
+          disponiveis: number
+          maior_cents: number
+          menor_cents: number
+          menor_reservada_cents: number
+          reservadas: number
+          total: number
+        }[]
       }
       run_due_reminders: { Args: { _limit?: number }; Returns: number }
       sem_credencial: { Args: { _payload: Json }; Returns: Json }

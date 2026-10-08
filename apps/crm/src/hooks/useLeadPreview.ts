@@ -9,6 +9,9 @@ export interface InteresseDoLead {
   for_rent: boolean;
   price_cents: number | null;
   rent_cents: number | null;
+  /** Empreendimento: o preço é o "a partir de", e sai com as disponíveis (`valoresDoImovel`). */
+  has_units: boolean;
+  units_available: number;
 }
 
 export interface LeadPreviewData extends RespostasDeQualificacao {
@@ -53,7 +56,7 @@ export function useLeadPreview(leadId: string | null) {
           .single(),
         supabase
           .from('lead_property_interests')
-          .select('properties(title, public_code, for_sale, for_rent, price_cents, rent_cents)')
+          .select('properties(title, public_code, for_sale, for_rent, price_cents, rent_cents, has_units, units_available)')
           .eq('lead_id', leadId!)
           .limit(3),
         supabase

@@ -1,5 +1,6 @@
 import type { FinalidadeDoSite } from '@juliana/contracts';
 
+import { precosDisponiveis } from './empreendimento';
 import type { Imovel } from './tipos';
 
 /**
@@ -52,17 +53,41 @@ export function interpretarFaixa(valor: string | null | undefined): Faixa | null
   return faixa;
 }
 
-/** O preço que vale para aquela busca: aluguel mensal ou valor de venda. */
+/**
+ * O preço que vale para aquela busca: aluguel mensal ou valor de venda. No
+ * empreendimento, o "a partir de", que é também o que ordena por preço.
+ */
 export function precoNaFinalidade(imovel: Imovel, finalidade: FinalidadeDoSite): number | null {
   return finalidade === 'aluguel' ? imovel.aluguelCents : imovel.precoVendaCents;
 }
 
 /**
+ * Os preços que uma busca por faixa confere.
+ *
+ * O empreendimento entra na faixa se ALGUMA unidade disponível couber: quem
+ * procura até R$ 870 mil quer ver o prédio que tem um apartamento de R$ 850 mil,
+ * mesmo que o "a partir de" seja outro. Só as disponíveis com preço contam: sem
+ * nenhuma (só restam reservadas, ou sem a tabela do mês), o cartão diz
+ * "Consulte", e o empreendimento fica fora de toda faixa, como o imóvel comum
+ * sem preço.
+ */
+export function precosNaFinalidade(imovel: Imovel, finalidade: FinalidadeDoSite): number[] {
+  if (finalidade === 'venda' && imovel.empreendimento) return precosDisponiveis(imovel);
+  const preco = precoNaFinalidade(imovel, finalidade);
+  return preco === null ? [] : [preco];
+}
+
+/**
  * Imóvel sem preço cadastrado ("Consulte") fica FORA de uma busca por faixa:
- * não dá para afirmar que ele cabe no orçamento da pessoa.
+ * não dá para afirmar que ele cabe no orçamento da pessoa. O empreendimento sem
+ * a tabela do mês também.
  */
 export function dentroDaFaixa(imovel: Imovel, finalidade: FinalidadeDoSite, faixa: Faixa): boolean {
-  return precoNaFaixa(precoNaFinalidade(imovel, finalidade), faixa);
+  return algumPrecoNaFaixa(precosNaFinalidade(imovel, finalidade), faixa);
+}
+
+export function algumPrecoNaFaixa(precosCents: readonly number[], faixa: Faixa): boolean {
+  return precosCents.some((preco) => precoNaFaixa(preco, faixa));
 }
 
 export function precoNaFaixa(precoCents: number | null, faixa: Faixa): boolean {

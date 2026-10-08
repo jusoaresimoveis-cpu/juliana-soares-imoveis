@@ -15,7 +15,7 @@ import {
 } from '@dnd-kit/core';
 import { SortableContext, arrayMove, rectSortingStrategy, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Upload, Star, Trash2, FileText, Video, Loader2 } from 'lucide-react';
+import { Upload, Star, Trash2, FileText, Video, Loader2, Sparkles } from 'lucide-react';
 import { usePropertyMedia, useMediaActions, urlPublica, type PropertyMedia } from '@/hooks/useProperties';
 import { useMarcaDagua, useSalvarMarcaDagua } from '@/hooks/useSettings';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,7 +29,7 @@ interface Props {
 
 export function MediaManager({ orgId, propertyId }: Props) {
   const { data: midias } = usePropertyMedia(propertyId);
-  const { enviar, reordenar, ordenar, remover, porMarca, tirarMarca } = useMediaActions(orgId, propertyId);
+  const { enviar, reordenar, ordenar, remover, porMarca, tirarMarca, ilustrativa } = useMediaActions(orgId, propertyId);
   const inputRef = useRef<HTMLInputElement>(null);
   const [arrastando, setArrastando] = useState(false);
   // A foto que está sendo arrastada para outro lugar da lista.
@@ -73,6 +73,10 @@ export function MediaManager({ orgId, propertyId }: Props) {
   const semMarca = lista.filter((m) => m.kind === 'image' && !m.marca_dagua);
   const comOriginal = lista.filter((m) => m.original_sem_marca);
   const ocupado = porMarca.isPending || tirarMarca.isPending;
+  // Só fotos: o site mostra as imagens, e é nelas que vai o aviso.
+  const fotos = lista.filter((m) => m.kind === 'image');
+  const ilustrativas = fotos.filter((m) => m.is_illustrative);
+  const todasIlustrativas = fotos.length > 0 && ilustrativas.length === fotos.length;
 
   const lugarDe = (id: UniqueIdentifier) => lista.findIndex((m) => m.id === id) + 1;
   const anuncios: Announcements = {
@@ -212,6 +216,44 @@ export function MediaManager({ orgId, propertyId }: Props) {
         </p>
       )}
 
+      {/*
+        Render de empreendimento na planta, decorado, foto de banco: o site põe
+        "Imagem ilustrativa" na foto marcada. Nada inventado no site, e o
+        cliente não reclama que o apartamento não é aquele.
+      */}
+      {fotos.length > 0 && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-md border border-line bg-card-2 px-3.5 py-3">
+          <Sparkles className="h-4 w-4 shrink-0 text-pri" />
+          <span className="text-sm text-tx-2">
+            <b className="font-semibold">Imagem ilustrativa</b> (render, decorado): o site avisa na foto.{' '}
+            <span className="text-tx-3">
+              {ilustrativas.length === 0
+                ? 'Nenhuma marcada.'
+                : ilustrativas.length === 1
+                  ? '1 marcada.'
+                  : `${ilustrativas.length} marcadas.`}
+            </span>
+          </span>
+          <button
+            type="button"
+            disabled={ilustrativa.isPending}
+            onClick={() =>
+              ilustrativa.mutate({
+                ids: (todasIlustrativas ? fotos : fotos.filter((m) => !m.is_illustrative)).map((m) => m.id),
+                valor: !todasIlustrativas,
+              })
+            }
+            className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-line-2 bg-card px-3.5 py-1.5 text-sm font-semibold text-tx-2 hover:border-pri hover:text-pri disabled:opacity-60"
+          >
+            {ilustrativa.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            {todasIlustrativas ? 'Desmarcar todas' : 'Marcar todas'}
+          </button>
+          {ilustrativa.isError && (
+            <p className="w-full text-sm text-dng">{(ilustrativa.error as Error).message}</p>
+          )}
+        </div>
+      )}
+
       {lista.length > 0 && (
         <>
           <p className="text-sm text-tx-3">
@@ -249,6 +291,7 @@ export function MediaManager({ orgId, propertyId }: Props) {
                     media={m}
                     lugar={i + 1}
                     onCapa={() => reordenar([m, ...lista.filter((x) => x.id !== m.id)])}
+                    onIlustrativa={() => ilustrativa.mutate({ ids: [m.id], valor: !m.is_illustrative })}
                     onRemover={() => remover.mutate(m)}
                   />
                 ))}
@@ -287,11 +330,13 @@ function MediaCard({
   media,
   lugar,
   onCapa,
+  onIlustrativa,
   onRemover,
 }: {
   media: PropertyMedia;
   lugar: number;
   onCapa: () => void;
+  onIlustrativa: () => void;
   onRemover: () => void;
 }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
@@ -312,7 +357,7 @@ function MediaCard({
       style={estilo}
       {...attributes}
       {...listeners}
-      aria-label={`Foto ${lugar}${media.is_cover ? ', capa' : ''}`}
+      aria-label={`Foto ${lugar}${media.is_cover ? ', capa' : ''}${media.is_illustrative ? ', ilustrativa' : ''}`}
       className={cn(
         // `touch-manipulation`: o dedo ainda rola a tela, e o arraste só pega
         // quem segura. Sem o menu de "salvar imagem" do toque longo, que
@@ -329,11 +374,25 @@ function MediaCard({
           Capa
         </span>
       )}
+      {media.is_illustrative && (
+        <span className="absolute right-1.5 top-1.5 rounded bg-tx/85 px-1.5 py-0.5 text-2xs font-bold uppercase text-sheet">
+          Ilustrativa
+        </span>
+      )}
 
       <div className="absolute inset-x-0 bottom-0 flex items-center justify-end gap-1 bg-gradient-to-t from-black/70 to-transparent p-1.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
         {media.kind === 'image' && !media.is_cover && (
           <BotaoMini rotulo="Usar como capa (vai para o primeiro lugar)" onClick={onCapa}>
             <Star className="h-3 w-3" />
+          </BotaoMini>
+        )}
+        {media.kind === 'image' && (
+          <BotaoMini
+            rotulo={media.is_illustrative ? 'Desmarcar "Imagem ilustrativa"' : 'Marcar como imagem ilustrativa'}
+            onClick={onIlustrativa}
+            ativo={media.is_illustrative}
+          >
+            <Sparkles className="h-3 w-3" />
           </BotaoMini>
         )}
         <BotaoMini rotulo="Remover" onClick={onRemover} perigo>
@@ -380,23 +439,28 @@ function BotaoMini({
   onClick,
   disabled,
   perigo,
+  ativo,
 }: {
   children: React.ReactNode;
   rotulo: string;
   onClick: () => void;
   disabled?: boolean;
   perigo?: boolean;
+  /** Botão de liga e desliga, ligado. */
+  ativo?: boolean;
 }) {
   return (
     <button
       type="button"
       aria-label={rotulo}
+      aria-pressed={ativo}
       title={rotulo}
       disabled={disabled}
       onClick={onClick}
       className={cn(
         'grid h-6 w-6 place-items-center rounded bg-white/90 text-tx transition-colors disabled:opacity-30',
         perigo ? 'hover:bg-dng hover:text-pri-fg' : 'hover:bg-pri hover:text-pri-fg',
+        ativo && 'bg-pri text-pri-fg',
       )}
     >
       {children}

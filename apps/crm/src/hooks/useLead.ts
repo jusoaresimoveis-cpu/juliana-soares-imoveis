@@ -73,11 +73,31 @@ export interface TimelineEvent {
   occurred_at: string;
 }
 
+/**
+ * O imóvel como a ficha do lead o mostra. O valor sai por `valoresDoImovel`,
+ * que precisa do regime e, no empreendimento, das disponíveis: o preço solto
+ * de um empreendimento é o "a partir de", e lido sozinho parece o preço dele.
+ */
+export interface ImovelDoLead {
+  title: string;
+  public_code: string;
+  neighborhood: string | null;
+  for_sale: boolean;
+  for_rent: boolean;
+  price_cents: number | null;
+  rent_cents: number | null;
+  has_units: boolean;
+  units_available: number;
+}
+
+const COLUNAS_DO_IMOVEL_DO_LEAD =
+  'title, public_code, neighborhood, for_sale, for_rent, price_cents, rent_cents, has_units, units_available';
+
 export interface Interesse {
   id: string;
   property_id: string;
   is_primary: boolean;
-  properties: { title: string; public_code: string; price_cents: number | null; neighborhood: string | null } | null;
+  properties: ImovelDoLead | null;
 }
 
 export function useLead(id: string | undefined) {
@@ -117,7 +137,7 @@ export function useInteresses(leadId: string | undefined) {
     queryFn: async (): Promise<Interesse[]> => {
       const { data, error } = await supabase
         .from('lead_property_interests')
-        .select('id, property_id, is_primary, properties(title, public_code, price_cents, neighborhood)')
+        .select(`id, property_id, is_primary, properties(${COLUNAS_DO_IMOVEL_DO_LEAD})`)
         .eq('lead_id', leadId!);
       if (error) throw error;
       return (data ?? []) as unknown as Interesse[];
@@ -212,7 +232,7 @@ export function useBuscaImoveis(termo: string) {
       const t = termo.trim().replace(/[%,()]/g, '');
       const { data, error } = await supabase
         .from('properties')
-        .select('id, title, public_code, price_cents, neighborhood')
+        .select(`id, ${COLUNAS_DO_IMOVEL_DO_LEAD}`)
         .or(`title.ilike.%${t}%,neighborhood.ilike.%${t}%,public_code.ilike.%${t}%`)
         .limit(8);
       if (error) throw error;

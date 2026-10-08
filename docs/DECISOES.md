@@ -208,6 +208,36 @@ relação ao briefing, já combinado:
     Tirar um id da lista exige migration que troque o id nos imóveis.
   - Bairro, cidade e UF foram para a aba "Dados": a aba "Localização" tinha só
     os três campos.
+- **Empreendimento com unidades** (08/10). Caso que trouxe: New York Residence
+  (90 apartamentos, 10 disponíveis na tabela de outubro, mesmas fotos e mesmo
+  lazer). Três desenhos foram comparados por dois juízes (produto e
+  engenharia); venceu o de unidades como linhas embaixo do imóvel.
+  - O empreendimento é UM imóvel: uma página, uma galeria, um código público,
+    os mesmos leads e a mesma campanha da Meta. As unidades (`property_units`)
+    e as plantas (`property_floorplans`) ficam embaixo dele. Unidade não tem
+    página nem código: ela é uma linha da página, com WhatsApp próprio e o link
+    `?unidade=804`. Dez páginas quase iguais disputariam entre si no Google.
+  - O "a partir de" é o menor preço entre as unidades DISPONÍVEIS, calculado
+    pelo banco (gatilho); ninguém digita. A situação do imóvel também vem
+    delas, menos "suspenso", que é decisão de quem cadastra.
+  - A tabela da construtora sai todo 1º dia útil do mês, com o CUB/SC. Até a
+    Juliana aplicar a do mês corrente, o site mostra "Consulte" no lugar dos
+    preços (decisão do usuário): o banco zera os preços na leitura do site, e
+    um agendamento avisa o site às 00h01 do dia 1. A tabela aplicada é sempre a
+    do mês corrente, e só o que a Juliana mudou vai para o banco (o que mudou
+    em outro aparelho não é desfeito).
+  - Construtora só no CRM: no site, nunca (o cliente compraria direto com
+    ela). No site saem a entrega (só o ano), a situação da obra e o registro de
+    incorporação com o cartório, que a Lei 4.591/64 (art. 32, § 3º) exige nos
+    anúncios. O nome do empreendimento no título é escolha da Juliana: ele
+    também leva o cliente ao site da construtora.
+  - Salas comerciais do mesmo prédio são outro cadastro: juntas, o "a partir
+    de" dos apartamentos cairia para o preço da sala mais barata, e elas
+    sumiriam da busca por salas.
+  - Render é imagem ilustrativa: a foto marcada (`is_illustrative`) sai com o
+    aviso no site.
+  - Para depois: colar a tabela da imagem, unidade de interesse no lead, planta
+    baixa por tipologia, entrada calculada por unidade.
 
 ## Leads e WhatsApp
 

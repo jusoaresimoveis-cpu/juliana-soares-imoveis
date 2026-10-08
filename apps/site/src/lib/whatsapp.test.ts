@@ -2,7 +2,8 @@ import { parseRefCode } from '@juliana/contracts';
 import { describe, expect, it } from 'vitest';
 
 import { GET } from '../app/w/[...rota]/route';
-import { linkDoCanal, linkDoWhatsApp, mensagemDoImovel } from './whatsapp';
+import { comCanal } from './origem';
+import { linkDoCanal, linkDoWhatsApp, mensagemDaUnidade, mensagemDoImovel } from './whatsapp';
 
 /**
  * Todo link de WhatsApp do site leva um código que o CRM lê.
@@ -66,5 +67,45 @@ describe('o link /w/<canal>', () => {
     expect(resposta.status).toBe(302);
     expect(resposta.headers.get('Cache-Control')).toBe('no-store');
     expect(parseRefCode(textoDoLink(resposta.headers.get('Location') ?? ''))?.market).toBe('go');
+  });
+});
+
+/**
+ * O botão de cada unidade do empreendimento. O código é o do empreendimento (a
+ * unidade não tem código), e a unidade vai escrita e no link.
+ */
+describe('a mensagem da unidade', () => {
+  const NEW_YORK = { codigo: '1004', slug: 'new-york-residence-1004', titulo: 'New York Residence', tipo: 'apartamento' as const };
+
+  it('diz a unidade e a planta, leva à linha dela, e tem um código só', () => {
+    const texto = textoDoLink(linkDoWhatsApp(mensagemDaUnidade(NEW_YORK, { rotulo: '804', planta: '2 suítes + lavabo' })));
+    expect(texto).toBe(
+      'Olá, Juliana! Tenho interesse no Apto 804 (2 suítes + lavabo). Anúncio: New York Residence ' +
+        'https://julianasoaresimoveis.com.br/imovel/new-york-residence-1004?unidade=804 (Ref. 1004-A)',
+    );
+    expect(texto.match(/Ref\./g)).toHaveLength(1);
+    expect(parseRefCode(texto)?.publicCode).toBe('1004');
+  });
+
+  it('sem preço: a mensagem pode sair com a tabela de outro mês', () => {
+    expect(mensagemDaUnidade(NEW_YORK, { rotulo: '804', planta: '2 suítes + lavabo' })).not.toMatch(/R\$/);
+  });
+
+  it('o canal da visita entra no código no clique, como nos outros botões', () => {
+    const href = comCanal(linkDoWhatsApp(mensagemDaUnidade(NEW_YORK, { rotulo: '804', planta: 'x' })), 'go');
+    expect(parseRefCode(textoDoLink(href))).toEqual({ publicCode: '1004', market: 'go', variant: 'a' });
+  });
+
+  it('o título entra sem artigo, que sairia errado no título padrão, que é plural', () => {
+    const padrao = { ...NEW_YORK, titulo: 'Apartamentos com 2 ou 3 dormitórios em Morretes, Itapema' };
+    const texto = mensagemDaUnidade(padrao, { rotulo: '804', planta: '2 suítes + lavabo' });
+    expect(texto).toContain('(2 suítes + lavabo). Anúncio: Apartamentos com 2 ou 3 dormitórios em Morretes, Itapema https://');
+    expect(texto).not.toMatch(/d[oa] Apartamentos/);
+    expect(texto.match(/Ref\./g)).toHaveLength(1);
+  });
+
+  it('sala, loja e casa pedem "na"', () => {
+    const sala = mensagemDaUnidade({ ...NEW_YORK, tipo: 'sala_comercial' }, { rotulo: '03', planta: 'Frente' });
+    expect(sala).toContain('Tenho interesse na Sala 03 (Frente)');
   });
 });

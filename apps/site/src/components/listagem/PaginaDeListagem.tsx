@@ -13,7 +13,7 @@ import { CartaoDeImovel } from '@/components/imoveis/CartaoDeImovel';
 import { Migalhas } from '@/components/Migalhas';
 import { SITE } from '@/config/site';
 import { bairrosDe, filtrarImoveis, urlDaListagem } from '@/lib/imoveis/listagem';
-import { precoNaFinalidade } from '@/lib/imoveis/preco';
+import { precosNaFinalidade } from '@/lib/imoveis/preco';
 import { resolverListagem } from '@/lib/imoveis/resolver-listagem';
 import type { Migalha } from '@/lib/seo/schema';
 
@@ -61,7 +61,7 @@ export async function PaginaDeListagem({ finalidade, segmentos }: Props) {
 
   const itens: ItemDaGrade[] = imoveis.map((imovel, indice) => ({
     codigo: imovel.codigo,
-    precoCents: precoNaFinalidade(imovel, finalidade),
+    precosCents: precosNaFinalidade(imovel, finalidade),
     cartao: <CartaoDeImovel imovel={imovel} finalidade={finalidade} prioridade={indice < 2} />,
   }));
 

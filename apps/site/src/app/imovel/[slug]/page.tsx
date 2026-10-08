@@ -5,10 +5,12 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import { BotaoWhatsApp } from '@/components/BotaoWhatsApp';
 import { CartaoDeImovel } from '@/components/imoveis/CartaoDeImovel';
 import { ContadorDeVisita } from '@/components/imoveis/ContadorDeVisita';
+import { DadosDoEmpreendimento, RegistroDaIncorporacao } from '@/components/imoveis/DadosDoEmpreendimento';
 import { GaleriaDoImovel } from '@/components/imoveis/GaleriaDoImovel';
 import { Caracteristicas } from '@/components/imoveis/Caracteristicas';
 import { Preco } from '@/components/imoveis/Preco';
 import { SobreOImovel } from '@/components/imoveis/SobreOImovel';
+import { Unidades } from '@/components/imoveis/Unidades';
 import { JsonLd } from '@/components/JsonLd';
 import { Migalhas } from '@/components/Migalhas';
 import { SITE } from '@/config/site';
@@ -108,12 +110,14 @@ export default async function Page(props: PageProps<'/imovel/[slug]'>) {
       <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
         <div className="space-y-6">
           <SobreOImovel imovel={imovel} />
+          {naVitrine && <Unidades imovel={imovel} />}
         </div>
 
         {/* No celular, preço e botão vêm logo depois do título, antes da descrição:
             é o que decide se a pessoa chama ou vai embora. */}
         <aside className="order-first h-fit space-y-4 rounded-lg bg-white p-5 shadow-sm ring-1 ring-linha lg:sticky lg:top-20 lg:order-none">
           <Preco imovel={imovel} tamanho="grande" />
+          {imovel.empreendimento && naVitrine && <DadosDoEmpreendimento empreendimento={imovel.empreendimento} />}
           <dl className="space-y-1 text-sm text-suave">
             {imovel.condominioCents ? (
               <div className="flex justify-between">
@@ -133,6 +137,7 @@ export default async function Page(props: PageProps<'/imovel/[slug]'>) {
             </div>
           </dl>
           {naVitrine && <BotaoWhatsApp mensagem={mensagem} rotulo="Quero saber mais" />}
+          {imovel.empreendimento && <RegistroDaIncorporacao empreendimento={imovel.empreendimento} />}
           <p className="text-xs text-suave">
             {SITE.nome} · {SITE.creci}
           </p>

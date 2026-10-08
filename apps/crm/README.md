@@ -25,6 +25,16 @@ lead em [docs/QUALIFICACAO.md](docs/QUALIFICACAO.md).
   tela de entrada usa a areia e o bronze do site.
 - **O dicionário** (`@contracts`) é o `packages/contracts` da raiz,
   compartilhado com o site.
+- **Empreendimento com unidades** (`supabase/migrations/20261009000000_unidades.sql`):
+  o imóvel com "Empreendimento com várias unidades" ligado continua um imóvel
+  só (uma página, um código, os leads), com plantas e unidades embaixo. Preço
+  ("a partir de") e situação vêm das unidades, calculados pelo banco a partir
+  da primeira tabela aplicada (antes dela, as unidades nascem vendidas e o
+  imóvel fica com a situação que tinha, sem preço). A página
+  `/imoveis/:id/unidades` (`pages/Unidades.tsx`) cadastra as plantas, gera as
+  unidades do prédio de uma vez e aplica a tabela da construtora do mês, com a
+  conferência antes de gravar (`lib/unidades.ts`). Sem a tabela do mês, o site
+  mostra "Consulte"; a construtora nunca sai no site.
 
 ## Rodando
 

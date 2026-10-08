@@ -31,3 +31,31 @@ describe('resumoDoImovel', () => {
     );
   });
 });
+
+describe('resumoDoImovel no empreendimento', () => {
+  it('diz os tipos no plural, os dormitórios das plantas, o "a partir de" e as unidades', () => {
+    // "Dormitórios", e não "quartos": o número já soma as suítes.
+    expect(resumo(exemplo('EX5'))).toBe(
+      'Apartamentos à venda em Morretes, Itapema: 70 m², 2 ou 3 dormitórios. A partir de R$ 840.569, 4 unidades disponíveis. Cód. EX5.',
+    );
+  });
+
+  it('o "a partir de" corta os centavos para baixo, nunca arredonda para cima', () => {
+    expect(resumo(exemplo('EX5', { precoVendaCents: 84_056_999 }))).toContain('A partir de R$ 840.569,');
+  });
+
+  it('sem a tabela do mês, sai sem preço', () => {
+    expect(resumo(exemplo('EX5', { precoVendaCents: null }))).toBe(
+      'Apartamentos à venda em Morretes, Itapema: 70 m², 2 ou 3 dormitórios. 4 unidades disponíveis. Cód. EX5.',
+    );
+  });
+
+  it('sem unidade disponível (só reservadas, suspenso), sem preço e sem contagem, como o "Consulte" da página', () => {
+    const ex5 = exemplo('EX5');
+    const semDisponivel = exemplo('EX5', {
+      precoVendaCents: null,
+      empreendimento: { ...ex5.empreendimento!, unidadesDisponiveis: 0 },
+    });
+    expect(resumo(semDisponivel)).toBe('Apartamentos à venda em Morretes, Itapema: 70 m², 2 ou 3 dormitórios. Cód. EX5.');
+  });
+});

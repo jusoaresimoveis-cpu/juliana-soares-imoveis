@@ -49,6 +49,12 @@ supabase/
   (itens marcados e texto livre da unidade, do empreendimento, do lazer e das
   informações adicionais), com o formato conferido por `caracteristicas_validas`.
   O site lê `features` no lugar da coluna antiga `amenities`.
+- `20261009000000_unidades.sql`: empreendimento com unidades
+  (`properties.has_units`, `property_floorplans`, `property_units`). O "a
+  partir de" e a situação são calculados das unidades; a tabela do mês é
+  aplicada por `aplicar_tabela_de_unidades`; com a tabela fora do mês corrente
+  o site recebe os preços nulos ("Consulte"), e `site-virada-do-mes` avisa o
+  site às 00h01 do dia 1. Também `property_media.is_illustrative`.
 
 Dado de cliente não entra em migration: fica em `seeds/`, para o mesmo schema
 servir a outro cliente sem limpeza.

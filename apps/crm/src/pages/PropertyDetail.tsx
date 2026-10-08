@@ -14,6 +14,7 @@ import {
   MessageCircle,
   EyeOff,
   ExternalLink,
+  Layers,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { env } from '@/lib/env';
@@ -26,16 +27,25 @@ import {
   urlPublica,
 } from '@/hooks/useProperties';
 import { usePipelineStages } from '@/hooks/useLeadsBoard';
+import { useUnidades, type Planta, type Unidade } from '@/hooks/useUnidades';
 import { PropertyFormDialog, type AbaDoImovel } from '@/components/properties/PropertyFormDialog';
+import { AvisoDaTabela, EspelhoDasUnidades } from '@/components/properties/Empreendimento';
+import { resumoDaPlanta } from '@/lib/unidades';
 import { telefoneLegivel } from '@/exportacao';
 import {
+  CONSTRUCTION_STATUS_LABEL,
   PROPERTY_TYPE_LABEL,
   PROPERTY_STATUS_LABEL,
   RENTAL_GUARANTEE_LABEL,
+  aPartirDe,
   caracteristicasParaMostrar,
   normalizarCaracteristicas,
   precoDeTabela,
+  reaisComCentavos,
+  resumoDoEmpreendimento,
   rotuloDoRegime,
+  type ConstructionStatus,
+  type PropertyType,
   type RentalGuarantee,
 } from '@contracts';
 import { brlCents, cn, valoresDoImovel } from '@/lib/utils';
@@ -52,6 +62,7 @@ export default function PropertyDetail() {
   const { data: visitas } = useVisitasDoImovel(id);
   const { data: proprietario } = useProprietario(imovel?.owner_id);
   const { data: etapas } = usePipelineStages(orgId);
+  const { data: doEmpreendimento } = useUnidades(id, !!imovel?.has_units);
 
   // A aba em que o formulário abre; nulo é fechado.
   const [editando, setEditando] = useState<AbaDoImovel | null>(null);
@@ -144,7 +155,9 @@ export default function PropertyDetail() {
       </header>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <section className="flex flex-col gap-4 lg:col-span-2">
+        {/* `min-w-0`: o espelho das unidades é largo, e sem isto a coluna do grid
+            cresceria até ele caber, passando da tela do celular. Assim ele rola. */}
+        <section className="flex min-w-0 flex-col gap-4 lg:col-span-2">
           {/* galeria */}
           <div className="overflow-hidden rounded-lg bg-card shadow-card">
             {capa ? (
@@ -202,20 +215,33 @@ export default function PropertyDetail() {
             )}
 
             {/* Quartos e suítes lado a lado, com os ícones do site: no cadastro, os
-                quartos não contam as suítes (2 quartos e 1 suíte são 3 dormitórios). */}
-            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-line pt-4 sm:grid-cols-5">
-              <Numero icone={BedSingle} valor={imovel.bedrooms} rotulo={imovel.bedrooms === 1 ? 'quarto' : 'quartos'} />
-              <Numero icone={BedDouble} valor={imovel.suites} rotulo={imovel.suites === 1 ? 'suíte' : 'suítes'} />
-              <Numero icone={Bath} valor={imovel.bathrooms} rotulo="banh." />
-              <Numero icone={Car} valor={imovel.parking_spots} rotulo={imovel.parking_spots === 1 ? 'vaga' : 'vagas'} />
-              <Numero
-                icone={Ruler}
-                valor={imovel.area_total}
-                rotulo="m² total"
-                extra={imovel.area_built ? `${imovel.area_built} m² úteis` : null}
-              />
-            </div>
+                quartos não contam as suítes (2 quartos e 1 suíte são 3 dormitórios).
+                No empreendimento eles são de cada planta, no bloco "Unidades". */}
+            {!imovel.has_units && (
+              <div className="mt-4 grid grid-cols-2 gap-3 border-t border-line pt-4 sm:grid-cols-5">
+                <Numero icone={BedSingle} valor={imovel.bedrooms} rotulo={imovel.bedrooms === 1 ? 'quarto' : 'quartos'} />
+                <Numero icone={BedDouble} valor={imovel.suites} rotulo={imovel.suites === 1 ? 'suíte' : 'suítes'} />
+                <Numero icone={Bath} valor={imovel.bathrooms} rotulo="banh." />
+                <Numero icone={Car} valor={imovel.parking_spots} rotulo={imovel.parking_spots === 1 ? 'vaga' : 'vagas'} />
+                <Numero
+                  icone={Ruler}
+                  valor={imovel.area_total}
+                  rotulo="m² total"
+                  extra={imovel.area_built ? `${imovel.area_built} m² úteis` : null}
+                />
+              </div>
+            )}
           </div>
+
+          {imovel.has_units && (
+            <BlocoDasUnidades
+              imovelId={imovel.id}
+              tipo={imovel.property_type}
+              mesDaTabela={imovel.units_table_month ?? null}
+              plantas={doEmpreendimento?.plantas}
+              unidades={doEmpreendimento?.unidades}
+            />
+          )}
 
           {/* descrição — o campo que a lista não trazia */}
           <div className="rounded-lg bg-card p-5 shadow-card">
@@ -347,6 +373,37 @@ export default function PropertyDetail() {
             />
           </div>
 
+          {imovel.has_units && (
+            <div className="rounded-lg bg-card p-5 shadow-card">
+              <h2 className="mb-2.5 text-2xs font-bold uppercase text-tx-3">Empreendimento</h2>
+              <Linha
+                rotulo="Obra"
+                valor={CONSTRUCTION_STATUS_LABEL[imovel.construction_status as ConstructionStatus] ?? 'Não informada'}
+              />
+              <Linha rotulo="Entrega" valor={imovel.delivery_at ? imovel.delivery_at.slice(0, 4) : 'Não informada'} />
+              <Linha rotulo="Registro de incorporação" valor={imovel.incorporation_registry || 'Não informado'} />
+              <Linha rotulo="Cartório" valor={imovel.incorporation_registry_office || 'Não informado'} />
+              {/* A construtora nunca sai no site (decisão do usuário, 08/10): o
+                  cliente iria comprar direto com ela. */}
+              <div className="border-b border-line py-1.5 last:border-0">
+                <p className="flex items-baseline justify-between gap-3">
+                  <span className="text-sm text-tx-3">Construtora</span>
+                  <span className="text-base font-semibold">{imovel.developer || 'Não informada'}</span>
+                </p>
+                <p className="mt-0.5 flex items-center justify-end gap-1 text-2xs font-bold uppercase text-warn">
+                  <EyeOff className="h-3 w-3" />
+                  Só no CRM, nunca no site
+                </p>
+              </div>
+              {imovel.payment_notes && (
+                <div className="py-1.5">
+                  <p className="text-sm text-tx-3">Condição de pagamento</p>
+                  <p className="text-base font-semibold">{imovel.payment_notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="rounded-lg bg-card p-5 shadow-card">
             <h2 className="mb-2.5 text-2xs font-bold uppercase text-tx-3">Proprietário</h2>
             {proprietario ? (
@@ -389,6 +446,97 @@ export default function PropertyDetail() {
           abaInicial={editando}
           onFechar={() => setEditando(null)}
         />
+      )}
+    </div>
+  );
+}
+
+/**
+ * O empreendimento na ficha: o "a partir de", as disponíveis por planta, o
+ * espelho do prédio e o aviso do mês da tabela (o site mostra "Consulte" desde
+ * o dia 1 até a Juliana aplicar a tabela nova).
+ */
+function BlocoDasUnidades({
+  imovelId,
+  tipo,
+  mesDaTabela,
+  plantas,
+  unidades,
+}: {
+  imovelId: string;
+  tipo: PropertyType;
+  mesDaTabela: string | null;
+  plantas: Planta[] | undefined;
+  unidades: Unidade[] | undefined;
+}) {
+  const resumo = unidades ? resumoDoEmpreendimento(unidades) : null;
+  const aPartir = resumo ? aPartirDe(resumo) : null;
+  const quantas = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`;
+
+  return (
+    <div className="rounded-lg bg-card p-5 shadow-card">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="flex items-center gap-1.5 text-lg font-bold">
+          <Layers className="h-4 w-4 text-pri" />
+          Unidades
+        </h2>
+        <Link
+          to={`/imoveis/${imovelId}/unidades`}
+          className="inline-flex items-center gap-1.5 rounded-full bg-pri px-4 py-2 text-base font-semibold text-pri-fg hover:bg-pri-deep"
+        >
+          {unidades?.length ? 'Tabela do mês e unidades' : 'Cadastrar plantas e unidades'}
+        </Link>
+      </div>
+
+      <AvisoDaTabela mesAplicado={mesDaTabela} temUnidades={!!unidades?.length} className="mb-3" />
+
+      {!unidades || !plantas ? (
+        <Loader2 className="h-4 w-4 animate-spin text-pri" />
+      ) : unidades.length === 0 || !resumo ? (
+        <p className="text-base text-tx-3">
+          Nenhuma unidade cadastrada. Cadastre as plantas (quartos, suítes, área) e gere as unidades do prédio de uma
+          vez; depois, a tabela do mês dá o preço e a situação de cada uma.
+        </p>
+      ) : (
+        <div className="flex flex-col gap-4">
+          <p className="text-base text-tx-2">
+            {aPartir !== null && (
+              <>
+                A partir de <b className="text-pri">{reaisComCentavos(aPartir)}</b> ·{' '}
+              </>
+            )}
+            {quantas(resumo.disponiveis, 'disponível', 'disponíveis')} ·{' '}
+            {quantas(resumo.reservadas, 'reservada', 'reservadas')} · {quantas(resumo.total, 'unidade', 'unidades')}
+          </p>
+
+          <ul className="flex flex-col gap-1.5">
+            {plantas.map((p) => {
+              const daPlanta = unidades.filter((u) => u.floorplan_id === p.id);
+              const r = resumoDoEmpreendimento(daPlanta);
+              return (
+                <li key={p.id} className="rounded-lg bg-card-2 px-3 py-2">
+                  <p className="flex flex-wrap items-baseline justify-between gap-x-3">
+                    <b className="text-base font-bold">{p.name}</b>
+                    <span className="text-sm font-semibold text-tx-2">
+                      {r.disponiveis
+                        ? `${quantas(r.disponiveis, 'disponível', 'disponíveis')}${
+                            r.menorCents !== null ? `, a partir de ${reaisComCentavos(r.menorCents)}` : ''
+                          }`
+                        : r.reservadas
+                          ? quantas(r.reservadas, 'reservada', 'reservadas')
+                          : daPlanta.length
+                            ? 'Esgotada'
+                            : 'Sem unidades'}
+                    </span>
+                  </p>
+                  {resumoDaPlanta(p) && <p className="text-sm text-tx-3">{resumoDaPlanta(p)}</p>}
+                </li>
+              );
+            })}
+          </ul>
+
+          <EspelhoDasUnidades unidades={unidades} tipo={tipo} />
+        </div>
       )}
     </div>
   );

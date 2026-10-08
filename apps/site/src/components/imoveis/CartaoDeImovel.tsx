@@ -1,4 +1,4 @@
-import type { FinalidadeDoSite } from '@juliana/contracts';
+import { CONSTRUCTION_STATUS_LABEL, type FinalidadeDoSite } from '@juliana/contracts';
 import { ArrowRight, Building2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { numerosDoImovel } from '@/lib/imoveis/numeros';
 import type { Imovel } from '@/lib/imoveis/tipos';
 
+import { AvisoIlustrativa } from './AvisoIlustrativa';
 import { BotaoFavorito } from './BotaoFavorito';
 import { ICONE_DO_NUMERO } from './Caracteristicas';
 import { Preco } from './Preco';
@@ -36,6 +37,8 @@ function Etiqueta({ imovel, finalidade }: { imovel: Imovel; finalidade?: Finalid
 export function CartaoDeImovel({ imovel, finalidade, prioridade = false }: Props) {
   const capa = imovel.fotos[0];
   const onde = [imovel.cidade, imovel.bairro].filter(Boolean).join(' - ');
+  // "Na planta", "Em obras": no lançamento, é o que a pessoa filtra de olho.
+  const obra = imovel.empreendimento?.obra ?? null;
 
   // Os mesmos números da página do imóvel, na mesma ordem, com quartos e
   // suítes lado a lado. A área entra na lista: numa linha à parte, o cartão
@@ -65,8 +68,10 @@ export function CartaoDeImovel({ imovel, finalidade, prioridade = false }: Props
             <span className="sr-only">Sem foto</span>
           </div>
         )}
+        {capa?.ilustrativa && <AvisoIlustrativa />}
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1 text-[0.6875rem] font-semibold tracking-wider text-white uppercase">
           <Etiqueta imovel={imovel} finalidade={finalidade} />
+          {obra && <span className="bg-white/90 px-2.5 py-1 text-tinta">{CONSTRUCTION_STATUS_LABEL[obra]}</span>}
           {imovel.status === 'reservado' && <span className="bg-tinta/80 px-2.5 py-1">Reservado</span>}
         </div>
         <div className="absolute right-3 top-3 z-10">

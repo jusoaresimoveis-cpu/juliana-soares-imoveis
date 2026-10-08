@@ -29,6 +29,9 @@ export const LISTA_COLUNAS = [
   'is_published',
   'is_featured',
   'created_at',
+  // O empreendimento mostra "A partir de R$ X · N disponíveis" no cartão.
+  'has_units',
+  'units_available',
 ].join(', ');
 
 export interface Property {
@@ -56,6 +59,13 @@ export interface Property {
   is_published: boolean;
   is_featured: boolean;
   created_at: string;
+  /**
+   * Empreendimento com várias unidades (migration 20261009000000): o preço é o
+   * "a partir de" e a situação vem das unidades, calculados pelo banco.
+   */
+  has_units: boolean;
+  /** Quantas unidades estão disponíveis. Calculado; só leitura. */
+  units_available: number;
 
   /*
    * Plano de pagamento.
@@ -85,6 +95,16 @@ export interface Property {
   condo_fee_cents?: number | null;
   iptu_year_cents?: number | null;
   rental_guarantees?: string[] | null;
+
+  /* O empreendimento. A construtora é só do CRM: nunca sai no site. */
+  developer?: string | null;
+  /** Previsão de entrega, guardada como 1º de janeiro: só o ano sai no site. */
+  delivery_at?: string | null;
+  construction_status?: string | null;
+  incorporation_registry?: string | null;
+  incorporation_registry_office?: string | null;
+  /** Mês da tabela de preços aplicada (dia 1). Fora do mês corrente, o site mostra "Consulte". */
+  units_table_month?: string | null;
 }
 
 /** O arquivo de antes da marca, guardado para desfazer (migration 20260926000100). */
@@ -111,6 +131,8 @@ export interface PropertyMedia {
   mime_type: string | null;
   /** A foto no ar tem a marca d'água. */
   marca_dagua: boolean;
+  /** Render ou decorado: o site avisa "Imagem ilustrativa" na foto. */
+  is_illustrative: boolean;
   original_sem_marca: OriginalSemMarca | null;
 }
 
@@ -190,7 +212,7 @@ export function usePropertyMedia(propertyId: string | null) {
       const { data, error } = await supabase
         .from('property_media')
         .select(
-          'id, property_id, kind, storage_path, position, is_cover, caption, alt_text, bytes, width, height, mime_type, marca_dagua, original_sem_marca',
+          'id, property_id, kind, storage_path, position, is_cover, caption, alt_text, bytes, width, height, mime_type, marca_dagua, original_sem_marca, is_illustrative',
         )
         .eq('property_id', propertyId!)
         // A ordem do site (`site_imoveis`): a capa primeiro, depois a posição.
@@ -458,7 +480,20 @@ export function useMediaActions(orgId: string | undefined, propertyId: string | 
     onSettled: invalidar,
   });
 
-  return { enviar, reordenar, ordenar, remover, porMarca, tirarMarca };
+  /*
+   * "Imagem ilustrativa": o empreendimento na planta mostra render, e o site
+   * avisa na foto (nada inventado no site). Uma foto ou várias numa gravação.
+   */
+  const ilustrativa = useMutation({
+    mutationFn: async ({ ids, valor }: { ids: string[]; valor: boolean }) => {
+      if (!ids.length) return;
+      const { error } = await supabase.from('property_media').update({ is_illustrative: valor }).in('id', ids);
+      if (error) throw error;
+    },
+    onSettled: invalidar,
+  });
+
+  return { enviar, reordenar, ordenar, remover, porMarca, tirarMarca, ilustrativa };
 }
 
 /**

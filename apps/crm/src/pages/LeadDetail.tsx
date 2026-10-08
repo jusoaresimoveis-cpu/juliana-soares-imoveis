@@ -38,7 +38,7 @@ import { ReminderDialog } from '@/components/reminders/ReminderDialog';
 import { useLembretes, useCriarLembrete, useAcoesLembrete } from '@/hooks/useReminders';
 import { diasDesde, tempoAte } from '@/hooks/useLeadPreview';
 import type { PipelineStage, TeamMember } from '@/types/db';
-import { brl, cn, initials } from '@/lib/utils';
+import { brl, cn, initials, valoresDoImovel } from '@/lib/utils';
 import {
   LEAD_SOURCE_LABEL_CURTO,
   LOSS_REASON_LABEL,
@@ -686,9 +686,10 @@ function AbaImoveis({ leadId, orgId }: { leadId: string; orgId: string | undefin
                   {i.properties?.public_code && ` · ${i.properties.public_code}`}
                 </p>
               </div>
-              {i.properties?.price_cents != null && (
-                <span className="shrink-0 text-base font-bold text-ok">
-                  {brl.format(i.properties.price_cents / 100)}
+              {/* Pelo regime e, no empreendimento, com as disponíveis: "A partir de R$ X · N disponíveis". */}
+              {i.properties && valoresDoImovel(i.properties).length > 0 && (
+                <span className="shrink-0 text-right text-base font-bold text-ok">
+                  {valoresDoImovel(i.properties).join(' · ')}
                 </span>
               )}
               <button
@@ -728,9 +729,9 @@ function AbaImoveis({ leadId, orgId }: { leadId: string; orgId: string | undefin
                       {p.neighborhood} · {p.public_code}
                     </span>
                   </span>
-                  {p.price_cents != null && (
-                    <span className="shrink-0 text-base font-bold text-tx-2">
-                      {brl.format(p.price_cents / 100)}
+                  {valoresDoImovel(p).length > 0 && (
+                    <span className="shrink-0 text-right text-base font-bold text-tx-2">
+                      {valoresDoImovel(p).join(' · ')}
                     </span>
                   )}
                 </button>
