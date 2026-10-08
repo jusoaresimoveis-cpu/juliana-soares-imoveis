@@ -77,22 +77,6 @@ export const PROPERTY_STATUS_LABEL: Record<PropertyStatus, string> = {
 export const MEDIA_KINDS = ['image', 'video', 'document', 'tour'] as const;
 export type MediaKind = (typeof MEDIA_KINDS)[number];
 
-/** Comodidades mais buscadas. Lista aberta — o banco aceita qualquer texto. */
-export const COMMON_AMENITIES = [
-  'piscina',
-  'churrasqueira',
-  'academia',
-  'salao_festas',
-  'playground',
-  'quadra',
-  'portaria_24h',
-  'elevador',
-  'varanda_gourmet',
-  'mobiliado',
-  'aceita_pet',
-  'vista_mar',
-] as const;
-
 export const PROPERTY_PURPOSE_LABEL: Record<PropertyPurpose, string> = {
   venda: 'Venda',
   aluguel: 'Aluguel',

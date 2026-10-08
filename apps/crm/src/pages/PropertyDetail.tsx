@@ -32,6 +32,8 @@ import {
   PROPERTY_TYPE_LABEL,
   PROPERTY_STATUS_LABEL,
   RENTAL_GUARANTEE_LABEL,
+  caracteristicasParaMostrar,
+  normalizarCaracteristicas,
   precoDeTabela,
   rotuloDoRegime,
   type RentalGuarantee,
@@ -78,6 +80,7 @@ export default function PropertyDetail() {
   const capa = imagens[foto] ?? imagens[0];
   // O "de" do "de R$ X por R$ Y" que o site mostra.
   const tabela = imovel.for_sale ? precoDeTabela(imovel.price_cents, imovel.original_price_cents) : null;
+  const sobre = caracteristicasParaMostrar(normalizarCaracteristicas(imovel.features), imovel.property_type);
 
   return (
     <div className="flex flex-col gap-4 pb-4">
@@ -227,14 +230,40 @@ export default function PropertyDetail() {
               </p>
             )}
 
-            {imovel.amenities?.length > 0 && (
-              <div className="mt-4 flex flex-wrap gap-1.5 border-t border-line pt-4">
-                {imovel.amenities.map((a) => (
-                  <span key={a} className="rounded-full bg-card-2 px-2.5 py-1 text-sm font-semibold text-tx-2">
-                    {a}
-                  </span>
+          </div>
+
+          {/* "Sobre o imóvel": o que o site mostra abaixo da descrição. */}
+          <div className="rounded-lg bg-card p-5 shadow-card">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-bold">Sobre o imóvel</h2>
+              <button
+                type="button"
+                onClick={() => setEditando('sobre')}
+                className="inline-flex items-center gap-1 text-sm font-semibold text-pri hover:underline"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                {sobre.length ? 'Editar' : 'Marcar itens'}
+              </button>
+            </div>
+            {sobre.length ? (
+              <div className="flex flex-col gap-3">
+                {sobre.map(({ categoria, titulo, itens }) => (
+                  <div key={categoria}>
+                    <p className="mb-1.5 text-sm font-bold uppercase text-tx-3">{titulo}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {itens.map((item) => (
+                        <span key={item} className="rounded-full bg-card-2 px-2.5 py-1 text-sm font-semibold text-tx-2">
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
+            ) : (
+              <p className="text-base text-tx-3">
+                Nenhum item marcado. Piscina, box de praia, churrasqueira: é o que o cliente procura no anúncio.
+              </p>
             )}
           </div>
 

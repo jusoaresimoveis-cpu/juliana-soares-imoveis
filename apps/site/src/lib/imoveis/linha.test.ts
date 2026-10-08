@@ -28,7 +28,7 @@ const linha = (mudancas: Partial<LinhaDoSite> = {}): LinhaDoSite => ({
   area_total: 90,
   neighborhood: 'Meia Praia',
   city: 'Itapema',
-  amenities: ['piscina'],
+  features: { lazer: { outros: ['Piscina aquecida'] }, cozinha: { itens: ['ilha'] } },
   is_featured: true,
   updated_at: '2026-09-24T12:00:00Z',
   media: [{ storage_path: 'org/imovel/capa.webp', width: 2000, height: 1500, alt_text: 'Sala', caption: null }],
@@ -83,6 +83,11 @@ describe('imovelDaLinha', () => {
       BANCO,
     ).fotos;
     expect(foto).toMatchObject({ largura: 1600, altura: 1200, alt: 'Apartamento com 3 quartos em Meia Praia, Itapema, foto 1' });
+  });
+
+  it('"sobre o imóvel" chega limpo: categoria desconhecida fica de fora', () => {
+    expect(imovelDaLinha(linha(), BANCO).caracteristicas).toEqual({ lazer: { outros: ['Piscina aquecida'] } });
+    expect(imovelDaLinha(linha({ features: null }), BANCO).caracteristicas).toEqual({});
   });
 
   it('valor fora do contrato não quebra a página', () => {

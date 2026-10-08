@@ -2076,6 +2076,7 @@ export type Database = {
           description: string | null
           developer: string | null
           down_payment_cents: number | null
+          features: Json
           floor: number | null
           for_rent: boolean
           for_sale: boolean
@@ -2139,6 +2140,7 @@ export type Database = {
           description?: string | null
           developer?: string | null
           down_payment_cents?: number | null
+          features?: Json
           floor?: number | null
           for_rent?: boolean
           for_sale?: boolean
@@ -2202,6 +2204,7 @@ export type Database = {
           description?: string | null
           developer?: string | null
           down_payment_cents?: number | null
+          features?: Json
           floor?: number | null
           for_rent?: boolean
           for_sale?: boolean

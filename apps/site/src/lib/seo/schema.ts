@@ -1,4 +1,4 @@
-import { PROPERTY_TYPE_LABEL, type PropertyType } from '@juliana/contracts';
+import { PROPERTY_TYPE_LABEL, caracteristicasParaMostrar, type PropertyType } from '@juliana/contracts';
 
 import { SITE } from '@/config/site';
 import { STATUS_NA_VITRINE, type Imovel } from '@/lib/imoveis/tipos';
@@ -84,6 +84,12 @@ export function schemaDoImovel(imovel: Imovel, url: string): Schema {
     });
   }
 
+  // O que a unidade, o condomínio e o lazer têm, como "comodidades" do schema.org.
+  // As informações adicionais ficam de fora: são texto livre, não comodidade.
+  const comodidades = caracteristicasParaMostrar(imovel.caracteristicas, imovel.tipo)
+    .filter((categoria) => categoria.categoria !== 'adicionais')
+    .flatMap((categoria) => categoria.itens);
+
   return {
     '@context': 'https://schema.org',
     '@type': 'RealEstateListing',
@@ -103,6 +109,15 @@ export function schemaDoImovel(imovel: Imovel, url: string): Schema {
       ...(imovel.banheiros ? { numberOfBathroomsTotal: imovel.banheiros } : {}),
       ...(imovel.areaM2
         ? { floorSize: { '@type': 'QuantitativeValue', value: imovel.areaM2, unitCode: 'MTK' } }
+        : {}),
+      ...(comodidades.length
+        ? {
+            amenityFeature: comodidades.map((nome) => ({
+              '@type': 'LocationFeatureSpecification',
+              name: nome,
+              value: true,
+            })),
+          }
         : {}),
       address: {
         '@type': 'PostalAddress',

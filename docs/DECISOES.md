@@ -193,6 +193,21 @@ relação ao briefing, já combinado:
     meia ordem se a rede cair, duas arrastadas não chegam trocadas, e o site é
     avisado uma vez, não uma por foto. Apagar a capa passa a capa para a
     primeira foto que sobrou.
+- **"Sobre o imóvel"** (08/10): aba do cadastro com itens prontos para marcar
+  em três categorias (a unidade, com o nome do tipo, "Apartamento" ou "Casa";
+  o empreendimento; a área de lazer), um campo para digitar o que faltar em
+  cada uma, e "Informações adicionais", só texto. O site mostra na seção
+  "Sobre o imóvel", logo abaixo da descrição, e manda os itens ao Google como
+  `amenityFeature`.
+  - A lista (`ITENS_DO_IMOVEL`, packages/contracts) saiu da pesquisa do usuário
+    em portais, sem sinônimos repetidos nem enchimento, e sem repetir o que o
+    cadastro já tem em campo próprio (quartos, suítes, banheiros, vagas, área).
+    Os subgrupos só organizam os quadradinhos do CRM.
+  - Guardado em `properties.features` (jsonb por categoria). A coluna antiga
+    `amenities`, sem categoria, estava vazia em todos os imóveis e saiu do site.
+    Tirar um id da lista exige migration que troque o id nos imóveis.
+  - Bairro, cidade e UF foram para a aba "Dados": a aba "Localização" tinha só
+    os três campos.
 
 ## Leads e WhatsApp
 

@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import {
   PROPERTY_TYPE_PLURAL,
   PROPERTY_TYPES,
-  rotuloDaComodidade,
   slugify,
   tipoPeloSlug,
   TODOS_OS_TIPOS,
@@ -29,12 +28,5 @@ describe('slugs de tipo', () => {
   it('vão e voltam', () => {
     for (const tipo of PROPERTY_TYPES) expect(tipoPeloSlug(PROPERTY_TYPE_PLURAL[tipo].slug)).toBe(tipo);
     expect(tipoPeloSlug('mansoes')).toBeNull();
-  });
-});
-
-describe('rotuloDaComodidade', () => {
-  it('usa o rótulo da lista, ou arruma o texto livre', () => {
-    expect(rotuloDaComodidade('salao_festas')).toBe('Salão de festas');
-    expect(rotuloDaComodidade('sauna_seca')).toBe('Sauna seca');
   });
 });

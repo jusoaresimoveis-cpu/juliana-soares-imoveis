@@ -77,6 +77,8 @@ export interface Property {
   /* Os campos que a ficha carrega e a lista não: o formulário abre dela. */
   /** Preço de TABELA da venda com desconto: o "de" do "de R$ X por R$ Y". */
   original_price_cents?: number | null;
+  /** "Sobre o imóvel" (jsonb): passe por `normalizarCaracteristicas` antes de usar. */
+  features?: unknown;
   public_title?: string | null;
   suites?: number | null;
   area_built?: number | null;
@@ -226,8 +228,11 @@ export function useSalvarImovel(orgId: string | undefined) {
       if (error) throw error;
       return data.id;
     },
-    onSuccess: () => {
+    // A ficha também: sem isto ela seguia com a linha de antes, e o formulário
+    // aberto de novo dali regravava o valor velho por cima do que acabou de ser salvo.
+    onSuccess: (id) => {
       void qc.invalidateQueries({ queryKey: ['properties'] });
+      void qc.invalidateQueries({ queryKey: ['imovel', id] });
     },
   });
 }
@@ -483,7 +488,6 @@ export interface PropertyFull extends Property {
   complement: string | null;
   zip_code: string | null;
   show_exact_address: boolean;
-  amenities: string[];
   internal_notes: string | null;
   published_at: string | null;
   updated_at: string;

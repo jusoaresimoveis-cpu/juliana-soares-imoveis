@@ -2,6 +2,7 @@ import {
   PROPERTY_STATUSES,
   PROPERTY_TYPE_LABEL,
   PROPERTY_TYPES,
+  normalizarCaracteristicas,
   precoDeTabela,
   type FinalidadeDoSite,
   type PropertyStatus,
@@ -44,7 +45,8 @@ export interface LinhaDoSite {
   area_total: number | null;
   neighborhood: string | null;
   city: string | null;
-  amenities: string[] | null;
+  /** "Sobre o imóvel" (jsonb). Vem como o banco guardou: passa por `normalizarCaracteristicas`. */
+  features: unknown;
   is_featured: boolean;
   updated_at: string;
   media: MidiaDaLinha[] | null;
@@ -126,7 +128,7 @@ export function imovelDaLinha(linha: LinhaDoSite, urlDoBanco: string): Imovel {
     bairro: linha.neighborhood?.trim() || null,
     cidade: linha.city?.trim() || null,
     fotos,
-    comodidades: linha.amenities ?? [],
+    caracteristicas: normalizarCaracteristicas(linha.features),
     destaque: linha.is_featured,
     atualizadoEm: linha.updated_at,
   };

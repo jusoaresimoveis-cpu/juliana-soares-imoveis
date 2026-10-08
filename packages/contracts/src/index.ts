@@ -34,5 +34,6 @@ export * from './angulos';
 
 export * from './aluguel';
 export * from './imovel';
+export * from './caracteristicas';
 export * from './localidades';
 export * from './rastreio';

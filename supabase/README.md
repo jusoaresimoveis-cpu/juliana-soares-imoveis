@@ -45,6 +45,10 @@ supabase/
   R$ Y". Só existe acima do preço de venda.
 - `20261006000100_ordem_das_fotos.sql`: a ordem das fotos gravada de uma vez
   (`ordenar_midia`), depois de cada arrastada no CRM; a primeira foto é a capa.
+- `20261008000000_sobre_o_imovel.sql`: "Sobre o imóvel" em `properties.features`
+  (itens marcados e texto livre da unidade, do empreendimento, do lazer e das
+  informações adicionais), com o formato conferido por `caracteristicas_validas`.
+  O site lê `features` no lugar da coluna antiga `amenities`.
 
 Dado de cliente não entra em migration: fica em `seeds/`, para o mesmo schema
 servir a outro cliente sem limpeza.

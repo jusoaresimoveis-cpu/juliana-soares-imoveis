@@ -1,4 +1,4 @@
-import { PROPERTY_STATUS_LABEL, rotuloDaComodidade } from '@juliana/contracts';
+import { PROPERTY_STATUS_LABEL } from '@juliana/contracts';
 import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 
@@ -8,6 +8,7 @@ import { ContadorDeVisita } from '@/components/imoveis/ContadorDeVisita';
 import { GaleriaDoImovel } from '@/components/imoveis/GaleriaDoImovel';
 import { Caracteristicas } from '@/components/imoveis/Caracteristicas';
 import { Preco } from '@/components/imoveis/Preco';
+import { SobreOImovel } from '@/components/imoveis/SobreOImovel';
 import { JsonLd } from '@/components/JsonLd';
 import { Migalhas } from '@/components/Migalhas';
 import { SITE } from '@/config/site';
@@ -106,23 +107,7 @@ export default async function Page(props: PageProps<'/imovel/[slug]'>) {
 
       <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
         <div className="space-y-6">
-          {imovel.descricao && (
-            <section className="space-y-2">
-              <h2 className="font-serif text-2xl">Sobre o imóvel</h2>
-              <p className="whitespace-pre-line leading-relaxed">{imovel.descricao}</p>
-            </section>
-          )}
-
-          {imovel.comodidades.length > 0 && (
-            <section className="space-y-2">
-              <h2 className="font-serif text-2xl">Comodidades</h2>
-              <ul className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
-                {imovel.comodidades.map((comodidade) => (
-                  <li key={comodidade}>{rotuloDaComodidade(comodidade)}</li>
-                ))}
-              </ul>
-            </section>
-          )}
+          <SobreOImovel imovel={imovel} />
         </div>
 
         {/* No celular, preço e botão vêm logo depois do título, antes da descrição:

@@ -1,4 +1,4 @@
-import type { FinalidadeDoSite, PropertyStatus, PropertyType } from '@juliana/contracts';
+import type { CaracteristicasDoImovel, FinalidadeDoSite, PropertyStatus, PropertyType } from '@juliana/contracts';
 
 /**
  * O imóvel como o SITE precisa dele.
@@ -59,7 +59,8 @@ export interface Imovel {
   cidade: string | null;
 
   fotos: FotoDoImovel[];
-  comodidades: string[];
+  /** "Sobre o imóvel": itens marcados e texto livre por categoria, já normalizados. */
+  caracteristicas: CaracteristicasDoImovel;
   destaque: boolean;
   /** ISO 8601. Entra no sitemap como `lastModified`. */
   atualizadoEm: string;

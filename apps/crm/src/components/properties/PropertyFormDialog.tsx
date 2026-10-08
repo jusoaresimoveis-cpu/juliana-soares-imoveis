@@ -12,9 +12,12 @@ import {
   REINFORCEMENT_PERIOD_LABEL,
   RENTAL_GUARANTEES,
   RENTAL_GUARANTEE_LABEL,
+  normalizarCaracteristicas,
   precoDeTabela,
   resumoDoPlano,
+  type CaracteristicasDoImovel,
   type PaymentMethod,
+  type PropertyType,
   type RentalGuarantee,
 } from '@contracts';
 import {
@@ -25,11 +28,13 @@ import {
   type Proprietario,
 } from '@/hooks/useProperties';
 import { telefoneLegivel } from '@/exportacao';
+import type { Json } from '@/lib/database.types';
 import { MediaManager } from './MediaManager';
+import { SobreOImovel } from './SobreOImovel';
 import { Switch } from '@/components/Switch';
 import { brlCents, cn } from '@/lib/utils';
 
-export type AbaDoImovel = 'dados' | 'local' | 'pagamento' | 'proprietario' | 'midia';
+export type AbaDoImovel = 'dados' | 'sobre' | 'pagamento' | 'proprietario' | 'midia';
 
 interface Props {
   orgId: string | undefined;
@@ -139,6 +144,9 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
     payment_notes: imovel?.payment_notes ?? '',
   });
 
+  // A aba "Sobre o imóvel": itens marcados e texto livre por categoria.
+  const [sobre, setSobre] = useState<CaracteristicasDoImovel>(() => normalizarCaracteristicas(imovel?.features));
+
   const [formas, setFormas] = useState<PaymentMethod[]>(
     (imovel?.payment_methods as PaymentMethod[] | undefined) ?? [],
   );
@@ -202,6 +210,7 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
       neighborhood: f.neighborhood.trim() || null,
       city: f.city.trim() || null,
       state: f.state.trim().toUpperCase() || null,
+      features: normalizarCaracteristicas(sobre) as Json,
       is_published: f.is_published,
       is_featured: f.is_featured,
 
@@ -305,7 +314,7 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
           {(
             [
               ['dados', 'Dados'],
-              ['local', 'Localização'],
+              ['sobre', 'Sobre o imóvel'],
               ['pagamento', 'Pagamento'],
               ['proprietario', 'Proprietário'],
               ['midia', 'Mídia'],
@@ -352,6 +361,24 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
                 placeholder="Vazio: o site monta, como “Apartamento com 2 quartos em Meia Praia, Itapema”"
                 className={inputCls}
               />
+            </Campo>
+
+            {/* Moravam numa aba só para elas; são três campos e cabem aqui. */}
+            <Campo className="col-span-2" rotulo="Bairro">
+              <input value={f.neighborhood} onChange={(e) => set('neighborhood')(e.target.value)} className={inputCls} />
+            </Campo>
+            {/* Sugere as cidades atendidas pelo nome exato: é por ele que o site
+                monta as páginas de cidade. */}
+            <Campo rotulo="Cidade">
+              <input list="cidades-atendidas" value={f.city} onChange={(e) => set('city')(e.target.value)} className={inputCls} />
+              <datalist id="cidades-atendidas">
+                {CIDADES_ATENDIDAS.map((c) => (
+                  <option key={c.slug} value={c.nome} />
+                ))}
+              </datalist>
+            </Campo>
+            <Campo rotulo="UF">
+              <input maxLength={2} value={f.state} onChange={(e) => set('state')(e.target.value.toUpperCase())} className={inputCls} />
             </Campo>
 
             <Campo className="col-span-2" rotulo="Tipo">
@@ -489,29 +516,8 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
           </div>
         )}
 
-        {aba === 'local' && (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Campo className="col-span-2" rotulo="Bairro">
-              <input value={f.neighborhood} onChange={(e) => set('neighborhood')(e.target.value)} className={inputCls} />
-            </Campo>
-            {/* Sugere as cidades atendidas pelo nome exato: é por ele que o site
-                monta as páginas de cidade. */}
-            <Campo rotulo="Cidade">
-              <input list="cidades-atendidas" value={f.city} onChange={(e) => set('city')(e.target.value)} className={inputCls} />
-              <datalist id="cidades-atendidas">
-                {CIDADES_ATENDIDAS.map((c) => (
-                  <option key={c.slug} value={c.nome} />
-                ))}
-              </datalist>
-            </Campo>
-            <Campo rotulo="UF">
-              <input maxLength={2} value={f.state} onChange={(e) => set('state')(e.target.value.toUpperCase())} className={inputCls} />
-            </Campo>
-            <p className="col-span-2 text-sm leading-relaxed text-tx-3 sm:col-span-4">
-              O site mostra só bairro e cidade. Endereço completo e mapa entram junto com a nova
-              página do imóvel.
-            </p>
-          </div>
+        {aba === 'sobre' && (
+          <SobreOImovel valor={sobre} onMudar={setSobre} tipo={f.property_type as PropertyType} />
         )}
 
         {aba === 'pagamento' && (
