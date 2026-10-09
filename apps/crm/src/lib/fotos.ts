@@ -53,6 +53,26 @@ export interface FotoPronta {
   altura: number;
 }
 
+function desenharReduzida(
+  bitmap: ImageBitmap,
+  largura: number,
+  altura: number,
+  marcaDagua: boolean,
+): HTMLCanvasElement {
+  const tela = document.createElement('canvas');
+  tela.width = largura;
+  tela.height = altura;
+  const ctx = tela.getContext('2d');
+  if (!ctx) throw new Error('Este navegador não conseguiu preparar a foto.');
+  // Fundo branco: um PNG com transparência viraria fundo preto no JPEG.
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, largura, altura);
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(bitmap, 0, 0, largura, altura);
+  if (marcaDagua) desenharMarcaDagua(ctx, largura, altura);
+  return tela;
+}
+
 /**
  * Abre, gira conforme o celular gravou, reduz, põe a marca d'água se pedida e
  * devolve em JPEG, com as dimensões.
@@ -77,17 +97,7 @@ export async function prepararFoto(arquivo: File, { marcaDagua = false } = {}): 
     }
 
     const { largura, altura } = dimensoesReduzidas(bitmap.width, bitmap.height);
-    const tela = document.createElement('canvas');
-    tela.width = largura;
-    tela.height = altura;
-    const ctx = tela.getContext('2d');
-    if (!ctx) throw new Error('Este navegador não conseguiu preparar a foto.');
-    // Fundo branco: um PNG com transparência viraria fundo preto no JPEG.
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, largura, altura);
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(bitmap, 0, 0, largura, altura);
-    if (marcaDagua) desenharMarcaDagua(ctx, largura, altura);
+    const tela = desenharReduzida(bitmap, largura, altura, marcaDagua);
 
     const reduzida = await new Promise<Blob | null>((pronto) => tela.toBlob(pronto, 'image/jpeg', QUALIDADE));
     if (!reduzida) throw new Error(`Não deu para reduzir "${arquivo.name}".`);
