@@ -21,7 +21,7 @@ export const GRAPH_VERSION = 'v21.0';
 export const GRAPH = `https://graph.facebook.com/${GRAPH_VERSION}`;
 
 /*
- * Estas três listas são cópia de `packages/contracts/meta.ts`.
+ * Estas três listas são cópia de `packages/contracts/meta-gasto.ts`.
  *
  * Não é preguiça: o Deno não alcança o pacote, e o teste
  * `meta.test.ts` do pacote lê ESTE arquivo como texto e compara os números — se

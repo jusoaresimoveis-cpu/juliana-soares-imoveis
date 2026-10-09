@@ -46,7 +46,7 @@ const JANELA_MS = 7 * 24 * 3_600_000;
  * OS DOIS VOCABULÁRIOS DA META.
  *
  * Cópia de `CONVERSAO_NA_CONVERSA` e `CONVERSAO_NO_SITE`, em
- * `packages/contracts/meta.ts` — a função de borda roda em Deno e não enxerga o
+ * `packages/contracts/meta-conversoes.ts` — a função de borda roda em Deno e não enxerga o
  * pacote de contratos. A cópia é conferida por teste (`src/conversoes.test.ts`),
  * a mesma disciplina das listas de qualificação na `landing-lead`.
  *
