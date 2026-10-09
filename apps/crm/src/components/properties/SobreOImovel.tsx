@@ -280,6 +280,6 @@ export function dividir(categoria: CategoriaDoImovel, texto: string): string[] {
   return texto
     .replace(/(\d),(\d)/g, '$1\u0000$2')
     .split(/[,;\n]/)
-    .map((parte) => parte.replace(/\u0000/g, ',').trim())
+    .map((parte) => parte.replaceAll('\u0000', ',').trim())
     .filter(Boolean);
 }
