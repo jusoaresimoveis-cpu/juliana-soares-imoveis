@@ -13,10 +13,9 @@
 //
 // Severidade pela contagem medida na instalação (08/10/2026), não por gosto:
 // regra sem violação é "error". Com violação, a contagem fica anotada ao lado e
-// é a linha de base. Nas regras quality/*, a linha de base é a lista dos
-// arquivos que já violavam: eles ficam em "warn" e o resto do código em
-// "error", então dívida nova quebra o lint. Arquivo consertado sai da lista;
-// lista vazia, bloco apagado.
+// é a linha de base. Nas regras quality/*, a linha de base era a lista dos
+// arquivos que já violavam, em "warn" com o resto do código em "error"; a
+// queima de avisos (09/10/2026) zerou a lista e o bloco saiu.
 import js from "@eslint/js";
 import { defineConfig, globalIgnores } from "eslint/config";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -36,12 +35,6 @@ const FONTES = [
 const TESTES = [
   `**/*.{test,spec}.${EXTENSOES}`,
   `**/{__tests__,__mocks__,fixtures,mocks}/**/*.${EXTENSOES}`,
-];
-
-// Acima de MAX_LINES na instalação (linhas ao lado), fora os testes.
-const ACIMA_DO_TETO = [
-  "apps/crm/src/pages/PropertyDetail.tsx", // 586
-  "apps/crm/src/components/settings/WhatsApp.tsx", // 374
 ];
 
 export default defineConfig([
@@ -139,15 +132,6 @@ export default defineConfig([
       "max-lines-per-function": "off",
       "max-statements": "off",
     },
-  },
-
-  // Linhas de base por arquivo. Estes blocos TÊM que vir depois do que liga as
-  // regras: no flat config o bloco de baixo vence, e um "warn" ou "off" posto
-  // antes seria desfeito em silêncio pelo "error". Só a severidade muda; as
-  // opções do bloco de cima continuam valendo.
-  {
-    files: ACIMA_DO_TETO,
-    rules: { "quality/max-lines": "warn" }, // 2
   },
 
   // Exceções de verdade, não dívida.
