@@ -148,24 +148,30 @@ export function tituloPadrao(
   const onde = [linha.neighborhood?.trim(), linha.city?.trim()].filter(Boolean).join(', ');
   const lugar = onde ? ` em ${onde}` : '';
 
-  if (linha.empreendimento) {
-    const tipo = conhecido ? PROPERTY_TYPE_PLURAL[conhecido].label : 'Imóveis';
-    // As plantas dos números do cartão (as que têm unidade disponível), para o
-    // título e o cartão não discordarem. O total já soma as suítes, e por isso
-    // é "dormitórios", como no cartão (ver `numeros.ts`). O título não leva
-    // preço, e por isso tanto faz a tabela do mês.
-    const daLinha = plantasDaLinha(linha.empreendimento.floorplans, false);
-    const plantas = plantasAVenda({ empreendimento: { plantas: daLinha } });
-    const dormitorios = numerosDasPlantas(plantas).dormitorios.filter((n) => n > 0);
-    const rotulo = Math.max(0, ...dormitorios) === 1 ? 'dormitório' : 'dormitórios';
-    const quantos = dormitorios.length ? ` com ${faixaDeContagem(dormitorios)} ${rotulo}` : '';
-    return `${tipo}${quantos}${lugar}`;
-  }
+  if (linha.empreendimento) return tituloDoEmpreendimento(conhecido, linha.empreendimento, lugar);
 
   const tipo = conhecido ? PROPERTY_TYPE_LABEL[conhecido] : 'Imóvel';
   const dormitorios = (linha.bedrooms ?? 0) + (linha.suites ?? 0);
   const quartos = dormitorios ? ` com ${plural(dormitorios, 'quarto', 'quartos')}` : '';
   return `${tipo}${quartos}${lugar}`;
+}
+
+function tituloDoEmpreendimento(
+  conhecido: PropertyType | null,
+  empreendimento: EmpreendimentoDaLinha,
+  lugar: string,
+): string {
+  const tipo = conhecido ? PROPERTY_TYPE_PLURAL[conhecido].label : 'Imóveis';
+  // As plantas dos números do cartão (as que têm unidade disponível), para o
+  // título e o cartão não discordarem. O total já soma as suítes, e por isso
+  // é "dormitórios", como no cartão (ver `numeros.ts`). O título não leva
+  // preço, e por isso tanto faz a tabela do mês.
+  const daLinha = plantasDaLinha(empreendimento.floorplans, false);
+  const plantas = plantasAVenda({ empreendimento: { plantas: daLinha } });
+  const dormitorios = numerosDasPlantas(plantas).dormitorios.filter((n) => n > 0);
+  const rotulo = Math.max(0, ...dormitorios) === 1 ? 'dormitório' : 'dormitórios';
+  const quantos = dormitorios.length ? ` com ${faixaDeContagem(dormitorios)} ${rotulo}` : '';
+  return `${tipo}${quantos}${lugar}`;
 }
 
 /**
@@ -236,11 +242,35 @@ function empreendimentoDaLinha(linha: EmpreendimentoDaLinha, naVitrineDoSite: bo
   };
 }
 
-export function imovelDaLinha(linha: LinhaDoSite, urlDoBanco: string, agora: Date = new Date()): Imovel {
-  const titulo = linha.public_title?.trim() || tituloPadrao(linha);
+function finalidadesDaLinha(linha: LinhaDoSite): FinalidadeDoSite[] {
   const finalidades: FinalidadeDoSite[] = [];
   if (linha.for_rent) finalidades.push('aluguel');
   if (linha.for_sale) finalidades.push('venda');
+  return finalidades;
+}
+
+function precosDaLinha(
+  linha: LinhaDoSite,
+  empreendimento: Empreendimento | null,
+): Pick<Imovel, 'precoVendaCents' | 'precoDeTabelaCents' | 'aluguelCents'> {
+  return {
+    // Preço de um regime que o imóvel não tem não aparece, mesmo que tenha
+    // ficado gravado de quando ele estava à venda. No empreendimento, o "a
+    // partir de" só com a tabela do mês e com unidade disponível, como o banco
+    // manda (o do só reservadas seria o de uma reservada).
+    precoVendaCents:
+      linha.for_sale && (!empreendimento || (empreendimento.tabelaVigente && empreendimento.unidadesDisponiveis > 0))
+        ? linha.price_cents
+        : null,
+    precoDeTabelaCents:
+      linha.for_sale && !empreendimento ? precoDeTabela(linha.price_cents, linha.original_price_cents) : null,
+    aluguelCents: linha.for_rent ? linha.rent_cents : null,
+  };
+}
+
+export function imovelDaLinha(linha: LinhaDoSite, urlDoBanco: string, agora: Date = new Date()): Imovel {
+  const titulo = linha.public_title?.trim() || tituloPadrao(linha);
+  const finalidades = finalidadesDaLinha(linha);
 
   const status: PropertyStatus = situacaoConhecida(linha.status) ? linha.status : 'suspenso';
   const empreendimento = linha.empreendimento
@@ -266,17 +296,7 @@ export function imovelDaLinha(linha: LinhaDoSite, urlDoBanco: string, agora: Dat
     tipo: tipoConhecido(linha.property_type) ? linha.property_type : 'outro',
     finalidades,
     status,
-    // Preço de um regime que o imóvel não tem não aparece, mesmo que tenha
-    // ficado gravado de quando ele estava à venda. No empreendimento, o "a
-    // partir de" só com a tabela do mês e com unidade disponível, como o banco
-    // manda (o do só reservadas seria o de uma reservada).
-    precoVendaCents:
-      linha.for_sale && (!empreendimento || (empreendimento.tabelaVigente && empreendimento.unidadesDisponiveis > 0))
-        ? linha.price_cents
-        : null,
-    precoDeTabelaCents:
-      linha.for_sale && !empreendimento ? precoDeTabela(linha.price_cents, linha.original_price_cents) : null,
-    aluguelCents: linha.for_rent ? linha.rent_cents : null,
+    ...precosDaLinha(linha, empreendimento),
     condominioCents: linha.condo_fee_cents,
     iptuAnualCents: linha.iptu_year_cents,
     quartos: linha.bedrooms,
@@ -285,8 +305,8 @@ export function imovelDaLinha(linha: LinhaDoSite, urlDoBanco: string, agora: Dat
     vagas: linha.parking_spots,
     areaM2: linha.area_built ?? linha.area_total,
     areaTotalM2: linha.area_total,
-    bairro: linha.neighborhood?.trim() || null,
-    cidade: linha.city?.trim() || null,
+    bairro: textoOuNulo(linha.neighborhood),
+    cidade: textoOuNulo(linha.city),
     fotos,
     caracteristicas: normalizarCaracteristicas(linha.features),
     destaque: linha.is_featured,
