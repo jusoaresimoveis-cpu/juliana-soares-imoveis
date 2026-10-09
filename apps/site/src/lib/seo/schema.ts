@@ -86,11 +86,7 @@ function ofertaDoEmpreendimento(imovel: Imovel, disponibilidade: string): Schema
   };
 }
 
-export function schemaDoImovel(imovel: Imovel, url: string): Schema {
-  const disponibilidade = STATUS_NA_VITRINE.includes(imovel.status)
-    ? 'https://schema.org/InStock'
-    : 'https://schema.org/SoldOut';
-
+function ofertasDoImovel(imovel: Imovel, disponibilidade: string): Schema[] {
   const ofertas: Schema[] = [];
   if (imovel.finalidades.includes('aluguel') && imovel.aluguelCents) {
     ofertas.push({
@@ -116,6 +112,26 @@ export function schemaDoImovel(imovel: Imovel, url: string): Schema {
       priceCurrency: 'BRL',
     });
   }
+  return ofertas;
+}
+
+function enderecoNoSchema(imovel: Imovel): Schema {
+  return {
+    '@type': 'PostalAddress',
+    // Só bairro e cidade: o endereço exato é decisão do corretor, imóvel a imóvel.
+    ...(imovel.bairro ? { streetAddress: imovel.bairro } : {}),
+    ...(imovel.cidade ? { addressLocality: imovel.cidade } : {}),
+    addressRegion: 'SC',
+    addressCountry: 'BR',
+  };
+}
+
+export function schemaDoImovel(imovel: Imovel, url: string): Schema {
+  const disponibilidade = STATUS_NA_VITRINE.includes(imovel.status)
+    ? 'https://schema.org/InStock'
+    : 'https://schema.org/SoldOut';
+
+  const ofertas = ofertasDoImovel(imovel, disponibilidade);
 
   // O que a unidade, o condomínio e o lazer têm, como "comodidades" do schema.org.
   // As informações adicionais ficam de fora: são texto livre, não comodidade.
@@ -157,14 +173,7 @@ export function schemaDoImovel(imovel: Imovel, url: string): Schema {
             })),
           }
         : {}),
-      address: {
-        '@type': 'PostalAddress',
-        // Só bairro e cidade: o endereço exato é decisão do corretor, imóvel a imóvel.
-        ...(imovel.bairro ? { streetAddress: imovel.bairro } : {}),
-        ...(imovel.cidade ? { addressLocality: imovel.cidade } : {}),
-        addressRegion: 'SC',
-        addressCountry: 'BR',
-      },
+      address: enderecoNoSchema(imovel),
     },
   };
 }
