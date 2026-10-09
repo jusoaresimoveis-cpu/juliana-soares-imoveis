@@ -33,7 +33,8 @@ lead em [docs/QUALIFICACAO.md](docs/QUALIFICACAO.md).
   imóvel fica com a situação que tinha, sem preço). A página
   `/imoveis/:id/unidades` (`pages/Unidades.tsx`) cadastra as plantas, gera as
   unidades do prédio de uma vez e aplica a tabela da construtora do mês, com a
-  conferência antes de gravar (`lib/unidades.ts`). Sem a tabela do mês, o site
+  conferência antes de gravar (`lib/conferencia.ts`, reexportada por
+  `lib/unidades.ts`). Sem a tabela do mês, o site
   mostra "Consulte"; a construtora nunca sai no site.
 
 ## Rodando

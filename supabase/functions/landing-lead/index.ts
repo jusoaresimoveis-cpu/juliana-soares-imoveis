@@ -21,7 +21,7 @@ const MAX = { nome: 120, telefone: 30, email: 160, mensagem: 1000 } as const;
  * Cópia de `FINALIDADES`, em `packages/contracts/qualificacao.ts`.
  *
  * A função de borda roda em Deno e não enxerga o pacote de contratos. A cópia
- * é conferida por teste (`packages/contracts/qualificacao.test.ts`), e o banco
+ * é conferida por teste (`packages/contracts/src/qualificacao-leitor.test.ts`), e o banco
  * confere de novo no CHECK — valor fora da lista nunca chega à coluna.
  */
 const FINALIDADES = ['morar', 'investir', 'segunda_residencia', 'avaliando'] as const;

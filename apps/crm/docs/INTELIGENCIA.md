@@ -191,10 +191,11 @@ lento. É confundimento estrutural: mais dados não corrigem.
 | Coleta | `105_o_que_faltava_medir.sql` | clique de link, orçamento, lance, imóvel, meta de CPL |
 | Ingestão | `meta-insights/entrega.ts` | campos por nível; orçamento já vem em unidade mínima |
 | Fato | `107_inteligencia_de_marketing.sql` | junção gasto × lead × funil, faixa de confiança |
-| Leitura | `src/inteligencia.ts` | vereditos em texto, achados, link do gerenciador |
+| Leitura | `src/inteligencia.ts` | vereditos em texto, link do gerenciador |
+| Leitura | `src/achados.ts`, `src/inteligencia-por-anuncio.ts` | achados da conta; leitura por anúncio |
 | Tela | `src/pages/Inteligencia.tsx` | desenho |
 | Prévia | `src/pages/InteligenciaPrevia.tsx` | retrato de 23/08, só em desenvolvimento |
-| Travas | `src/inteligencia.test.ts` | 28 testes sobre as regras, não sobre os números |
+| Travas | `src/inteligencia.test.ts`, `src/inteligencia-sql.test.ts` | as regras, não os números; as travas do veredito no SQL |
 
 A divisão fato/leitura é de propósito. Fato vem do banco, onde estão as junções
 e a RLS. Leitura vem do TypeScript, porque é ela que muda de opinião quando

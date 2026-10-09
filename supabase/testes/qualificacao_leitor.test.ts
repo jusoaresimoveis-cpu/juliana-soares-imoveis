@@ -31,7 +31,7 @@ afterAll(async () => {
 /* -------------------------------------------------------------------------- */
 
 describe('o que um texto afirma', () => {
-  // Os MESMOS exemplos de `packages/contracts/qualificacao.test.ts`, feitos
+  // Os MESMOS exemplos de `packages/contracts/src/qualificacao-leitor.test.ts`, feitos
   // agora ao leitor de verdade. Se as duas listas divergirem, uma delas está
   // testando outra coisa.
   const EXEMPLOS: [string, string | null][] = [

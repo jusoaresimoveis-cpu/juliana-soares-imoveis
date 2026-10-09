@@ -33,7 +33,7 @@ import {
  * O cano existia, instalado na porta que ninguém usa. Ligá-lo na porta certa
  * custou CINCO recusas da Meta, cada uma revelando um campo que a anterior
  * escondia, e nenhum deles documentado junto. Estes testes seguram o que cada
- * uma ensinou — o último bloco as lista na ordem em que apareceram.
+ * uma ensinou — `conversoes-tela.test.ts` as lista na ordem em que apareceram.
  */
 
 /** A definição vigente de uma função, sem comentário — só ela, e não o arquivo. */

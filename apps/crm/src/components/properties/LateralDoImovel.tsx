@@ -5,7 +5,6 @@ import type { PipelineStage } from '@/types/db';
 import { telefoneLegivel } from '@/exportacao';
 import { CONSTRUCTION_STATUS_LABEL, PROPERTY_STATUS_LABEL, type ConstructionStatus } from '@contracts';
 import type { AbaDoImovel } from './PropertyFormDialog';
-import { Contador, Linha } from './PecasDaFicha';
 
 /**
  * A lateral da ficha do imóvel: interessados e visitas, situação, empreendimento
@@ -163,5 +162,24 @@ export function LateralDoImovel({
         )}
       </div>
     </aside>
+  );
+}
+
+function Contador({ valor, rotulo, dica }: { valor: number; rotulo: string; dica?: string | null }) {
+  return (
+    <div className="rounded-lg bg-card-2 px-3 py-2.5">
+      <b className="block text-2xl font-bold tabular-nums">{valor.toLocaleString('pt-BR')}</b>
+      <span className="text-sm text-tx-3">{rotulo}</span>
+      {dica && <span className="block text-2xs text-tx-3">{dica}</span>}
+    </div>
+  );
+}
+
+function Linha({ rotulo, valor }: { rotulo: string; valor: string }) {
+  return (
+    <p className="flex items-baseline justify-between gap-3 border-b border-line py-1.5 last:border-0">
+      <span className="text-sm text-tx-3">{rotulo}</span>
+      <span className="text-base font-semibold">{valor}</span>
+    </p>
   );
 }

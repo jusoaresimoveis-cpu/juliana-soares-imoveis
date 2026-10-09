@@ -28,7 +28,7 @@ import { useUnidades } from '@/hooks/useUnidades';
 import { PropertyFormDialog, type AbaDoImovel } from '@/components/properties/PropertyFormDialog';
 import { BlocoDasUnidades } from '@/components/properties/BlocoDasUnidades';
 import { LateralDoImovel } from '@/components/properties/LateralDoImovel';
-import { Numero } from '@/components/properties/PecasDaFicha';
+import { Numero } from '@/components/properties/NumeroDaFicha';
 import {
   PROPERTY_TYPE_LABEL,
   RENTAL_GUARANTEE_LABEL,

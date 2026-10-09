@@ -31,8 +31,10 @@ const eslintConfig = defineConfig([
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
       // Orçamento de tamanho e complexidade. Começou em "warn", com a contagem
-      // ao lado; a queima de avisos (09/10/2026) zerou o que tinha violação, e
-      // tudo vale como "error".
+      // ao lado; a queima de avisos (09/10/2026) zerou o que tinha violação
+      // FORA dos .tsx, e tudo vale como "error". Nos .tsx, complexity,
+      // max-statements e max-lines-per-function estão desligadas (bloco
+      // abaixo): lá as violações não foram zeradas, saíram da conta.
       complexity: ["error", 12],
       "max-depth": ["error", 4],
       "max-statements": ["error", 20],

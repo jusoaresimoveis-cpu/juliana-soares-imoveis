@@ -158,7 +158,8 @@ para a Inteligência agrupar por ângulo.
 
 | Camada | Arquivo | Responsabilidade |
 |---|---|---|
-| Contrato | `packages/contracts/qualificacao.ts` | listas, rótulos, a frase que explica, as frases do leitor |
+| Contrato | `packages/contracts/qualificacao.ts` | listas, rótulos, a frase que explica |
+| Contrato | `packages/contracts/qualificacao-leitor.ts`, `retomada.ts` | as frases do leitor; o motivo de retomar um lead |
 | Banco | `120_o_que_o_lead_disse.sql` | colunas, regra, colunas geradas, histórico, exportação |
 | Banco | `121_a_pessoa_responde_sozinha.sql` | porta única, leitor, prova de origem, releitura das mensagens antigas |
 | Borda | `functions/landing-lead` | grava a finalidade do seletor pela porta da landing |
@@ -166,8 +167,10 @@ para a Inteligência agrupar por ângulo.
 | Tela | `components/leads/SeloDeTemperatura.tsx` | o selo, nos dois temas |
 | Tela | `pages/Leads.tsx`, `hooks/useLeadsBoard.ts` | filtro por temperatura, uma chave de cache só |
 | Planilha | `src/exportacao.ts` | quatro colunas no fim |
-| Travas | `packages/contracts/qualificacao.test.ts` | contrato contra o banco, a regra literal, os rótulos, o leitor |
-| Travas | `supabase/testes/qualificacao.test.ts` | tabela-verdade, RLS, coluna gerada, leitor de verdade |
+| Travas | `packages/contracts/qualificacao.test.ts` | contrato contra o banco, a regra literal, os rótulos |
+| Travas | `packages/contracts/qualificacao-leitor.test.ts` | o leitor, a porta única, a cópia das finalidades na landing |
+| Travas | `supabase/testes/qualificacao.test.ts` | tabela-verdade, RLS, coluna gerada |
+| Travas | `supabase/testes/qualificacao_leitor.test.ts` | leitor de verdade, a primeira mensagem, a porta única |
 | Fila | `122_o_cartao_anda_quando_alguem_responde.sql` | o cartão sai de "Novo" na primeira resposta humana |
 | Fila | `123_os_que_ja_tinham_sido_respondidos.sql` | o remanejamento de uma vez |
 | Travas | `src/atendimento.test.ts`, `supabase/testes/atendimento.test.ts` | o desenho e os sete comportamentos do gatilho |

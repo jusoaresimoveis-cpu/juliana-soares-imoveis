@@ -170,8 +170,10 @@ export function caminhoSuave(p: readonly (readonly [number, number])[]): string 
     const p1 = p[i];
     const p2 = p[i + 1];
     const p3 = p[i + 2 < p.length ? i + 2 : i + 1];
-    // Só num array com buraco (não acontece): os segmentos em volta do buraco
-    // somem e a curva emenda no ponto seguinte, em vez de estourar TypeError.
+    // Só num array com buraco (não acontece): somem os até quatro segmentos que
+    // usam o ponto que falta, e a curva vai do ponto dois antes dele direto ao
+    // três depois, em vez de estourar TypeError. Buraco no primeiro ponto apaga
+    // a curva (a guarda de cima).
     if (p0 === undefined || p1 === undefined || p2 === undefined || p3 === undefined) continue;
 
     // 1/6 é o fator canônico da conversão Catmull-Rom → Bézier cúbica.
