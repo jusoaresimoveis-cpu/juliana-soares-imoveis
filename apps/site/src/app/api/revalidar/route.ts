@@ -15,7 +15,7 @@ import { ETIQUETA_DOS_IMOVEIS } from '@/lib/imoveis/dados';
  * O segredo vai num cabeçalho e é comparado em tempo constante. Sem ele, a
  * rota não faz nada: qualquer um poderia forçar o site a refazer as páginas.
  */
-export async function POST(request: Request) {
+export function POST(request: Request) {
   const segredo = process.env.REVALIDACAO_SEGREDO;
   if (!segredo || !mesmoSegredo(request.headers.get('x-revalidacao') ?? '', segredo)) {
     return Response.json({ revalidado: false }, { status: 401 });

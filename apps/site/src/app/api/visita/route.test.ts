@@ -22,7 +22,7 @@ beforeEach(() => {
   vi.stubEnv('SUPABASE_URL', 'https://exemplo.supabase.co');
   vi.stubEnv('SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_teste');
   vi.stubEnv('SITE_ORGANIZACAO', 'juliana-soares');
-  banco = vi.fn(async () => new Response(null, { status: 204 }));
+  banco = vi.fn(() => Promise.resolve(new Response(null, { status: 204 })));
   vi.stubGlobal('fetch', banco);
 });
 
