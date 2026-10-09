@@ -61,6 +61,19 @@ export function acharProblemas(d: Inteligencia): Achado[] {
 
   const ativas = d.campanhas.filter(ativa);
 
+  acharFaltaDeMeta(d, $, a);
+  acharVerbaPulverizada(ativas, $, a);
+  acharFurosDaAtribuicao(d, ativas, $, a);
+  acharComparacoesConfundidas(d, ativas, a);
+  acharDadosQueFaltam(d, ativas, a);
+
+  const peso = { alta: 0, media: 1, baixa: 2 } as const;
+  return a.sort((x, y) => peso[x.gravidade] - peso[y.gravidade]);
+}
+
+type FormatarDinheiro = (v: number | null | undefined) => string;
+
+function acharFaltaDeMeta(d: Inteligencia, $: FormatarDinheiro, a: Achado[]): void {
   /* --- 1. Sem meta, o semáforo inteiro está desligado --------------------- */
   if (d.teto_cpl == null) {
     a.push({
@@ -84,7 +97,13 @@ export function acharProblemas(d: Inteligencia): Achado[] {
         'aceitável.',
     });
   }
+}
 
+function acharVerbaPulverizada(
+  ativas: CampanhaInteligencia[],
+  $: FormatarDinheiro,
+  a: Achado[],
+): void {
   /* --- 2. Verba pulverizada: o achado principal de conta pequena ---------- */
   const comOrcamento = ativas.filter(
     (c): c is CampanhaInteligencia & { orcamento: number } =>
@@ -119,7 +138,14 @@ export function acharProblemas(d: Inteligencia): Achado[] {
       }
     }
   }
+}
 
+function acharFurosDaAtribuicao(
+  d: Inteligencia,
+  ativas: CampanhaInteligencia[],
+  $: FormatarDinheiro,
+  a: Achado[],
+): void {
   /* --- 3. Gasto sem rastro: o dinheiro que some da contabilidade ---------- */
   const semRastro = ativas.filter((c) => c.resultados_meta > 0 && c.leads === 0 && c.gasto > 0);
   if (semRastro.length > 0) {
@@ -154,7 +180,13 @@ export function acharProblemas(d: Inteligencia): Achado[] {
       });
     }
   }
+}
 
+function acharComparacoesConfundidas(
+  d: Inteligencia,
+  ativas: CampanhaInteligencia[],
+  a: Achado[],
+): void {
   /* --- 5. Objetivos misturados no mesmo ranking --------------------------- */
   const objetivos = new Set(ativas.map((c) => c.objetivo ?? '?').filter((o) => o !== '?'));
   if (objetivos.size > 1) {
@@ -190,7 +222,9 @@ export function acharProblemas(d: Inteligencia): Achado[] {
       });
     }
   }
+}
 
+function acharDadosQueFaltam(d: Inteligencia, ativas: CampanhaInteligencia[], a: Achado[]): void {
   /* --- 7. CTR de link ainda não coletado ---------------------------------- */
   const semLink = d.campanhas.filter((c) => c.cliques_link == null && (c.impressoes ?? 0) > 0);
   if (semLink.length > 0) {
@@ -221,7 +255,4 @@ export function acharProblemas(d: Inteligencia): Achado[] {
       quais: semOrc.map(nome),
     });
   }
-
-  const peso = { alta: 0, media: 1, baixa: 2 } as const;
-  return a.sort((x, y) => peso[x.gravidade] - peso[y.gravidade]);
 }
