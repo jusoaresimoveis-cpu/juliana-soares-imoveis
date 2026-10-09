@@ -65,6 +65,18 @@ async function mensagemDoCorpo(erro: unknown): Promise<string | null> {
   return null;
 }
 
+/**
+ * O erro a lançar quando a função falhou.
+ *
+ * O corpo vem antes da `message` porque a do supabase-js é a mesma para qualquer
+ * status de erro ("Edge Function returned a non-2xx status code") e não diz nada
+ * a quem está usando o CRM.
+ */
+async function falhaDaFuncao(erro: unknown, generico: string): Promise<Error> {
+  const doCorpo = await mensagemDoCorpo(erro);
+  return new Error(doCorpo ?? (erro as { message?: string }).message ?? generico);
+}
+
 export async function chamarFuncao<T = unknown>(
   nome: string,
   corpo: Record<string, unknown>,
@@ -109,10 +121,7 @@ export async function chamarFuncao<T = unknown>(
     }
   }
 
-  if (error) {
-    const doCorpo = await mensagemDoCorpo(error);
-    throw new Error(doCorpo ?? (error as { message?: string }).message ?? generico);
-  }
+  if (error) throw await falhaDaFuncao(error, generico);
 
   // Função que responde 200 com `{erro}` no corpo: acontece quando a regra de
   // negócio recusa e o status não é o canal certo para dizer isso.
