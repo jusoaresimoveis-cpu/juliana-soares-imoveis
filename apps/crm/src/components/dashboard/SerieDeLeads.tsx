@@ -160,15 +160,17 @@ export function escalaDoTopo(maximo: number): number {
  */
 export function caminhoSuave(p: readonly (readonly [number, number])[]): string {
   if (p.length === 0) return '';
-  const primeiro = p[0]!;
+  const primeiro = p[0];
+  if (primeiro === undefined) return '';
   if (p.length === 1) return `M ${primeiro[0]} ${primeiro[1]}`;
 
   let d = `M ${primeiro[0]} ${primeiro[1]}`;
   for (let i = 0; i < p.length - 1; i++) {
-    const p0 = p[i === 0 ? 0 : i - 1]!;
-    const p1 = p[i]!;
-    const p2 = p[i + 1]!;
-    const p3 = p[i + 2 < p.length ? i + 2 : i + 1]!;
+    const p0 = p[i === 0 ? 0 : i - 1];
+    const p1 = p[i];
+    const p2 = p[i + 1];
+    const p3 = p[i + 2 < p.length ? i + 2 : i + 1];
+    if (!p0 || !p1 || !p2 || !p3) continue;
 
     // 1/6 é o fator canônico da conversão Catmull-Rom → Bézier cúbica.
     const c1x = p1[0] + (p2[0] - p0[0]) / 6;
