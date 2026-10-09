@@ -56,27 +56,38 @@ export function interpretarSegmentos(
     if (!tipo) return invalido;
   }
 
+  // Cidade e bairro digitados à mão ("Itapema", "Porto Belo", "Perequê") viram o
+  // slug certo pelo redirecionamento de conferirCanonica, em vez de 404.
   let cidade: CidadeAtendida | null = null;
   if (cidadeSlug !== undefined) {
-    cidade = cidadePeloSlug(cidadeSlug);
+    const slug = segmentoComoSlug(cidadeSlug);
+    cidade = slug === null ? null : cidadePeloSlug(slug);
     if (!cidade) return invalido;
   }
 
-  // "Perequê" ou "Meia-Praia" digitados à mão viram o slug certo pelo
-  // redirecionamento abaixo, em vez de 404. O Next entrega o segmento ainda
-  // codificado ("Perequ%C3%AA"): sem decodificar, o acento vira "c3-aa".
   let bairro: string | null = null;
   if (bairroSlug !== undefined) {
-    try {
-      bairro = slugify(decodeURIComponent(bairroSlug));
-    } catch {
-      return invalido;
-    }
-    if (bairro === '') return invalido;
+    bairro = segmentoComoSlug(bairroSlug);
+    if (bairro === null) return invalido;
   }
 
   const filtro: FiltroDeListagem = { finalidade, tipo, cidade, bairro };
   return conferirCanonica(filtro, segmentos);
+}
+
+/**
+ * O slug de um segmento da URL, ou nulo se não sobra nada dele. O Next entrega o
+ * segmento ainda codificado ("Perequ%C3%AA"): sem decodificar, o acento vira
+ * "c3-aa". Codificação quebrada também dá nulo, em vez de estourar erro.
+ */
+function segmentoComoSlug(segmento: string): string | null {
+  let slug: string;
+  try {
+    slug = slugify(decodeURIComponent(segmento));
+  } catch {
+    return null;
+  }
+  return slug === '' ? null : slug;
 }
 
 function conferirCanonica(filtro: FiltroDeListagem, segmentos: string[] | undefined): Interpretacao {

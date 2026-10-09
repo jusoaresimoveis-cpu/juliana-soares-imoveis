@@ -50,6 +50,26 @@ describe('interpretarSegmentos', () => {
     });
   });
 
+  it('corrige cidade digitada com maiúscula, acento ou espaço', () => {
+    expect(interpretarSegmentos('venda', ['apartamentos', 'Itapema'])).toEqual({
+      ok: false,
+      redirecionarPara: '/venda/apartamentos/itapema',
+    });
+    expect(interpretarSegmentos('aluguel', ['imoveis', 'Porto%20Belo', 'Perequ%C3%AA'])).toEqual({
+      ok: false,
+      redirecionarPara: '/aluguel/imoveis/porto-belo/pereque',
+    });
+    // Cidade que a Juliana não atende continua 404, escrita como for.
+    expect(interpretarSegmentos('venda', ['apartamentos', 'Florianópolis'])).toEqual({
+      ok: false,
+      redirecionarPara: null,
+    });
+    expect(interpretarSegmentos('venda', ['apartamentos', '%E0%A4%A'])).toEqual({
+      ok: false,
+      redirecionarPara: null,
+    });
+  });
+
   it('recusa segmento com codificação quebrada em vez de estourar erro', () => {
     expect(interpretarSegmentos('aluguel', ['imoveis', 'itapema', '%E0%A4%A'])).toEqual({
       ok: false,
