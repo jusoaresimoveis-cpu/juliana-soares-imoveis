@@ -228,6 +228,33 @@ export const OBJETIVOS_DE_CADASTRO = ['OUTCOME_LEADS', 'LEAD_GENERATION'] as con
 /** E os que geram conversa por mensagem. */
 export const OBJETIVOS_DE_CONVERSA = ['MESSAGES', 'OUTCOME_MESSAGES', 'CONVERSATIONS'] as const;
 
+function tipoSemBater(
+  esperado: TipoDeResultado | null,
+  temCadastro: boolean,
+  temConversa: boolean,
+): TipoDeResultado {
+  // Produziu só uma coisa: é essa, independente do que o objetivo prometia.
+  if (temConversa && !temCadastro) return 'conversa';
+  if (temCadastro && !temConversa) return 'cadastro';
+  // As duas, e o objetivo desempata.
+  if (temCadastro && temConversa) return esperado ?? 'cadastro';
+
+  // Não produziu nada. O objetivo diz o que ERA para produzir.
+  return esperado ?? 'clique';
+}
+
+function decidirTipo(
+  esperado: TipoDeResultado | null,
+  temCadastro: boolean,
+  temConversa: boolean,
+): TipoDeResultado {
+  // Produziu o que se esperava dela: nada a discutir.
+  if (esperado === 'cadastro' && temCadastro) return 'cadastro';
+  if (esperado === 'conversa' && temConversa) return 'conversa';
+
+  return tipoSemBater(esperado, temCadastro, temConversa);
+}
+
 /**
  * Que resultado esta linha realmente produziu.
  *
@@ -260,18 +287,7 @@ export function tipoDeResultado(
   const temCadastro = (cadastros ?? 0) > 0;
   const temConversa = (conversas ?? 0) > 0;
 
-  // Produziu o que se esperava dela: nada a discutir.
-  if (esperado === 'cadastro' && temCadastro) return 'cadastro';
-  if (esperado === 'conversa' && temConversa) return 'conversa';
-
-  // Produziu só uma coisa: é essa, independente do que o objetivo prometia.
-  if (temConversa && !temCadastro) return 'conversa';
-  if (temCadastro && !temConversa) return 'cadastro';
-  // As duas, e o objetivo desempata.
-  if (temCadastro && temConversa) return esperado ?? 'cadastro';
-
-  // Não produziu nada. O objetivo diz o que ERA para produzir.
-  return esperado ?? 'clique';
+  return decidirTipo(esperado, temCadastro, temConversa);
 }
 
 /**
