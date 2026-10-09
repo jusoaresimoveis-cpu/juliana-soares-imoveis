@@ -10,11 +10,8 @@ import {
   Bath,
   Car,
   Ruler,
-  Users,
-  MessageCircle,
   EyeOff,
   ExternalLink,
-  Layers,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { env } from '@/lib/env';
@@ -27,25 +24,18 @@ import {
   urlPublica,
 } from '@/hooks/useProperties';
 import { usePipelineStages } from '@/hooks/useLeadsBoard';
-import { useUnidades, type Planta, type Unidade } from '@/hooks/useUnidades';
+import { useUnidades } from '@/hooks/useUnidades';
 import { PropertyFormDialog, type AbaDoImovel } from '@/components/properties/PropertyFormDialog';
-import { AvisoDaTabela, EspelhoDasUnidades } from '@/components/properties/Empreendimento';
-import { resumoDaPlanta } from '@/lib/unidades';
-import { telefoneLegivel } from '@/exportacao';
+import { BlocoDasUnidades } from '@/components/properties/BlocoDasUnidades';
+import { LateralDoImovel } from '@/components/properties/LateralDoImovel';
+import { Numero } from '@/components/properties/PecasDaFicha';
 import {
-  CONSTRUCTION_STATUS_LABEL,
   PROPERTY_TYPE_LABEL,
-  PROPERTY_STATUS_LABEL,
   RENTAL_GUARANTEE_LABEL,
-  aPartirDe,
   caracteristicasParaMostrar,
   normalizarCaracteristicas,
   precoDeTabela,
-  reaisComCentavos,
-  resumoDoEmpreendimento,
   rotuloDoRegime,
-  type ConstructionStatus,
-  type PropertyType,
   type RentalGuarantee,
 } from '@contracts';
 import { brlCents, cn, valoresDoImovel } from '@/lib/utils';
@@ -305,137 +295,14 @@ export default function PropertyDetail() {
           )}
         </section>
 
-        <aside className="flex flex-col gap-4">
-          <div className="rounded-lg bg-card p-5 shadow-card">
-            <h2 className="mb-3 flex items-center gap-1.5 text-lg font-bold">
-              <Users className="h-4 w-4 text-pri" />
-              Interessados
-            </h2>
-
-            {/* Os números que o painel do proprietário vai mostrar ao dono: a
-                Juliana já vê aqui. Visita é pessoa por dia na página do site. */}
-            <div className="mb-4 grid grid-cols-2 gap-2">
-              <Contador valor={(interessados ?? []).length} rotulo="Leads" />
-              <Contador
-                valor={visitas?.total ?? 0}
-                rotulo="Visitas no site"
-                dica={visitas?.desde ? `desde ${new Date(`${visitas.desde}T12:00`).toLocaleDateString('pt-BR')}` : null}
-              />
-            </div>
-
-            {(interessados ?? []).length === 0 && (
-              <p className="text-base text-tx-3">Nenhum lead vinculado ainda.</p>
-            )}
-
-            {(interessados ?? []).map((i) => {
-              const etapa = etapas?.find((s) => s.id === i.leads?.stage_id);
-              return (
-                <div key={i.id} className="mb-2 flex items-center gap-2 last:mb-0">
-                  <Link
-                    to={`/leads/${i.leads?.id}`}
-                    className="min-w-0 flex-1 rounded-lg p-1.5 transition-colors hover:bg-card-2"
-                  >
-                    <span className="block truncate text-base font-bold">{i.leads?.full_name}</span>
-                    {etapa && (
-                      <span className="text-sm font-semibold" style={{ color: etapa.color }}>
-                        {etapa.label}
-                      </span>
-                    )}
-                  </Link>
-                  {i.leads?.phone_e164 && (
-                    <a
-                      href={`https://wa.me/${i.leads.phone_e164.replace('+', '')}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={`WhatsApp de ${i.leads.full_name}`}
-                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-tx-3 hover:bg-ok-soft hover:text-ok"
-                    >
-                      <MessageCircle className="h-3.5 w-3.5" />
-                    </a>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="rounded-lg bg-card p-5 shadow-card">
-            <h2 className="mb-2.5 text-2xs font-bold uppercase text-tx-3">Situação</h2>
-            <Linha rotulo="Status" valor={PROPERTY_STATUS_LABEL[imovel.status]} />
-            <Linha rotulo="Código" valor={imovel.public_code} />
-            {imovel.floor !== null && <Linha rotulo="Andar" valor={String(imovel.floor)} />}
-            <Linha
-              rotulo="Endereço exato"
-              valor={imovel.show_exact_address ? 'Visível no anúncio' : 'Oculto no anúncio'}
-            />
-            <Linha
-              rotulo="Atualizado"
-              valor={new Date(imovel.updated_at).toLocaleDateString('pt-BR')}
-            />
-          </div>
-
-          {imovel.has_units && (
-            <div className="rounded-lg bg-card p-5 shadow-card">
-              <h2 className="mb-2.5 text-2xs font-bold uppercase text-tx-3">Empreendimento</h2>
-              <Linha
-                rotulo="Obra"
-                valor={CONSTRUCTION_STATUS_LABEL[imovel.construction_status as ConstructionStatus] ?? 'Não informada'}
-              />
-              <Linha rotulo="Entrega" valor={imovel.delivery_at ? imovel.delivery_at.slice(0, 4) : 'Não informada'} />
-              <Linha rotulo="Registro de incorporação" valor={imovel.incorporation_registry || 'Não informado'} />
-              <Linha rotulo="Cartório" valor={imovel.incorporation_registry_office || 'Não informado'} />
-              {/* A construtora nunca sai no site (decisão do usuário, 08/10): o
-                  cliente iria comprar direto com ela. */}
-              <div className="border-b border-line py-1.5 last:border-0">
-                <p className="flex items-baseline justify-between gap-3">
-                  <span className="text-sm text-tx-3">Construtora</span>
-                  <span className="text-base font-semibold">{imovel.developer || 'Não informada'}</span>
-                </p>
-                <p className="mt-0.5 flex items-center justify-end gap-1 text-2xs font-bold uppercase text-warn">
-                  <EyeOff className="h-3 w-3" />
-                  Só no CRM, nunca no site
-                </p>
-              </div>
-              {imovel.payment_notes && (
-                <div className="py-1.5">
-                  <p className="text-sm text-tx-3">Condição de pagamento</p>
-                  <p className="text-base font-semibold">{imovel.payment_notes}</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="rounded-lg bg-card p-5 shadow-card">
-            <h2 className="mb-2.5 text-2xs font-bold uppercase text-tx-3">Proprietário</h2>
-            {proprietario ? (
-              <>
-                <Linha rotulo="Nome" valor={proprietario.full_name} />
-                {proprietario.city && <Linha rotulo="Mora em" valor={proprietario.city} />}
-                <p className="flex items-baseline justify-between gap-3 py-1.5">
-                  <span className="text-sm text-tx-3">Telefone</span>
-                  <a
-                    href={`https://wa.me/${proprietario.phone_e164.replace('+', '')}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-base font-semibold text-pri hover:underline"
-                  >
-                    {telefoneLegivel(proprietario.phone_e164, null)}
-                  </a>
-                </p>
-              </>
-            ) : (
-              <p className="text-base text-tx-3">
-                Nenhum cadastrado.{' '}
-                <button
-                  type="button"
-                  onClick={() => setEditando('proprietario')}
-                  className="font-semibold text-pri hover:underline"
-                >
-                  Cadastrar
-                </button>
-              </p>
-            )}
-          </div>
-        </aside>
+        <LateralDoImovel
+          imovel={imovel}
+          interessados={interessados}
+          visitas={visitas}
+          etapas={etapas}
+          proprietario={proprietario}
+          setEditando={setEditando}
+        />
       </div>
 
       {editando && (
@@ -448,138 +315,5 @@ export default function PropertyDetail() {
         />
       )}
     </div>
-  );
-}
-
-/**
- * O empreendimento na ficha: o "a partir de", as disponíveis por planta, o
- * espelho do prédio e o aviso do mês da tabela (o site mostra "Consulte" desde
- * o dia 1 até a Juliana aplicar a tabela nova).
- */
-function BlocoDasUnidades({
-  imovelId,
-  tipo,
-  mesDaTabela,
-  plantas,
-  unidades,
-}: {
-  imovelId: string;
-  tipo: PropertyType;
-  mesDaTabela: string | null;
-  plantas: Planta[] | undefined;
-  unidades: Unidade[] | undefined;
-}) {
-  const resumo = unidades ? resumoDoEmpreendimento(unidades) : null;
-  const aPartir = resumo ? aPartirDe(resumo) : null;
-  const quantas = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`;
-
-  return (
-    <div className="rounded-lg bg-card p-5 shadow-card">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="flex items-center gap-1.5 text-lg font-bold">
-          <Layers className="h-4 w-4 text-pri" />
-          Unidades
-        </h2>
-        <Link
-          to={`/imoveis/${imovelId}/unidades`}
-          className="inline-flex items-center gap-1.5 rounded-full bg-pri px-4 py-2 text-base font-semibold text-pri-fg hover:bg-pri-deep"
-        >
-          {unidades?.length ? 'Tabela do mês e unidades' : 'Cadastrar plantas e unidades'}
-        </Link>
-      </div>
-
-      <AvisoDaTabela mesAplicado={mesDaTabela} temUnidades={!!unidades?.length} className="mb-3" />
-
-      {!unidades || !plantas ? (
-        <Loader2 className="h-4 w-4 animate-spin text-pri" />
-      ) : unidades.length === 0 || !resumo ? (
-        <p className="text-base text-tx-3">
-          Nenhuma unidade cadastrada. Cadastre as plantas (quartos, suítes, área) e gere as unidades do prédio de uma
-          vez; depois, a tabela do mês dá o preço e a situação de cada uma.
-        </p>
-      ) : (
-        <div className="flex flex-col gap-4">
-          <p className="text-base text-tx-2">
-            {aPartir !== null && (
-              <>
-                A partir de <b className="text-pri">{reaisComCentavos(aPartir)}</b> ·{' '}
-              </>
-            )}
-            {quantas(resumo.disponiveis, 'disponível', 'disponíveis')} ·{' '}
-            {quantas(resumo.reservadas, 'reservada', 'reservadas')} · {quantas(resumo.total, 'unidade', 'unidades')}
-          </p>
-
-          <ul className="flex flex-col gap-1.5">
-            {plantas.map((p) => {
-              const daPlanta = unidades.filter((u) => u.floorplan_id === p.id);
-              const r = resumoDoEmpreendimento(daPlanta);
-              return (
-                <li key={p.id} className="rounded-lg bg-card-2 px-3 py-2">
-                  <p className="flex flex-wrap items-baseline justify-between gap-x-3">
-                    <b className="text-base font-bold">{p.name}</b>
-                    <span className="text-sm font-semibold text-tx-2">
-                      {r.disponiveis
-                        ? `${quantas(r.disponiveis, 'disponível', 'disponíveis')}${
-                            r.menorCents !== null ? `, a partir de ${reaisComCentavos(r.menorCents)}` : ''
-                          }`
-                        : r.reservadas
-                          ? quantas(r.reservadas, 'reservada', 'reservadas')
-                          : daPlanta.length
-                            ? 'Esgotada'
-                            : 'Sem unidades'}
-                    </span>
-                  </p>
-                  {resumoDaPlanta(p) && <p className="text-sm text-tx-3">{resumoDaPlanta(p)}</p>}
-                </li>
-              );
-            })}
-          </ul>
-
-          <EspelhoDasUnidades unidades={unidades} tipo={tipo} />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function Numero({
-  icone: Icone,
-  valor,
-  rotulo,
-  extra,
-}: {
-  icone: typeof BedDouble;
-  valor: number | null;
-  rotulo: string;
-  extra?: string | null;
-}) {
-  return (
-    <div>
-      <p className="flex items-baseline gap-1.5">
-        <Icone className="h-3.5 w-3.5 shrink-0 self-center text-tx-3" />
-        <b className="text-lg font-bold tabular-nums">{valor ?? '—'}</b>
-        <span className="text-sm text-tx-3">{rotulo}</span>
-      </p>
-      {extra && <p className="ml-5 text-sm text-tx-3">{extra}</p>}
-    </div>
-  );
-}
-
-function Contador({ valor, rotulo, dica }: { valor: number; rotulo: string; dica?: string | null }) {
-  return (
-    <div className="rounded-lg bg-card-2 px-3 py-2.5">
-      <b className="block text-2xl font-bold tabular-nums">{valor.toLocaleString('pt-BR')}</b>
-      <span className="text-sm text-tx-3">{rotulo}</span>
-      {dica && <span className="block text-2xs text-tx-3">{dica}</span>}
-    </div>
-  );
-}
-
-function Linha({ rotulo, valor }: { rotulo: string; valor: string }) {
-  return (
-    <p className="flex items-baseline justify-between gap-3 border-b border-line py-1.5 last:border-0">
-      <span className="text-sm text-tx-3">{rotulo}</span>
-      <span className="text-base font-semibold">{valor}</span>
-    </p>
   );
 }
