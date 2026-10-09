@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Loader2, ArrowLeft, ArrowRight, MailCheck, ShieldCheck } from 'lucide-react';
 import { pedirLinkDeSenha, trocarSenha, useSessaoDeRecuperacao } from '@/hooks/useRecuperacaoDeSenha';
 import { MARCA } from '@/config/marca';
-import { ENTRADA } from './temaEntrada';
+import { ENTRADA } from '@/config/temaEntrada';
 
 /*
  * As duas telas da recuperação de senha, no mesmo arquivo.
