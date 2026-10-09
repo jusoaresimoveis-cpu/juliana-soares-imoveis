@@ -170,8 +170,8 @@ describe('importação do estado', () => {
      */
     const [linha] = entregaDe([{ id: '1', effective_status: 'ACTIVE' }], 'ad', 'org', 'act_1', agora);
     expect(linha).toBeDefined();
-    expect(Object.keys(linha!)).not.toContain('name');
-    expect(Object.keys(linha!)).not.toContain('objective');
+    expect(Object.keys(linha)).not.toContain('name');
+    expect(Object.keys(linha)).not.toContain('objective');
   });
 
   it('id repetido vira uma linha só', () => {

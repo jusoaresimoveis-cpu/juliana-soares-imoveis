@@ -43,7 +43,7 @@ describe('âncoras internas', () => {
     for (const { p, txt } of arquivos) {
       // `href="#"` sozinho é âncora de posição, não de destino — fica de fora.
       for (const m of txt.matchAll(/href="#([A-Za-z][\w-]*)"/g)) {
-        const alvo = m[1]!;
+        const alvo = m[1];
         if (!new RegExp(`id="${alvo}"`).test(tudo)) orfas.push(`${p}: #${alvo}`);
       }
     }

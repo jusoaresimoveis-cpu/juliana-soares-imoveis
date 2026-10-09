@@ -28,7 +28,7 @@ const funcao = (nome: string) => colapsado(semComentarios(definicaoDaFuncao(nome
  */
 function canonico(e164: string): string {
   const d = e164.replace(/\D/g, '');
-  if (d.startsWith('55') && d.length === 12 && /[6-9]/.test(d[4]!)) {
+  if (d.startsWith('55') && d.length === 12 && /[6-9]/.test(d.charAt(4))) {
     return `+${d.slice(0, 4)}9${d.slice(4)}`;
   }
   return `+${d}`;

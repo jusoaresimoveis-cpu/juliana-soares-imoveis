@@ -38,7 +38,7 @@ function terceiroArgumento(texto: string, inicio: number): string | null {
   let aspas = false;
 
   for (let i = inicio; i < texto.length; i++) {
-    const c = texto[i]!;
+    const c = texto[i];
     if (aspas) {
       atual += c;
       if (c === "'") aspas = false;

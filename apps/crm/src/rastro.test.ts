@@ -28,7 +28,7 @@ describe('rastro', () => {
   it('corta o texto de um passo antes de ele sair da máquina', () => {
     anotar('console', 'x'.repeat(500));
     const ultimo = rastro().at(-1);
-    expect(ultimo!.texto.length).toBeLessThanOrEqual(201); // 200 + reticência
+    expect(ultimo?.texto.length).toBeLessThanOrEqual(201); // 200 + reticência
   });
 
   it('devolve uma cópia — quem lê não mexe no rastro', () => {
@@ -49,7 +49,7 @@ describe('montarRelato', () => {
   it('corta a pilha e a mensagem', () => {
     const r = montarRelato('tela', 'm'.repeat(900), 'p'.repeat(9000));
     expect(r.mensagem.length).toBeLessThanOrEqual(501);
-    expect(r.pilha!.length).toBeLessThanOrEqual(4001);
+    expect(r.pilha?.length).toBeLessThanOrEqual(4001);
   });
 
   it('leva o rastro junto', () => {

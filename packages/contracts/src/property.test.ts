@@ -14,6 +14,7 @@ import {
   restricoesDaTabela,
   valoresDoCheck as valoresDoCheckAtual,
 } from '../../../supabase/testes/esquema';
+import { exigir } from '../../../supabase/testes/exigir';
 
 describe('domínio de imóvel ↔ banco', () => {
   it('tipos batem', () => {
@@ -40,7 +41,7 @@ describe('plano de pagamento', () => {
   it('as formas do contrato são as que o banco aceita', () => {
     const formas = regras().find((r) => r.definicao.includes('payment_methods <@'));
     expect(formas, 'CHECK de payment_methods não encontrado').toBeDefined();
-    expect(valoresDoCheckAtual(formas!.nome)).toEqual([...PAYMENT_METHODS].sort());
+    expect(valoresDoCheckAtual(exigir(formas, 'o CHECK de payment_methods').nome)).toEqual([...PAYMENT_METHODS].sort());
   });
 
   it('quantidade e valor andam juntos, no banco', () => {

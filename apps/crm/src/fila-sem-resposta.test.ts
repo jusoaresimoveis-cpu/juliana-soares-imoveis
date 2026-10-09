@@ -18,6 +18,7 @@ import {
   tarefaAgendada,
   valoresDoCheck,
 } from '../../../supabase/testes/esquema';
+import { exigir } from '../../../supabase/testes/exigir';
 
 /**
  * O alarme da fila — a migração 128.
@@ -61,7 +62,7 @@ describe('o alarme não toca de madrugada', () => {
     const agendamento = tarefaAgendada('fila-sem-resposta')?.agenda;
     expect(agendamento, 'o cron do alarme sumiu').toBeTruthy();
     expect(tarefaAgendada('fila-sem-resposta')?.comando).toContain('public.avisar_espera_longa()');
-    const campos = agendamento!.trim().split(/\s+/);
+    const campos = exigir(agendamento, 'o cron do alarme').trim().split(/\s+/);
     expect(campos).toHaveLength(5);
     expect(campos.slice(1), 'hora, dia, mês e semana têm de ser "*"').toEqual(['*', '*', '*', '*']);
   });

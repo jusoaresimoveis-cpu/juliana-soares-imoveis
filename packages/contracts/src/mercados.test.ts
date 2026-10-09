@@ -45,7 +45,7 @@ describe('mercados de anúncio', () => {
     }));
     expect(doSql.length, 'derivação não encontrada em landing_gerar').toBe(MERCADOS.length);
     for (const linha of doSql) {
-      expect(localeDoMercado(linha.code!), linha.code).toBe(linha.locale);
+      expect(localeDoMercado(linha.code), linha.code).toBe(linha.locale);
     }
   });
 

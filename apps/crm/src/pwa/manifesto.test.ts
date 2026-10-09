@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { manifesto } from './manifesto';
+import { exigir } from '../../../../supabase/testes/exigir';
 
 /**
  * A instalabilidade quebra em silêncio.
@@ -33,7 +34,7 @@ const propositos = (i: (typeof icones)[number]): string[] =>
 /** Os `<link rel="icon">` do index.html: o favicon da aba, fora do manifesto. */
 const faviconsDoHtml = () =>
   [...readFileSync(join(RAIZ, 'index.html'), 'utf8').matchAll(/<link\s+rel="icon"\s+href="([^"]+)"/gi)].map(
-    (m) => m[1]!,
+    (m) => exigir(m[1]),
   );
 
 /** Um ícone serve de "any" quando não declara propósito ou o inclui na lista. */
@@ -132,7 +133,7 @@ describe('manifesto do PWA', () => {
      */
     const iApp = regras.findIndex((r) => r.destination === '/index.html');
     expect(iApp, 'sem regra de reescrita, recarregar em /leads dá 404').toBeGreaterThanOrEqual(0);
-    const re = new RegExp(`^${regras[iApp]!.source}$`);
+    const re = new RegExp(`^${exigir(regras[iApp]).source}$`);
 
     const html = readFileSync(join(RAIZ, 'index.html'), 'utf8');
     const appleIcon = /<link\s+rel="apple-touch-icon"\s+href="([^"]+)"/i.exec(html)?.[1];

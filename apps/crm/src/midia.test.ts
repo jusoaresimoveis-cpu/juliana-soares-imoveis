@@ -125,7 +125,7 @@ describe('o mapeamento de tipo, contra o que o provedor manda de verdade', () =>
 
   it('só devolve tipos que o CHECK da tabela aceita', () => {
     const aceitos = ['texto', 'imagem', 'audio', 'video', 'documento', 'figurinha', 'local', 'contato', 'sistema'];
-    const devolvidos = [...corpo().matchAll(/then '([a-z]+)'/g)].map((m) => m[1]!);
+    const devolvidos = [...corpo().matchAll(/then '([a-z]+)'/g)].map((m) => m[1]);
     expect(devolvidos.length).toBeGreaterThan(10);
     for (const t of devolvidos) expect(aceitos, t).toContain(t);
   });

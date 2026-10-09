@@ -14,6 +14,7 @@ import {
   semComentarios,
   valoresDoCheck as valoresDoCheckAtual,
 } from '../../../supabase/testes/esquema';
+import { exigir } from '../../../supabase/testes/exigir';
 
 const SP = 'America/Sao_Paulo';
 
@@ -59,17 +60,17 @@ describe('parede e instante', () => {
 
 describe('atalhos', () => {
   it('"Hoje às 18h" às 14h marca para hoje', () => {
-    const p = REMINDER_PRESETS.find((x) => x.key === 'hoje_18h')!;
+    const p = exigir(REMINDER_PRESETS.find((x) => x.key === 'hoje_18h'));
     expect(parede(resolverPreset(p, SEGUNDA_14H, SP))).toBe('10/08 18:00');
   });
 
   it('"Hoje às 18h" às 19h vira amanhã, não um lembrete já vencido', () => {
-    const p = REMINDER_PRESETS.find((x) => x.key === 'hoje_18h')!;
+    const p = exigir(REMINDER_PRESETS.find((x) => x.key === 'hoje_18h'));
     expect(parede(resolverPreset(p, SEGUNDA_19H, SP))).toBe('11/08 18:00');
   });
 
   it('"Segunda às 9h" numa segunda aponta para a próxima', () => {
-    const p = REMINDER_PRESETS.find((x) => x.key === 'proxima_seg')!;
+    const p = exigir(REMINDER_PRESETS.find((x) => x.key === 'proxima_seg'));
     expect(parede(resolverPreset(p, SEGUNDA_14H, SP))).toBe('17/08 09:00');
   });
 
@@ -88,41 +89,41 @@ describe('da frase para a sugestão', () => {
   it('reconhece o caso que originou o recurso', () => {
     const d = dica('Cliente pediu para retornar depois das 18h');
     expect(d).not.toBeNull();
-    expect(parede(d!.remindAt)).toBe('10/08 18:00');
+    expect(parede(exigir(d).remindAt)).toBe('10/08 18:00');
   });
 
   it('minuto explícito sobrevive', () => {
-    expect(parede(dica('retornar 18h30')!.remindAt)).toBe('10/08 18:30');
-    expect(parede(dica('ligar as 9:45')!.remindAt)).toBe('11/08 09:45');
+    expect(parede(exigir(dica('retornar 18h30')).remindAt)).toBe('10/08 18:30');
+    expect(parede(exigir(dica('ligar as 9:45')).remindAt)).toBe('11/08 09:45');
   });
 
   it('hora que já passou hoje empurra para amanhã', () => {
-    expect(parede(dica('me lembra as 9h')!.remindAt)).toBe('11/08 09:00');
+    expect(parede(exigir(dica('me lembra as 9h')).remindAt)).toBe('11/08 09:00');
   });
 
   it('período sem hora vira convenção, com confiança média', () => {
-    const d = dica('ligar amanhã de manhã')!;
+    const d = exigir(dica('ligar amanhã de manhã'));
     expect(parede(d.remindAt)).toBe('11/08 09:00');
     expect(d.confianca).toBe('media');
   });
 
   it('dia e hora juntos dão confiança alta', () => {
-    const d = dica('retornar amanhã às 15h')!;
+    const d = exigir(dica('retornar amanhã às 15h'));
     expect(parede(d.remindAt)).toBe('11/08 15:00');
     expect(d.confianca).toBe('alta');
   });
 
   it('dia da semana pelo nome', () => {
-    expect(parede(dica('visita na quarta às 10h')!.remindAt)).toBe('12/08 10:00');
-    expect(parede(dica('retornar sexta-feira')!.remindAt)).toBe('14/08 09:00');
+    expect(parede(exigir(dica('visita na quarta às 10h')).remindAt)).toBe('12/08 10:00');
+    expect(parede(exigir(dica('retornar sexta-feira')).remindAt)).toBe('14/08 09:00');
   });
 
   it('contagem de dias', () => {
-    expect(parede(dica('me cobra daqui a 3 dias')!.remindAt)).toBe('13/08 09:00');
+    expect(parede(exigir(dica('me cobra daqui a 3 dias')).remindAt)).toBe('13/08 09:00');
   });
 
   it('depois de amanhã não é confundido com amanhã', () => {
-    expect(parede(dica('retornar depois de amanhã às 11h')!.remindAt)).toBe('12/08 11:00');
+    expect(parede(exigir(dica('retornar depois de amanhã às 11h')).remindAt)).toBe('12/08 11:00');
   });
 
   it('anotação sem intenção de horário não vira lembrete', () => {
@@ -137,7 +138,7 @@ describe('da frase para a sugestão', () => {
 });
 
 describe('a dica distingue o que veio da frase do que foi convenção', () => {
-  const dica = (txt: string) => parseReminderHint(txt, SEGUNDA_14H, SP)!;
+  const dica = (txt: string) => exigir(parseReminderHint(txt, SEGUNDA_14H, SP));
 
   it('hora dita, dia inferido — o caso que originou o recurso', () => {
     const d = dica('Cliente pediu para retornar depois das 18h');

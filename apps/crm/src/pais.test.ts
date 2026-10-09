@@ -8,6 +8,7 @@ import {
   paisDoTelefone,
 } from '@contracts';
 import { definicaoDaFuncao, semComentarios } from '../../../supabase/testes/esquema';
+import { exigir } from '../../../supabase/testes/exigir';
 
 /**
  * O país do lead sai do NÚMERO — a migração 126.
@@ -36,7 +37,7 @@ function discagemDoBanco(): Record<string, string> {
   const sql = discagem();
   const bloco = sql.slice(sql.indexOf('from (values'), sql.indexOf(') as p(codigo, iso)'));
   const mapa: Record<string, string> = {};
-  for (const m of bloco.matchAll(/\('(\d+)',\s*'([A-Z]{2})'\)/g)) mapa[m[1]!] = m[2]!;
+  for (const m of bloco.matchAll(/\('(\d+)',\s*'([A-Z]{2})'\)/g)) mapa[exigir(m[1])] = exigir(m[2]);
   return mapa;
 }
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { colunasDaTabela, definicaoDaFuncao, definicaoDaRestricao } from '../../../supabase/testes/esquema';
+import { exigir } from '../../../supabase/testes/exigir';
 
 import {
   CATEGORIAS_COM_LISTA,
@@ -84,29 +85,29 @@ describe('normalizarCaracteristicas', () => {
     expect(normalizarCaracteristicas(['x'])).toEqual({});
     expect(
       normalizarCaracteristicas({
-        cozinha: { itens: [a!.id] },
-        unidade: { itens: ['nao_existe', b!.id, a!.id, b!.id, 7], outros: ['  Ilha   em quartzo ', '', 3] },
+        cozinha: { itens: [a.id] },
+        unidade: { itens: ['nao_existe', b.id, a.id, b.id, 7], outros: ['  Ilha   em quartzo ', '', 3] },
         lazer: 'piscina',
-        adicionais: { itens: [a!.id], outros: ['Escriturado'] },
+        adicionais: { itens: [a.id], outros: ['Escriturado'] },
       }),
     ).toEqual({
       // Na ordem da lista, sem repetir e sem id desconhecido.
-      unidade: { itens: [a!.id, b!.id], outros: ['Ilha em quartzo'] },
+      unidade: { itens: [a.id, b.id], outros: ['Ilha em quartzo'] },
       // "Informações adicionais" não tem lista.
       adicionais: { outros: ['Escriturado'] },
     });
   });
 
   it('texto livre que é sinônimo de um item marcado não repete o item', () => {
-    const salao = itemPeloTexto('lazer', 'Salão de jogos')!;
+    const salao = exigir(itemPeloTexto('lazer', 'Salão de jogos'));
     expect(normalizarCaracteristicas({ lazer: { itens: [salao.id], outros: ['Game room'] } }).lazer).toEqual({ itens: [salao.id] });
   });
 
   it('texto livre igual a um item marcado, ou repetido, aparece uma vez só', () => {
     const r = normalizarCaracteristicas({
-      lazer: { itens: [piscinaOuOutro!.id], outros: [piscinaOuOutro!.rotulo.toUpperCase(), 'Deck', 'deck '] },
+      lazer: { itens: [piscinaOuOutro.id], outros: [piscinaOuOutro.rotulo.toUpperCase(), 'Deck', 'deck '] },
     });
-    expect(r.lazer).toEqual({ itens: [piscinaOuOutro!.id], outros: ['Deck'] });
+    expect(r.lazer).toEqual({ itens: [piscinaOuOutro.id], outros: ['Deck'] });
   });
 
   it('categoria vazia some, e o texto longo é cortado no limite do banco', () => {
@@ -117,9 +118,9 @@ describe('normalizarCaracteristicas', () => {
 
   it('o corte no limite não parte um emoji ao meio (o banco recusaria o imóvel inteiro)', () => {
     const texto = `${'a'.repeat(LIMITE_DO_TEXTO_LIVRE - 1)}🏊 piscina`;
-    const [cortado] = normalizarCaracteristicas({ adicionais: { outros: [texto] } }).adicionais!.outros!;
-    expect(Array.from(cortado!)).toHaveLength(LIMITE_DO_TEXTO_LIVRE);
-    expect(cortado!.endsWith('🏊')).toBe(true);
+    const [cortado] = exigir(normalizarCaracteristicas({ adicionais: { outros: [texto] } }).adicionais?.outros);
+    expect(Array.from(cortado)).toHaveLength(LIMITE_DO_TEXTO_LIVRE);
+    expect(cortado.endsWith('🏊')).toBe(true);
     // Sem metade de par substituto solta.
     expect(cortado).not.toMatch(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/);
   });
@@ -133,8 +134,8 @@ describe('normalizarCaracteristicas', () => {
 describe('itemPeloTexto', () => {
   it('acha o item digitado sem olhar acento nem caixa', () => {
     const [item] = itensDa('empreendimento');
-    const digitado = item!.rotulo.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-    expect(itemPeloTexto('empreendimento', `  ${digitado} `)?.id).toBe(item!.id);
+    const digitado = item.rotulo.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    expect(itemPeloTexto('empreendimento', `  ${digitado} `)?.id).toBe(item.id);
     expect(itemPeloTexto('empreendimento', 'coisa que não existe')).toBeUndefined();
     expect(itemPeloTexto('empreendimento', '   ')).toBeUndefined();
   });
@@ -161,8 +162,8 @@ describe('itemPeloTexto', () => {
 
 describe('itemCombinaComBusca', () => {
   it('olha o começo das palavras do rótulo e dos sinônimos', () => {
-    const salao = itemPeloTexto('lazer', 'Salão de jogos')!;
-    const yoga = itemPeloTexto('lazer', 'Sala de yoga')!;
+    const salao = exigir(itemPeloTexto('lazer', 'Salão de jogos'));
+    const yoga = exigir(itemPeloTexto('lazer', 'Sala de yoga'));
     expect(itemCombinaComBusca(salao, 'game')).toBe(true);
     expect(itemCombinaComBusca(salao, 'JOG')).toBe(true);
     expect(itemCombinaComBusca(salao, 'salao de')).toBe(true);
@@ -172,10 +173,10 @@ describe('itemCombinaComBusca', () => {
   });
 
   it('acha com ou sem hífen', () => {
-    const wifi = itemPeloTexto('empreendimento', 'Wi-Fi nas áreas comuns')!;
+    const wifi = exigir(itemPeloTexto('empreendimento', 'Wi-Fi nas áreas comuns'));
     expect(itemCombinaComBusca(wifi, 'wifi')).toBe(true);
     expect(itemCombinaComBusca(wifi, 'wi fi')).toBe(true);
-    expect(itemCombinaComBusca(itemPeloTexto('unidade', 'Ar-condicionado')!, 'condicionado')).toBe(true);
+    expect(itemCombinaComBusca(exigir(itemPeloTexto('unidade', 'Ar-condicionado')), 'condicionado')).toBe(true);
   });
 });
 
@@ -184,15 +185,15 @@ describe('caracteristicasParaMostrar', () => {
     const [a, b] = itensDa('unidade');
     const [l] = itensDa('lazer');
     const r = caracteristicasParaMostrar(
-      { lazer: { itens: [l!.id] }, adicionais: { outros: ['Escriturado'] }, unidade: { itens: [b!.id, a!.id], outros: ['Ilha'] } },
+      { lazer: { itens: [l.id] }, adicionais: { outros: ['Escriturado'] }, unidade: { itens: [b.id, a.id], outros: ['Ilha'] } },
       'casa',
     );
     expect(r).toEqual([
-      { categoria: 'unidade', titulo: 'Casa', itens: [a!.rotulo, b!.rotulo, 'Ilha'] },
-      { categoria: 'lazer', titulo: 'Área de lazer', itens: [l!.rotulo] },
+      { categoria: 'unidade', titulo: 'Casa', itens: [a.rotulo, b.rotulo, 'Ilha'] },
+      { categoria: 'lazer', titulo: 'Área de lazer', itens: [l.rotulo] },
       { categoria: 'adicionais', titulo: 'Informações adicionais', itens: ['Escriturado'] },
     ]);
-    expect(totalDeCaracteristicas({ unidade: { itens: [a!.id], outros: ['Ilha'] }, lazer: { itens: [l!.id] } })).toBe(3);
+    expect(totalDeCaracteristicas({ unidade: { itens: [a.id], outros: ['Ilha'] }, lazer: { itens: [l.id] } })).toBe(3);
   });
 });
 

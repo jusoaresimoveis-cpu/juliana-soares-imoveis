@@ -106,7 +106,7 @@ function fimDaTagAberta(fonte: string, abre: number): number {
   let aspas: string | null = null;
 
   for (let i = abre + 1; i < fonte.length; i++) {
-    const c = fonte[i]!;
+    const c = fonte[i];
     if (aspas) {
       if (c === aspas) aspas = null;
       continue;
@@ -165,7 +165,7 @@ export function cabecalhosApertados(fonteBruta: string): string[] {
   const achados: string[] = [];
 
   for (const m of fonte.matchAll(/min-w-0 flex-1|flex-1 min-w-0/g)) {
-    const abre = fonte.lastIndexOf('<', m.index!);
+    const abre = fonte.lastIndexOf('<', m.index);
     if (abre < 0) continue;
     const tag = /^<([A-Za-z][\w.]*)/.exec(fonte.slice(abre))?.[1];
     if (!tag) continue;

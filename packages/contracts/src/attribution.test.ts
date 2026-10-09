@@ -5,6 +5,7 @@ import {
   semComentarios,
   valoresDoCheck as valoresDoCheckAtual,
 } from '../../../supabase/testes/esquema';
+import { exigir } from '../../../supabase/testes/exigir';
 
 /** A definição vigente de uma função, sem comentário. */
 const funcao = (nome: string) => semComentarios(definicaoDaFuncao(nome).texto);
@@ -86,7 +87,7 @@ describe('código de referência do WhatsApp', () => {
     const ultimo = todos.pop();
     expect(ultimo, 'o regexp_match sumiu de parse_ref_code').toBeDefined();
 
-    const [, padraoSql, resto] = ultimo!;
+    const [, padraoSql, resto] = exigir(ultimo, 'o regexp_match de parse_ref_code');
     // O grupo do meio, opcional, é o mercado.
     expect(padraoSql, 'o padrão do banco não tem o grupo de mercado').toContain('{2}');
     expect(padraoSql).toMatch(/\)\?/);

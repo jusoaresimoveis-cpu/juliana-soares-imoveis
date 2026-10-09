@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { exigir } from '../../../supabase/testes/exigir';
 
 /**
  * A origem do visitante vem do NAVEGADOR — e por isso é a entrada mais
@@ -39,7 +40,7 @@ describe('a trava da origem', () => {
     const bloco = FUNCAO.match(/const CAMPOS_DE_ORIGEM = \{([\s\S]*?)\} as const;/);
     expect(bloco, 'CAMPOS_DE_ORIGEM sumiu').toBeTruthy();
 
-    const chaves = [...bloco![1]!.matchAll(/^\s*(\w+):/gm)].map((m) => m[1]);
+    const chaves = [...exigir(bloco?.[1], 'CAMPOS_DE_ORIGEM').matchAll(/^\s*(\w+):/gm)].map((m) => m[1]);
     expect(chaves.sort()).toEqual(
       [
         'fbclid',
@@ -64,7 +65,7 @@ describe('a trava da origem', () => {
      * teste ele é contado — e o placar que decide onde a verba vai passaria a
      * ser editável por quem visita.
      */
-    const bloco = FUNCAO.match(/const CAMPOS_DE_ORIGEM = \{([\s\S]*?)\} as const;/)![1]!;
+    const bloco = exigir(FUNCAO.match(/const CAMPOS_DE_ORIGEM = \{([\s\S]*?)\} as const;/)?.[1], 'CAMPOS_DE_ORIGEM');
     for (const proibida of ['variant', 'locale', 'landing_page_id', 'method', 'organization_id']) {
       expect(bloco, `origem aceita '${proibida}' do cliente`).not.toMatch(
         new RegExp(`\\b${proibida}\\s*:`),
@@ -75,7 +76,7 @@ describe('a trava da origem', () => {
   it('e todo campo tem teto de tamanho', () => {
     // Sem teto, um POST com 2 MB de texto vira 2 MB de linha no banco, a cada
     // envio. O `fbclid` legítimo tem cerca de cem caracteres.
-    const bloco = FUNCAO.match(/const CAMPOS_DE_ORIGEM = \{([\s\S]*?)\} as const;/)![1]!;
+    const bloco = exigir(FUNCAO.match(/const CAMPOS_DE_ORIGEM = \{([\s\S]*?)\} as const;/)?.[1], 'CAMPOS_DE_ORIGEM');
     const pares = [...bloco.matchAll(/^\s*\w+:\s*(\d+)/gm)].map((m) => Number(m[1]));
     expect(pares.length, 'nenhum campo com teto declarado').toBeGreaterThan(0);
     for (const teto of pares) expect(teto).toBeLessThanOrEqual(300);
@@ -90,7 +91,7 @@ describe('a trava da origem', () => {
      * O teste acima já barra a chave na lista; este barra a ordem. As duas
      * precisam cair para o defeito voltar.
      */
-    const attr = FUNCAO.match(/_attribution:\s*\{([\s\S]*?)\n    \},/)![1]!;
+    const attr = exigir(FUNCAO.match(/_attribution:\s*\{([\s\S]*?)\n {4}\},/)?.[1], 'o _attribution');
     expect(attr.indexOf('...origem')).toBeLessThan(attr.indexOf('landing_page_id'));
   });
 });

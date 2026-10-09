@@ -107,16 +107,16 @@ describe('as colunas da exportação', () => {
 
   it('a cidade só vem do que foi informado; a região mora na coluna dela', () => {
     const [linha] = linhasDaPlanilha([lead({ cidade: null })]);
-    expect(linha![2]).toBeNull();
-    expect(linha![4]).toBe('SC · região de Chapecó e Lages');
+    expect(linha?.[2]).toBeNull();
+    expect(linha?.[4]).toBe('SC · região de Chapecó e Lages');
 
     const [informada] = linhasDaPlanilha([lead({ cidade: '  Lages ' })]);
-    expect(informada![2]).toBe('Lages');
+    expect(informada?.[2]).toBe('Lages');
   });
 
   it('lead sem corretor diz isso, em vez de ficar em branco', () => {
     const [linha] = linhasDaPlanilha([lead({ corretor: null })]);
-    expect(linha![3]).toBe('Sem responsável');
+    expect(linha?.[3]).toBe('Sem responsável');
   });
 
   it('telefone brasileiro sai legível; o de fora sai como chegou', () => {
@@ -154,12 +154,12 @@ describe('as colunas da exportação', () => {
         encaixe_financeiro: 'cabe',
       }),
     ]);
-    expect(linha!.slice(-4)).toEqual(['Quente', 'Investir', 'De 1 a 3 meses', 'Entrada e parcelas cabem']);
+    expect(linha?.slice(-4)).toEqual(['Quente', 'Investir', 'De 1 a 3 meses', 'Entrada e parcelas cabem']);
   });
 
   it('lead sem qualificação deixa as quatro em branco, e código novo não some', () => {
     const [vazio] = linhasDaPlanilha([lead()]);
-    expect(vazio!.slice(-4)).toEqual([null, null, null, null]);
+    expect(vazio?.slice(-4)).toEqual([null, null, null, null]);
 
     // Um valor que o banco aceite antes de o dicionário conhecer aparece cru.
     // Feio, mas visível: célula vazia onde havia resposta ninguém nota.
@@ -196,14 +196,14 @@ describe('a planilha .xlsx', () => {
      */
     const folha = partes(
       planilhaDeLeads([lead({ nome: '=HYPERLINK("http://x","clique")', telefone_e164: '+56912345678', pais: 'CL' })]),
-    )['xl/worksheets/sheet1.xml']!;
+    )['xl/worksheets/sheet1.xml'];
     expect(folha).not.toContain('<f>');
     expect(folha).toContain('=HYPERLINK(&quot;http://x&quot;,&quot;clique&quot;)');
     expect(folha).toContain('<t xml:space="preserve">+56912345678</t>');
   });
 
   it('a data vira data de verdade, com o formato de data', () => {
-    const folha = partes(planilhaDeLeads([lead()]))['xl/worksheets/sheet1.xml']!;
+    const folha = partes(planilhaDeLeads([lead()]))['xl/worksheets/sheet1.xml'];
     expect(folha).toContain(`<c r="F2" s="2"><v>${serialExcel('2026-09-10T21:52:00')}</v></c>`);
   });
 
@@ -218,7 +218,7 @@ describe('a planilha .xlsx', () => {
   });
 
   it('célula vazia não é escrita', () => {
-    const folha = partes(planilhaDeLeads([lead({ cidade: null, email: null })]))['xl/worksheets/sheet1.xml']!;
+    const folha = partes(planilhaDeLeads([lead({ cidade: null, email: null })]))['xl/worksheets/sheet1.xml'];
     expect(folha).not.toContain('r="C2"');
     expect(folha).not.toContain('r="J2"');
   });
