@@ -144,6 +144,10 @@ function valorDaColuna(x: LinhaCalculada, chave: ChaveDeOrdem): string | number 
   }
 }
 
+function ehVazio(v: string | number | null): boolean {
+  return v === null || v === '';
+}
+
 /**
  * Ordena sem nunca deixar o vazio na frente.
  *
@@ -165,8 +169,8 @@ export function ordenar(linhas: LinhaCalculada[], ordem: Ordem): LinhaCalculada[
     const a = valorDaColuna(A, chave);
     const b = valorDaColuna(B, chave);
 
-    const vazioA = a === null || a === '';
-    const vazioB = b === null || b === '';
+    const vazioA = ehVazio(a);
+    const vazioB = ehVazio(b);
     if (vazioA !== vazioB) return vazioA ? 1 : -1;
 
     if (!vazioA && !vazioB) {
