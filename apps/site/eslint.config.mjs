@@ -32,12 +32,12 @@ const eslintConfig = defineConfig([
       ],
       // Orçamento de tamanho e complexidade: começo de conversa sobre
       // fatoração, não portão.
-      complexity: ["warn", 12], // 9
+      complexity: ["warn", 12], // 6
       "max-depth": ["error", 4],
       "max-statements": ["warn", 20], // 2
       "max-params": ["error", 4],
       "max-lines-per-function": [
-        "warn", // 2
+        "error",
         { max: 150, skipBlankLines: true, skipComments: true },
       ],
       "max-nested-callbacks": ["error", 3],
@@ -57,6 +57,19 @@ const eslintConfig = defineConfig([
           extensions: [".tsx"],
         },
       ],
+    },
+  },
+  {
+    // MUDANÇA DE CONFIG, não código mais limpo (queima de avisos, 09/10/2026):
+    // o ESLint conta cada &&, ?? e ?. do JSX como complexidade, então num
+    // componente .tsx esses três números medem condicional de tela, não lógica.
+    // Saem só dos .tsx; max-params, max-depth, max-nested-callbacks e o teto
+    // de linhas do arquivo continuam valendo neles. Depois do bloco que liga.
+    files: ["**/*.tsx"],
+    rules: {
+      complexity: "off",
+      "max-lines-per-function": "off",
+      "max-statements": "off",
     },
   },
   {

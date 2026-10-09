@@ -30,7 +30,7 @@ const eslintTypedConfig = [
       "@typescript-eslint/unbound-method": "error",
       "@typescript-eslint/restrict-template-expressions": "error",
       "@typescript-eslint/restrict-plus-operands": "error",
-      "@typescript-eslint/require-await": "warn", // 2
+      "@typescript-eslint/require-await": "error",
     },
   },
 ];

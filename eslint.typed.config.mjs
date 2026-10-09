@@ -21,12 +21,12 @@ export default [
       // violação nasce em "error"; com violação, "warn" e a contagem ao lado,
       // até ela chegar a zero.
       "@typescript-eslint/no-floating-promises": "error",
-      "@typescript-eslint/no-misused-promises": "warn", // 4
-      "@typescript-eslint/no-unsafe-assignment": "warn", // 11
-      "@typescript-eslint/no-unsafe-member-access": "warn", // 8
-      "@typescript-eslint/no-unsafe-call": "warn", // 3
+      "@typescript-eslint/no-misused-promises": "error",
+      "@typescript-eslint/no-unsafe-assignment": "error",
+      "@typescript-eslint/no-unsafe-member-access": "error",
+      "@typescript-eslint/no-unsafe-call": "error",
       "@typescript-eslint/no-unsafe-return": "error",
-      "@typescript-eslint/no-unsafe-argument": "warn", // 4
+      "@typescript-eslint/no-unsafe-argument": "error",
       "@typescript-eslint/only-throw-error": "error",
       "@typescript-eslint/return-await": ["error", "in-try-catch"],
       "@typescript-eslint/await-thenable": "error",

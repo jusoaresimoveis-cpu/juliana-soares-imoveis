@@ -36,6 +36,7 @@ export class MolduraDeErro extends Component<{ children: ReactNode }, Estado> {
      * que dá para ler. As duas vão, uma embaixo da outra.
      */
     const pilha = [erro.stack, info.componentStack].filter(Boolean).join('\n---\n');
+    // eslint-disable-next-line quality/no-direct-console -- a moldura escreve no DevTools de propósito, e o rastro (lib/rastro.ts) já transforma este console.error em passo do relato
     console.error('moldura de erro:', erro.message);
     this.setState({ erro: Object.assign(erro, { pilhaCompleta: pilha }) });
   }
