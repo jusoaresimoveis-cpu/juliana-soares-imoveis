@@ -1,7 +1,7 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Loader2, ArrowLeft, ArrowRight, MailCheck, ShieldCheck } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { pedirLinkDeSenha, trocarSenha, useSessaoDeRecuperacao } from '@/hooks/useRecuperacaoDeSenha';
 import { MARCA } from '@/config/marca';
 import { ENTRADA } from './temaEntrada';
 
@@ -20,8 +20,8 @@ import { ENTRADA } from './temaEntrada';
  *
  * O `detectSessionInUrl: true` do cliente é quem faz a terceira etapa sozinho:
  * ao carregar `/redefinir` com o token no endereço, ele consome, guarda a
- * sessão e dispara `PASSWORD_RECOVERY`. Sem isso, o `updateUser` abaixo não
- * teria em nome de quem escrever.
+ * sessão e dispara `PASSWORD_RECOVERY`. Sem isso, o `updateUser` de
+ * `trocarSenha` não teria em nome de quem escrever.
  */
 
 /**
@@ -99,9 +99,7 @@ export default function Esqueci() {
     e.preventDefault();
     setErro(null);
     setEnviando(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/redefinir`,
-    });
+    const { error } = await pedirLinkDeSenha(email.trim(), `${window.location.origin}/redefinir`);
     setEnviando(false);
     if (error) setErro(error.message);
     else setEnviado(true);
@@ -147,7 +145,7 @@ export default function Esqueci() {
         Informe o e-mail da sua conta e mandamos um link para você criar uma nova.
       </p>
 
-      <form onSubmit={onSubmit}>
+      <form onSubmit={(e) => void onSubmit(e)}>
         <label className="block">
           <span className="mb-1.5 block text-base font-semibold" style={{ color: ENTRADA.texto }}>E-mail</span>
           <input
@@ -194,42 +192,10 @@ export default function Esqueci() {
 
 export function Redefinir() {
   const navigate = useNavigate();
-  const [pronta, setPronta] = useState<boolean | null>(null);
+  const pronta = useSessaoDeRecuperacao();
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
-
-  /*
-   * Espera a sessão de recuperação existir ANTES de mostrar o formulário.
-   *
-   * O cliente consome o token do endereço de forma assíncrona. Perguntando
-   * cedo demais, `getSession` devolve nulo numa página que vai funcionar em
-   * seguida — e a pessoa lê "link inválido" com o link bom na mão.
-   */
-  useEffect(() => {
-    let vivo = true;
-
-    const { data: assinatura } = supabase.auth.onAuthStateChange((evento) => {
-      if (evento === 'PASSWORD_RECOVERY' || evento === 'SIGNED_IN') {
-        if (vivo) setPronta(true);
-      }
-    });
-
-    void supabase.auth.getSession().then(({ data }) => {
-      if (data.session && vivo) setPronta(true);
-    });
-
-    // Se em 4 segundos nada chegou, o link não trouxe token válido.
-    const prazo = setTimeout(() => {
-      if (vivo) setPronta((p) => (p === null ? false : p));
-    }, 4000);
-
-    return () => {
-      vivo = false;
-      clearTimeout(prazo);
-      assinatura.subscription.unsubscribe();
-    };
-  }, []);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -239,7 +205,7 @@ export function Redefinir() {
     }
     setErro(null);
     setSalvando(true);
-    const { error } = await supabase.auth.updateUser({ password: senha });
+    const { error } = await trocarSenha(senha);
     setSalvando(false);
     if (error) setErro(error.message);
     else navigate('/', { replace: true });
@@ -275,7 +241,7 @@ export function Redefinir() {
         Escolha uma senha que você não use em outro lugar.
       </p>
 
-      <form onSubmit={onSubmit}>
+      <form onSubmit={(e) => void onSubmit(e)}>
         <label className="block">
           <span className="mb-1.5 block text-base font-semibold" style={{ color: ENTRADA.texto }}>Nova senha</span>
           <input

@@ -350,7 +350,7 @@ export function PropertyFormDialog({ orgId, imovel, proprietario, abaInicial, on
       onClick={(e) => e.target === e.currentTarget && onFechar()}
     >
       <form
-        onSubmit={onSubmit}
+        onSubmit={(e) => void onSubmit(e)}
         // `min-w-0`: no grid do fundo, o formulário cresceria até caber a barra
         // de abas inteira e passaria da tela do celular. Assim a barra rola.
         className="my-auto w-full min-w-0 max-w-[720px] rounded-[24px] bg-sheet p-6 shadow-sheet"

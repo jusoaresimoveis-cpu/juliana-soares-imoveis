@@ -100,7 +100,7 @@ export default function Auth() {
         <div className="relative z-10 -mt-16 px-4 pb-8 sm:-mt-24 sm:px-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:flex lg:items-center lg:px-10 lg:pb-0">
           <div className="mx-auto w-full max-w-[420px]">
             <form
-              onSubmit={onSubmit}
+              onSubmit={(e) => void onSubmit(e)}
               className="rounded-[24px] border p-6 shadow-[0_24px_60px_-30px_rgb(60_45_25_/_0.3)] backdrop-blur-xl sm:p-7"
               style={{ background: ENTRADA.vidro, borderColor: ENTRADA.vidroBorda }}
             >
