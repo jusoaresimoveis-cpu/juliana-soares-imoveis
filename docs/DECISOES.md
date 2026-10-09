@@ -500,6 +500,10 @@ relação ao briefing, já combinado:
   - A Juliana precisa ler e aprovar o texto. Contato de privacidade: o WhatsApp
     e o e-mail central (`SITE.email`).
 - [ ] Página "Sobre", com a bio que a Juliana escrever.
-- [ ] **Lançamento:** `SITE_NO_AR=sim` nas variáveis de produção do site e o
-      sitemap enviado no Search Console. O domínio já está no ar desde 25/09,
-      fora do Google até lá. **Não apagar** o TXT `google-site-verification`.
+- [x] **Lançamento (09/10):** `SITE_NO_AR=sim` nas variáveis de produção do
+      site e o sitemap enviado no Search Console. O domínio estava no ar desde
+      25/09, fora do Google até aqui. **Não apagar** o TXT
+      `google-site-verification`.
+  - A propriedade é de Domínio: o sitemap vai com a URL completa
+    (`https://julianasoaresimoveis.com.br/sitemap.xml`). Só `sitemap.xml` dá
+    "Endereço do sitemap inválido".
