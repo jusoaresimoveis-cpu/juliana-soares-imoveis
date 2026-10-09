@@ -194,15 +194,7 @@ export function motivoDo(
     return `${$(c.gasto)} gastos e nenhum lead no CRM. Se o custo real fosse o teto de ${$(teto)}, a chance de não ter saído nada seria de 2%.`;
   }
 
-  if (c.veredito === 'sem_leitura') {
-    const falta = c.faltam;
-    // O custo médio observado é a melhor estimativa que existe do que falta
-    // gastar. Não é promessa: é a conta que a própria campanha vem fazendo.
-    const previsto = c.cpl != null ? ` (cerca de ${$(c.cpl * falta)} no ritmo atual)` : '';
-    return c.leads === 0
-      ? `Nenhum lead ainda. Faltam ${falta} para uma leitura confiável.`
-      : `${leads} — faltam ${falta}${previsto} para o custo sair do ruído.`;
-  }
+  if (c.veredito === 'sem_leitura') return motivoSemLeitura(c, leads, $);
 
   /*
    * A faixa por extenso, e ela é o sujeito de toda frase daqui para baixo.
@@ -229,6 +221,20 @@ export function motivoDo(
   const contra =
     alvo != null ? `entre o alvo de ${$(alvo)} e o teto de ${$(teto)}` : `contra o teto de ${$(teto)}`;
   return `${$(c.cpl)} por lead sobre ${leads}, mas a faixa vai de ${faixa}. Ela ainda atravessa a linha ${contra} — não dá para afirmar de que lado está.`;
+}
+
+function motivoSemLeitura(
+  c: CampanhaInteligencia,
+  leads: string,
+  $: (v: number | null | undefined) => string,
+): string {
+  const falta = c.faltam;
+  // O custo médio observado é a melhor estimativa que existe do que falta
+  // gastar. Não é promessa: é a conta que a própria campanha vem fazendo.
+  const previsto = c.cpl != null ? ` (cerca de ${$(c.cpl * falta)} no ritmo atual)` : '';
+  return c.leads === 0
+    ? `Nenhum lead ainda. Faltam ${falta} para uma leitura confiável.`
+    : `${leads} — faltam ${falta}${previsto} para o custo sair do ruído.`;
 }
 
 // Os achados da conta moram em achados.ts; quem já os importava daqui
