@@ -1,5 +1,8 @@
 import { supabase } from './supabase';
 
+/** A resposta do functions.invoke, sem o `any` que o supabase-js põe no erro. */
+type RespostaDaFuncao = { data: unknown; error: unknown };
+
 /**
  * Chamar uma edge function sem cair na armadilha do token.
  *
@@ -75,10 +78,12 @@ export async function chamarFuncao<T = unknown>(
 
   // O token que ACABOU de ser conferido, explícito. Assim não há queda possível
   // para a chave publicável.
-  let { data, error } = (await supabase.functions.invoke(nome, {
+  // Anotação, não `as`: se o supabase-js mudar o formato da resposta, o tsc acusa.
+  const primeira: RespostaDaFuncao = await supabase.functions.invoke(nome, {
     body: corpo,
     headers: { Authorization: `Bearer ${sessao.session.access_token}` },
-  })) as { data: unknown; error: unknown };
+  });
+  let { data, error } = primeira;
 
   /*
    * Uma segunda chance, e uma só.
@@ -91,10 +96,11 @@ export async function chamarFuncao<T = unknown>(
   if (error && pareceFalhaDeRede(error)) {
     const { data: renovada } = await supabase.auth.refreshSession();
     if (renovada.session) {
-      ({ data, error } = (await supabase.functions.invoke(nome, {
+      const segunda: RespostaDaFuncao = await supabase.functions.invoke(nome, {
         body: corpo,
         headers: { Authorization: `Bearer ${renovada.session.access_token}` },
-      })) as { data: unknown; error: unknown });
+      });
+      ({ data, error } = segunda);
     }
     if (error && pareceFalhaDeRede(error)) {
       throw new Error(
