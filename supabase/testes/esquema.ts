@@ -760,8 +760,9 @@ type Tratador = (e: Esquema, m: RegExpExecArray, i: Instrucao) => void;
 
 /*
  * Cada instrução vai para o PRIMEIRO padrão da lista que casa com ela, e só
- * para ele. A ordem é parte da regra, não arrumação: era a de um if/else-if, e
- * trocar duas linhas de lugar muda o esquema montado sem erro nenhum.
+ * para ele. Hoje os padrões não se sobrepõem (cada um começa por palavras-chave
+ * próprias), mas a ordem é a do antigo if/else-if e é parte da regra: um padrão
+ * novo que se sobreponha a outro passa a depender dela, sem erro nenhum.
  */
 const TRATADORES: [RegExp, Tratador][] = [
   [new RegExp(`^create (?:or replace )?function ${NOME} ?\\(`), criarFuncao],
