@@ -124,7 +124,7 @@ export function celulaDasPartes(status: UnitStatus, preco: string): string {
 /* A grade                                                                    */
 /* -------------------------------------------------------------------------- */
 
-const natural = (a: string, b: string) => a.localeCompare(b, 'pt-BR', { numeric: true });
+export const natural = (a: string, b: string) => a.localeCompare(b, 'pt-BR', { numeric: true });
 
 /** O final da unidade: "804" no andar 8 é o final "04". Sem andar, ou fora do padrão, não tem. */
 export function finalDaUnidade(label: string, floor: number | null): string | null {
