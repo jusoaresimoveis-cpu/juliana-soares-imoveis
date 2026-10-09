@@ -76,11 +76,14 @@ export function interpretarSegmentos(
   }
 
   const filtro: FiltroDeListagem = { finalidade, tipo, cidade, bairro };
+  return conferirCanonica(filtro, segmentos);
+}
 
+function conferirCanonica(filtro: FiltroDeListagem, segmentos: string[] | undefined): Interpretacao {
   // `/aluguel/imoveis` é a mesma página que `/aluguel`. Duas URLs para o mesmo
   // conteúdo dividem a relevância entre elas; fica só a curta.
   const canonica = urlDaListagem(filtro);
-  const pedida = ['', finalidade, ...(segmentos ?? [])].join('/');
+  const pedida = ['', filtro.finalidade, ...(segmentos ?? [])].join('/');
   if (canonica !== pedida) return { ok: false, redirecionarPara: canonica };
 
   return { ok: true, filtro };
