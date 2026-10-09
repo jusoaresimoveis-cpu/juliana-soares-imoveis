@@ -44,15 +44,12 @@ const ACIMA_DO_TETO = [
   "apps/crm/src/pages/LeadDetail.tsx", // 911
   "apps/crm/src/pages/Inteligencia.tsx", // 708
   "apps/crm/src/pages/Dashboard.tsx", // 678
-  "apps/crm/src/hooks/useProperties.ts", // 640
-  "apps/crm/src/hooks/usePainel.ts", // 610
   "apps/crm/src/pages/Conversas.tsx", // 586
   "apps/crm/src/pages/PropertyDetail.tsx", // 586
   "apps/crm/src/pages/Settings.tsx", // 527
   "apps/crm/src/components/properties/MediaManager.tsx", // 470
   "apps/crm/src/components/settings/Equipe.tsx", // 447
   "apps/crm/src/pages/Documentos.tsx", // 446
-  "apps/crm/src/hooks/useMeta.ts", // 414
   "apps/crm/src/pages/Auth.tsx", // 387
   "apps/crm/src/components/settings/WhatsApp.tsx", // 374
   "apps/crm/src/pages/Agenda.tsx", // 363
@@ -161,7 +158,7 @@ export default defineConfig([
   // opções do bloco de cima continuam valendo.
   {
     files: ACIMA_DO_TETO,
-    rules: { "quality/max-lines": "warn" }, // 16
+    rules: { "quality/max-lines": "warn" }, // 13
   },
 
   // Exceções de verdade, não dívida.
