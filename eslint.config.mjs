@@ -83,13 +83,6 @@ export default defineConfig([
   },
   js.configs.recommended,
   ...tseslint.configs.strict,
-  {
-    // Linha de base dos presets acima: regras com violação no código que já
-    // existia. Depois dos presets, senão eles voltariam a ser "error".
-    rules: {
-      "@typescript-eslint/no-non-null-assertion": "warn", // 41
-    },
-  },
 
   {
     // Só as duas regras de hook, não o preset inteiro (o recommended da v7 traz
