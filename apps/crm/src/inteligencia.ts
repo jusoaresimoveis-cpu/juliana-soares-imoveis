@@ -271,7 +271,7 @@ function mediana(ns: number[]): number | null {
   if (ns.length === 0) return null;
   const s = [...ns].sort((a, b) => a - b);
   const m = Math.floor(s.length / 2);
-  return s.length % 2 ? s[m]! : Math.round(((s[m - 1] ?? 0) + (s[m] ?? 0)) / 2);
+  return s.length % 2 ? (s[m] ?? null) : Math.round(((s[m - 1] ?? 0) + (s[m] ?? 0)) / 2);
 }
 
 /**
