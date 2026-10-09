@@ -129,6 +129,15 @@ function Funil({ c }: { c: CampanhaInteligencia }) {
 
 /* -------------------------------------------------------------------------- */
 
+// Por nome: rótulo, ajuda, valor e cor são todos string; trocados de lugar, o tsc não veria.
+interface CampoDaMeta {
+  rotulo: string;
+  ajuda: string;
+  valor: string;
+  setValor: (v: string) => void;
+  cor: string;
+}
+
 /**
  * As duas linhas, editadas juntas.
  *
@@ -189,13 +198,7 @@ function MetaDeCpl({
     );
   }
 
-  const campo = (
-    rotulo: string,
-    ajuda: string,
-    valor: string,
-    setValor: (v: string) => void,
-    cor: string,
-  ) => (
+  const campo = ({ rotulo, ajuda, valor, setValor, cor }: CampoDaMeta) => (
     <label className="flex flex-col gap-1">
       <span className={cn('text-2xs font-semibold uppercase', cor)}>{rotulo}</span>
       <span className="flex items-center gap-1.5 rounded-sm border border-line-2 bg-card px-3 py-2">
@@ -225,8 +228,20 @@ function MetaDeCpl({
           </p>
 
           <div className="mt-3 flex flex-wrap items-start gap-4">
-            {campo('Alvo', 'abaixo dele, verde', txtAlvo, setTxtAlvo, 'text-ok')}
-            {campo('Teto', 'acima dele, vermelho', txtTeto, setTxtTeto, 'text-dng')}
+            {campo({
+              rotulo: 'Alvo',
+              ajuda: 'abaixo dele, verde',
+              valor: txtAlvo,
+              setValor: setTxtAlvo,
+              cor: 'text-ok',
+            })}
+            {campo({
+              rotulo: 'Teto',
+              ajuda: 'acima dele, vermelho',
+              valor: txtTeto,
+              setValor: setTxtTeto,
+              cor: 'text-dng',
+            })}
             <button
               type="button"
               disabled={!valido || !org || salvar.isPending}
