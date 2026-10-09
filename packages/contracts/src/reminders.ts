@@ -193,20 +193,14 @@ const PERIODOS: Array<{ re: RegExp; hora: number }> = [
   { re: /\ba noite|\bde noite|\bpela noite/, hora: 19 },
 ];
 
-/**
- * Reconhece intenção de horário numa anotação livre.
- *
- * O que ela faz: devolve uma sugestão para a tela abrir o diálogo já
- * preenchido, com o trecho reconhecido destacado.
- *
- * O que ela NUNCA faz: criar o lembrete sozinha. Um lembrete errado nascido de
- * adivinhação de texto ensina o corretor a ignorar o sino — e aí lead novo e
- * mensagem morrem junto, porque o sino é um só.
- */
-export function parseReminderHint(texto: string, agora: Date, tz: string): DicaDeLembrete | null {
-  const t = semAcento(texto);
-  const agoraP = paredeNoFuso(agora, tz);
+interface HoraDaFrase {
+  hora: number | null;
+  minuto: number;
+  trecho: string;
+  explicitaHora: boolean;
+}
 
+function horaDaFrase(t: string): HoraDaFrase {
   let hora: number | null = null;
   let minuto = 0;
   let trecho = '';
@@ -234,7 +228,15 @@ export function parseReminderHint(texto: string, agora: Date, tz: string): DicaD
       }
     }
   }
+  return { hora, minuto, trecho, explicitaHora };
+}
 
+interface DiaDaFrase {
+  deslocamento: number | null;
+  trechoDia: string;
+}
+
+function diaDaFrase(t: string, dowDeHoje: number): DiaDaFrase {
   // Que dia
   let deslocamento: number | null = null;
   let trechoDia = '';
@@ -256,13 +258,32 @@ export function parseReminderHint(texto: string, agora: Date, tz: string): DicaD
     } else {
       for (const [nome, dow] of Object.entries(DIAS_SEMANA)) {
         if (new RegExp(`\\b(?:na |proxima |proximo )?${nome}(?:-feira)?\\b`).test(t)) {
-          deslocamento = (dow - agoraP.dow + 7) % 7 || 7;
+          deslocamento = (dow - dowDeHoje + 7) % 7 || 7;
           trechoDia = nome;
           break;
         }
       }
     }
   }
+  return { deslocamento, trechoDia };
+}
+
+/**
+ * Reconhece intenção de horário numa anotação livre.
+ *
+ * O que ela faz: devolve uma sugestão para a tela abrir o diálogo já
+ * preenchido, com o trecho reconhecido destacado.
+ *
+ * O que ela NUNCA faz: criar o lembrete sozinha. Um lembrete errado nascido de
+ * adivinhação de texto ensina o corretor a ignorar o sino — e aí lead novo e
+ * mensagem morrem junto, porque o sino é um só.
+ */
+export function parseReminderHint(texto: string, agora: Date, tz: string): DicaDeLembrete | null {
+  const t = semAcento(texto);
+  const agoraP = paredeNoFuso(agora, tz);
+
+  const { hora, minuto, trecho, explicitaHora } = horaDaFrase(t);
+  const { deslocamento, trechoDia } = diaDaFrase(t, agoraP.dow);
 
   if (hora === null && deslocamento === null) return null;
 
