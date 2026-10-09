@@ -56,7 +56,10 @@ export function PorAngulo({ de, ate, moeda }: { de: string; ate: string; moeda: 
   if (!data || data.erro) return null;
 
   const semAngulo = porChave.get(SEM_ANGULO);
-  const marcados = ANGULOS_DE_CRIATIVO.filter((a) => porChave.has(a));
+  const marcados = ANGULOS_DE_CRIATIVO.flatMap((chave) => {
+    const linha = porChave.get(chave);
+    return linha ? [{ chave, linha }] : [];
+  });
   const anuncios = data.anuncios ?? [];
 
   return (
@@ -91,11 +94,11 @@ export function PorAngulo({ de, ate, moeda }: { de: string; ate: string; moeda: 
         </p>
       ) : (
         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {marcados.map((chave) => (
+          {marcados.map(({ chave, linha }) => (
             <CartaoDeAngulo
               key={chave}
               chave={chave}
-              linha={porChave.get(chave)!}
+              linha={linha}
               alvo={data.meta_cpl}
               teto={data.teto_cpl}
               moeda={moeda}
