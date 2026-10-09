@@ -10,7 +10,7 @@ import { CANAIS, CODIGO_DO_SITE, ORIGEM_SEM_CANAL, canalDoSlug, ehCanal, refDoSi
  * Se não for, o contato que veio do site cai como conversa pessoal e some do
  * CRM sem erro nenhum: a Juliana responde pelo celular e ninguém fica sabendo
  * que o site trouxe aquele cliente. O banco repete a regra em `parse_ref_code`,
- * e `contracts.test.ts` confere que as duas batem.
+ * e `attribution.test.ts` confere que as duas batem.
  */
 describe('o código do site', () => {
   it('é lido com o imóvel', () => {

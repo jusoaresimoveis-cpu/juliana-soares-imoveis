@@ -5,7 +5,15 @@ import {
   parseReminderHint,
   resolverPreset,
   REMINDER_PRESETS,
+  REMINDER_STATUSES,
 } from './reminders';
+import {
+  colunasDaTabela,
+  definicaoDaFuncao,
+  restricoesDaTabela,
+  semComentarios,
+  valoresDoCheck as valoresDoCheckAtual,
+} from '../../../supabase/testes/esquema';
 
 const SP = 'America/Sao_Paulo';
 
@@ -149,5 +157,40 @@ describe('a dica distingue o que veio da frase do que foi convenção', () => {
     expect(d.horaExplicita).toBe(true);
     expect(d.diaExplicito).toBe(true);
     expect(d.confianca).toBe('alta');
+  });
+});
+
+/** A definição vigente de uma função, sem comentário. */
+const funcao = (nome: string) => semComentarios(definicaoDaFuncao(nome).texto);
+
+describe('lembretes', () => {
+  it('os status batem com o CHECK', () => {
+    expect(valoresDoCheckAtual('lead_reminders_status_ck')).toEqual([...REMINDER_STATUSES].sort());
+  });
+
+  it('a varredura olha para trás, nunca para uma janela futura', () => {
+    // A origem usava `between now+5min and now+15min`: três horas fora do ar e
+    // o lembrete não casava mais com filtro nenhum, ficando pendente para
+    // sempre, sem erro em lugar algum.
+    const varredura = funcao('run_due_reminders');
+    expect(varredura).toMatch(/remind_at <= now\(\)/);
+    expect(varredura).not.toMatch(/remind_at\s+between/i);
+  });
+
+  it('o lembrete é reservado antes de ser notificado', () => {
+    expect(funcao('run_due_reminders')).toMatch(/for update skip locked/);
+  });
+
+  it('o lembrete é de uma pessoa, não do plantão', () => {
+    // À mão, `assigned_to uuid not null references public.profiles`; o pg_dump
+    // separa a referência numa restrição da tabela.
+    const coluna = colunasDaTabela('lead_reminders').get('assigned_to') ?? '';
+    expect(coluna).toMatch(/^uuid not null\b/);
+    const referencia =
+      /references public\.profiles\b/.test(coluna) ||
+      restricoesDaTabela('lead_reminders').some((r) =>
+        /^foreign key \(assigned_to\) references public\.profiles\b/.test(r.definicao),
+      );
+    expect(referencia, 'assigned_to deixou de apontar para profiles').toBe(true);
   });
 });

@@ -200,7 +200,7 @@ export default defineConfig([
     files: TESTES,
     plugins: { quality },
     rules: {
-      "quality/max-lines": ["warn", { max: MAX_LINES, includeTests: true }], // 6
+      "quality/max-lines": ["warn", { max: MAX_LINES, includeTests: true }], // 5
     },
   },
   {

@@ -4,8 +4,9 @@
  * Tudo que tem nome e atravessa mais de uma camada mora aqui: tipo de imóvel,
  * etapa do funil, origem do lead, chave de atribuição, tipo de evento. O site,
  * o CRM, as edge functions e as migrations leem destes arquivos. O banco repete
- * os mesmos valores em CHECK, e `contracts.test.ts` compara os dois: renomear de
- * um lado só quebra o CI de propósito.
+ * os mesmos valores em CHECK, e os testes do pacote (`contracts.test.ts` e o
+ * `<módulo>.test.ts` de cada módulo) comparam os dois: renomear de um lado só
+ * quebra o CI de propósito.
  *
  * Regra: nada de string solta. Se um valor aparece em duas camadas, ele é
  * exportado daqui ou não existe.

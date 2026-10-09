@@ -24,7 +24,7 @@ export const GRAPH = `https://graph.facebook.com/${GRAPH_VERSION}`;
  * Estas três listas são cópia de `packages/contracts/meta.ts`.
  *
  * Não é preguiça: o Deno não alcança o pacote, e o teste
- * `contracts.test.ts` lê ESTE arquivo como texto e compara os números — se
+ * `meta.test.ts` do pacote lê ESTE arquivo como texto e compara os números — se
  * alguém mexer num lado só, a suíte quebra. Sem esse guarda, os dois lados
  * divergem e o que a tela diz deixa de descrever o que o servidor decidiu.
  */
