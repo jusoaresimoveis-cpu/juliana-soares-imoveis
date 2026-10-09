@@ -76,6 +76,16 @@ export function fechamento(texto: string, inicio: number): number {
   return texto.length;
 }
 
+/** A posição logo depois da aspa `c` que fecha a de `i`; sem ela, o fim do texto. */
+function fimDoLiteral(texto: string, i: number, c: string): number {
+  const fim = texto.indexOf(c, i + 1);
+  return fim < 0 ? texto.length : fim + 1;
+}
+
+function abre(c: string): boolean {
+  return c === '(' || c === '[';
+}
+
 /** Divide nas vírgulas de fora de parêntese, colchete e aspas. */
 export function porVirgula(texto: string): string[] {
   const partes: string[] = [];
@@ -85,13 +95,12 @@ export function porVirgula(texto: string): string[] {
   while (i < texto.length) {
     const c = texto[i] ?? '';
     if (c === "'" || c === '"') {
-      const fim = texto.indexOf(c, i + 1);
-      const ate = fim < 0 ? texto.length : fim + 1;
+      const ate = fimDoLiteral(texto, i, c);
       atual += texto.slice(i, ate);
       i = ate;
       continue;
     }
-    if (c === '(' || c === '[') profundidade += 1;
+    if (abre(c)) profundidade += 1;
     if (c === ')' || c === ']') profundidade -= 1;
     if (c === ',' && profundidade === 0) {
       partes.push(atual.trim());
