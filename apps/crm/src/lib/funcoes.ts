@@ -48,11 +48,11 @@ async function mensagemDoCorpo(erro: unknown): Promise<string | null> {
     if (!ctx) return null;
 
     if (typeof (ctx as Response).json === 'function') {
-      const corpo = await (ctx as Response).json();
+      const corpo = (await (ctx as Response).json()) as { erro?: unknown } | null;
       if (corpo?.erro) return String(corpo.erro);
     }
     if (typeof (ctx as { body?: unknown }).body === 'string') {
-      const corpo = JSON.parse((ctx as { body: string }).body);
+      const corpo = JSON.parse((ctx as { body: string }).body) as { erro?: unknown } | null;
       if (corpo?.erro) return String(corpo.erro);
     }
     if (typeof ctx === 'object' && 'erro' in ctx) return String((ctx as { erro: unknown }).erro);
@@ -75,10 +75,10 @@ export async function chamarFuncao<T = unknown>(
 
   // O token que ACABOU de ser conferido, explícito. Assim não há queda possível
   // para a chave publicável.
-  let { data, error } = await supabase.functions.invoke(nome, {
+  let { data, error } = (await supabase.functions.invoke(nome, {
     body: corpo,
     headers: { Authorization: `Bearer ${sessao.session.access_token}` },
-  });
+  })) as { data: unknown; error: unknown };
 
   /*
    * Uma segunda chance, e uma só.
@@ -91,10 +91,10 @@ export async function chamarFuncao<T = unknown>(
   if (error && pareceFalhaDeRede(error)) {
     const { data: renovada } = await supabase.auth.refreshSession();
     if (renovada.session) {
-      ({ data, error } = await supabase.functions.invoke(nome, {
+      ({ data, error } = (await supabase.functions.invoke(nome, {
         body: corpo,
         headers: { Authorization: `Bearer ${renovada.session.access_token}` },
-      }));
+      })) as { data: unknown; error: unknown });
     }
     if (error && pareceFalhaDeRede(error)) {
       throw new Error(

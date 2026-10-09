@@ -74,7 +74,7 @@ self.addEventListener('push', (evento: PushEvent) => {
  */
 self.addEventListener('notificationclick', (evento: NotificationEvent) => {
   evento.notification.close();
-  const destino = (evento.notification.data?.url as string) ?? '/';
+  const destino = (evento.notification.data as { url?: string } | null | undefined)?.url ?? '/';
 
   evento.waitUntil(
     (async () => {

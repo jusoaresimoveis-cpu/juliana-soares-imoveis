@@ -474,7 +474,7 @@ export function useParaRetomar(quantos = 8) {
         const conversa = Array.isArray(l.whatsapp_conversations)
           ? l.whatsapp_conversations[0]
           : l.whatsapp_conversations;
-        const etapa = Array.isArray(l.pipeline_stages) ? l.pipeline_stages[0] : l.pipeline_stages;
+        const etapa: unknown = Array.isArray(l.pipeline_stages) ? l.pipeline_stages[0] : l.pipeline_stages;
         return {
           id: l.id as string,
           full_name: l.full_name as string,
@@ -532,7 +532,7 @@ export function useEsperando(quantos = 8) {
         const conversa = Array.isArray(l.whatsapp_conversations)
           ? l.whatsapp_conversations[0]
           : l.whatsapp_conversations;
-        const etapa = Array.isArray(l.pipeline_stages) ? l.pipeline_stages[0] : l.pipeline_stages;
+        const etapa: unknown = Array.isArray(l.pipeline_stages) ? l.pipeline_stages[0] : l.pipeline_stages;
         return {
           id: l.id as string,
           full_name: l.full_name as string,
@@ -563,7 +563,7 @@ export function useUltimosLeads(quantos = 5) {
         const conversa = Array.isArray(l.whatsapp_conversations)
           ? l.whatsapp_conversations[0]
           : l.whatsapp_conversations;
-        const etapa = Array.isArray(l.pipeline_stages) ? l.pipeline_stages[0] : l.pipeline_stages;
+        const etapa: unknown = Array.isArray(l.pipeline_stages) ? l.pipeline_stages[0] : l.pipeline_stages;
         const variante = (l.ft_variant as string | null)?.toUpperCase() ?? null;
 
         return {
