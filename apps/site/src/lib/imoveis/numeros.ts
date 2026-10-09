@@ -44,10 +44,7 @@ export function numerosDoImovel(imovel: Imovel): NumeroDoImovel[] {
 
   const numeros: NumeroDoImovel[] = [];
 
-  if (imovel.areaM2) {
-    const total = imovel.areaTotalM2 && imovel.areaTotalM2 !== imovel.areaM2 ? imovel.areaTotalM2 : null;
-    numeros.push({ tipo: 'area', valor: m2(imovel.areaM2), rotulo: 'm²', extra: total ? `${m2(total)} m² total` : null });
-  }
+  acrescentarArea(numeros, imovel);
 
   /*
    * Quartos e suítes lado a lado, do mesmo tamanho. No cadastro, "Quartos (sem
@@ -70,6 +67,13 @@ export function numerosDoImovel(imovel: Imovel): NumeroDoImovel[] {
   }
 
   return numeros;
+}
+
+function acrescentarArea(numeros: NumeroDoImovel[], imovel: Imovel): void {
+  if (imovel.areaM2) {
+    const total = imovel.areaTotalM2 && imovel.areaTotalM2 !== imovel.areaM2 ? imovel.areaTotalM2 : null;
+    numeros.push({ tipo: 'area', valor: m2(imovel.areaM2), rotulo: 'm²', extra: total ? `${m2(total)} m² total` : null });
+  }
 }
 
 /**
