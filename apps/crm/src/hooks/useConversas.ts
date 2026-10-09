@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { exigir } from '@/lib/exigir';
 import type { WaInstanceStatus } from '@contracts';
 
 /**
@@ -216,7 +217,7 @@ export function useMensagens(conversaId: string | null) {
         .select(
           'id, direction, kind, body, ref_code, media_status, media_path, media_mime, media_filename, status, error, sent_by, occurred_at',
         )
-        .eq('conversation_id', conversaId!)
+        .eq('conversation_id', exigir(conversaId, 'a conversa'))
         .order('occurred_at', { ascending: false })
         .limit(60);
       if (error) throw error;
@@ -230,7 +231,7 @@ export function useEnviar(conversaId: string | null) {
   return useMutation({
     mutationFn: async (texto: string) => {
       const { error } = await supabase.rpc('enfileirar_mensagem', {
-        _conversation_id: conversaId!,
+        _conversation_id: exigir(conversaId, 'a conversa'),
         _body: texto,
       });
       // As três recusas do banco chegam legíveis: número desconectado, conversa
@@ -307,7 +308,7 @@ export function useMidiaAssinada(caminho: string | null) {
     queryFn: async (): Promise<string | null> => {
       const { data, error } = await supabase.storage
         .from('whatsapp-media')
-        .createSignedUrl(caminho!, 300);
+        .createSignedUrl(exigir(caminho, 'o caminho da mídia'), 300);
       if (error) return null;
       return data.signedUrl;
     },

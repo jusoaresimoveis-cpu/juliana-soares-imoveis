@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { exigir } from '@/lib/exigir';
 import { NOTIFICATION_META, isNotificationType, type NotificationType } from '@contracts';
 import { tocar } from '@/lib/notificationSounds';
 
@@ -34,7 +35,7 @@ export function useNaoLidas(profileId: string | undefined) {
       const { count, error } = await supabase
         .from('notifications')
         .select('id', { count: 'exact', head: true })
-        .eq('recipient_id', profileId!)
+        .eq('recipient_id', exigir(profileId, 'o perfil'))
         .eq('is_read', false);
       if (error) throw error;
       return count ?? 0;
@@ -52,7 +53,7 @@ export function useNotificacoes(profileId: string | undefined, aberto: boolean) 
       const { data, error } = await supabase
         .from('notifications')
         .select('id, type, title, body, link_path, event_count, is_read, created_at, last_event_at')
-        .eq('recipient_id', profileId!)
+        .eq('recipient_id', exigir(profileId, 'o perfil'))
         .order('last_event_at', { ascending: false })
         .limit(PAGINA);
       if (error) throw error;
@@ -85,7 +86,7 @@ export function useMarcarLida(profileId: string | undefined) {
       const { error } = await supabase
         .from('notifications')
         .update({ is_read: true, read_at: new Date().toISOString() })
-        .eq('recipient_id', profileId!)
+        .eq('recipient_id', exigir(profileId, 'o perfil'))
         .eq('is_read', false);
       if (error) throw error;
     },

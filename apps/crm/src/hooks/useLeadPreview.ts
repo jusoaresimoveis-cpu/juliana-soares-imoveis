@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { exigir } from '@/lib/exigir';
 import type { AttributionMethod, LeadSource, RespostasDeQualificacao, Variant } from '@contracts';
 
 export interface InteresseDoLead {
@@ -52,17 +53,17 @@ export function useLeadPreview(leadId: string | null) {
           .select(
             'id, email, notes, created_at, first_contact_at, stage_changed_at, source, ft_variant, ft_locale, ft_utm_campaign, ft_meta_ad_id, attribution_method, ab_contaminated, deal_value_cents, finalidade, prazo_compra, encaixe_financeiro, temperatura_manual, temperatura_regra, temperatura',
           )
-          .eq('id', leadId!)
+          .eq('id', exigir(leadId, 'o lead'))
           .single(),
         supabase
           .from('lead_property_interests')
           .select('properties(title, public_code, for_sale, for_rent, price_cents, rent_cents, has_units, units_available)')
-          .eq('lead_id', leadId!)
+          .eq('lead_id', exigir(leadId, 'o lead'))
           .limit(3),
         supabase
           .from('lead_timeline_events')
           .select('category, title, occurred_at')
-          .eq('lead_id', leadId!)
+          .eq('lead_id', exigir(leadId, 'o lead'))
           .order('occurred_at', { ascending: false })
           .limit(4),
       ]);

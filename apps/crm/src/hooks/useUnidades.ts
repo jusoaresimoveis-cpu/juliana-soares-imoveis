@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { exigir } from '@/lib/exigir';
 import type { Json } from '@/lib/database.types';
 import type { UnitStatus } from '@contracts';
 
@@ -50,10 +51,10 @@ export function useUnidades(propertyId: string | null | undefined, ligado = true
         supabase
           .from('property_floorplans')
           .select(COLUNAS_DA_PLANTA)
-          .eq('property_id', propertyId!)
+          .eq('property_id', exigir(propertyId, 'o imóvel'))
           .order('position')
           .order('name'),
-        supabase.from('property_units').select(COLUNAS_DA_UNIDADE).eq('property_id', propertyId!),
+        supabase.from('property_units').select(COLUNAS_DA_UNIDADE).eq('property_id', exigir(propertyId, 'o imóvel')),
       ]);
       if (plantas.error) throw plantas.error;
       if (unidades.error) throw unidades.error;

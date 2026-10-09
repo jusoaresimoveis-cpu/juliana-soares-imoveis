@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { exigir } from '@/lib/exigir';
 import type { Database } from '@/lib/database.types';
 import { DEFAULT_VISIT_MINUTES, type VisitStatus } from '@contracts';
 
@@ -58,7 +59,7 @@ export function useVisitasDoLead(leadId: string | undefined) {
       const { data, error } = await supabase
         .from('visits')
         .select(CAMPOS)
-        .eq('lead_id', leadId!)
+        .eq('lead_id', exigir(leadId, 'o lead'))
         .order('starts_at', { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as Visita[];
@@ -92,9 +93,9 @@ export function useConflitos(
     staleTime: 0,
     queryFn: async (): Promise<Conflito[]> => {
       const { data, error } = await supabase.rpc('visit_conflicts', {
-        _assigned_to: corretor!,
-        _starts_at: inicio!,
-        _ends_at: fim!,
+        _assigned_to: exigir(corretor, 'o corretor'),
+        _starts_at: exigir(inicio, 'o início da janela'),
+        _ends_at: exigir(fim, 'o fim da janela'),
         _ignore_id: ignorar ?? undefined,
       });
       if (error) throw error;

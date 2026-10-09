@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { exigir } from '@/lib/exigir';
 import type { Database } from '@/lib/database.types';
 import type {
   AttributionMethod,
@@ -106,7 +107,7 @@ export function useLead(id: string | undefined) {
     enabled: !!id,
     staleTime: 15_000,
     queryFn: async (): Promise<LeadFull> => {
-      const { data, error } = await supabase.from('leads').select('*').eq('id', id!).single();
+      const { data, error } = await supabase.from('leads').select('*').eq('id', exigir(id, 'o lead')).single();
       if (error) throw error;
       return data as unknown as LeadFull;
     },
@@ -121,7 +122,7 @@ export function useTimeline(leadId: string | undefined) {
       const { data, error } = await supabase
         .from('lead_timeline_events')
         .select('id, category, event_type, title, description, actor_label, occurred_at')
-        .eq('lead_id', leadId!)
+        .eq('lead_id', exigir(leadId, 'o lead'))
         .order('occurred_at', { ascending: false })
         .limit(80);
       if (error) throw error;
@@ -138,7 +139,7 @@ export function useInteresses(leadId: string | undefined) {
       const { data, error } = await supabase
         .from('lead_property_interests')
         .select(`id, property_id, is_primary, properties(${COLUNAS_DO_IMOVEL_DO_LEAD})`)
-        .eq('lead_id', leadId!);
+        .eq('lead_id', exigir(leadId, 'o lead'));
       if (error) throw error;
       return (data ?? []) as unknown as Interesse[];
     },

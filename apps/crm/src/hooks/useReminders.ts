@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { exigir } from '@/lib/exigir';
 import type { ReminderStatus } from '@contracts';
 
 export interface Lembrete {
@@ -23,7 +24,7 @@ export function useLembretes(leadId: string | undefined) {
       const { data, error } = await supabase
         .from('lead_reminders')
         .select('id, lead_id, assigned_to, visit_id, title, body, remind_at, status, snooze_count, created_at')
-        .eq('lead_id', leadId!)
+        .eq('lead_id', exigir(leadId, 'o lead'))
         .order('remind_at', { ascending: false });
       if (error) throw error;
       return (data ?? []) as Lembrete[];

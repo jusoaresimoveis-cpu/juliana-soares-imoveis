@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { exigir } from '@/lib/exigir';
 import type { LeadScope, NotificationType } from '@contracts';
 
 export interface Preferencias {
@@ -19,7 +20,7 @@ export function usePreferencias(profileId: string | undefined, orgId: string | u
       const { data, error } = await supabase
         .from('notification_preferences')
         .select('*')
-        .eq('profile_id', profileId!)
+        .eq('profile_id', exigir(profileId, 'o perfil'))
         .maybeSingle();
       if (error) throw error;
 
@@ -135,7 +136,7 @@ export function useCobrancaDeResposta(orgId: string | undefined) {
       const { data, error } = await supabase
         .from('organizations')
         .select('aviso_espera_horas')
-        .eq('id', orgId!)
+        .eq('id', exigir(orgId, 'a organização'))
         .single();
       if (error) throw error;
       return (data?.aviso_espera_horas as number | null) ?? null;
@@ -178,7 +179,7 @@ export function useMarcaDagua(orgId: string | undefined) {
       const { data, error } = await supabase
         .from('organizations')
         .select('marca_dagua_nas_fotos')
-        .eq('id', orgId!)
+        .eq('id', exigir(orgId, 'a organização'))
         .single();
       if (error) throw error;
       return data?.marca_dagua_nas_fotos ?? true;

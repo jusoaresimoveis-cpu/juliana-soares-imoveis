@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { exigir } from '@/lib/exigir';
 import { prepararFoto } from '@/lib/fotos';
 import type { Database, Json } from '@/lib/database.types';
 import type { PropertyPurpose, PropertyStatus, PropertyType } from '@contracts';
@@ -214,7 +215,7 @@ export function usePropertyMedia(propertyId: string | null) {
         .select(
           'id, property_id, kind, storage_path, position, is_cover, caption, alt_text, bytes, width, height, mime_type, marca_dagua, original_sem_marca, is_illustrative',
         )
-        .eq('property_id', propertyId!)
+        .eq('property_id', exigir(propertyId, 'o imóvel'))
         // A ordem do site (`site_imoveis`): a capa primeiro, depois a posição.
         // Fotos de antes de `ordenar_midia` podem ter a capa no meio.
         .order('is_cover', { ascending: false })
@@ -536,7 +537,7 @@ export function useProperty(id: string | undefined) {
     enabled: !!id,
     staleTime: 15_000,
     queryFn: async (): Promise<PropertyFull> => {
-      const { data, error } = await supabase.from('properties').select('*').eq('id', id!).single();
+      const { data, error } = await supabase.from('properties').select('*').eq('id', exigir(id, 'o imóvel')).single();
       if (error) throw error;
       return data as unknown as PropertyFull;
     },
@@ -552,7 +553,7 @@ export function useInteressados(propertyId: string | undefined) {
       const { data, error } = await supabase
         .from('lead_property_interests')
         .select('id, is_primary, created_at, leads(id, full_name, phone_e164, stage_id)')
-        .eq('property_id', propertyId!)
+        .eq('property_id', exigir(propertyId, 'o imóvel'))
         .order('created_at', { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as Array<{
@@ -582,7 +583,7 @@ export function useProprietario(ownerId: string | null | undefined) {
       const { data, error } = await supabase
         .from('property_owners')
         .select('id, full_name, city, phone_e164')
-        .eq('id', ownerId!)
+        .eq('id', exigir(ownerId, 'o proprietário'))
         .single();
       if (error) throw error;
       return data;
@@ -627,7 +628,7 @@ export function useVisitasDoImovel(propertyId: string | undefined) {
       const { data, error } = await supabase
         .from('property_page_views')
         .select('day, views')
-        .eq('property_id', propertyId!);
+        .eq('property_id', exigir(propertyId, 'o imóvel'));
       if (error) throw error;
       const dias = data ?? [];
       return {

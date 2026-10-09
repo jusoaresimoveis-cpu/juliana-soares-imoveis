@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { exigir } from '@/lib/exigir';
 import { chamarFuncao } from '@/lib/funcoes';
 import { papelPrincipal, type AppRole } from '@contracts';
 
@@ -24,7 +25,7 @@ export function useEquipe(orgId: string | undefined) {
           .from('profiles')
           .select('id, full_name, email, creci, title, is_active, created_at')
           .order('full_name'),
-        supabase.from('user_roles').select('user_id, role').eq('organization_id', orgId!),
+        supabase.from('user_roles').select('user_id, role').eq('organization_id', exigir(orgId, 'a organização')),
       ]);
       if (perfis.error) throw perfis.error;
       if (papeis.error) throw papeis.error;

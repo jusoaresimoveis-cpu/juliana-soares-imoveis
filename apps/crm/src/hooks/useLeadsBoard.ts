@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { exigir } from '@/lib/exigir';
 import { atendeLead, papelPrincipal, type FiltroDeTemperatura } from '@contracts';
 import type { Database } from '@/lib/database.types';
 import { BOARD_COLUMNS, type BoardLead, type PipelineStage, type TeamMember } from '@/types/db';
@@ -58,7 +59,7 @@ export function useTeamMap(orgId: string | undefined) {
     queryFn: async (): Promise<Record<string, TeamMember>> => {
       const [perfis, papeis] = await Promise.all([
         supabase.from('profiles').select('id, full_name, avatar_url').eq('is_active', true),
-        supabase.from('user_roles').select('user_id, role').eq('organization_id', orgId!),
+        supabase.from('user_roles').select('user_id, role').eq('organization_id', exigir(orgId, 'a organização')),
       ]);
       if (perfis.error) throw perfis.error;
       if (papeis.error) throw papeis.error;

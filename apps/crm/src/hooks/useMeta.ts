@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { exigir } from '@/lib/exigir';
 import { chamarFuncao } from '@/lib/funcoes';
 import type { MetaHealth, MetaAdLevel, MetaSyncStatus } from '@contracts';
 
@@ -149,7 +150,7 @@ export function usePaginasMeta(integracaoId?: string) {
       const { data, error } = await supabase
         .from('meta_pages')
         .select('id, page_id, page_name, subscribed_at, subscribe_error')
-        .eq('integration_id', integracaoId!)
+        .eq('integration_id', exigir(integracaoId, 'a integração'))
         .order('page_name');
       if (error) throw error;
       return data ?? [];
@@ -232,7 +233,7 @@ export function useContasDeAnuncio(integracaoId?: string) {
       const { data, error } = await supabase
         .from('meta_ad_accounts')
         .select('id, ad_account_id, name, currency, timezone_name, enabled')
-        .eq('integration_id', integracaoId!)
+        .eq('integration_id', exigir(integracaoId, 'a integração'))
         .order('name');
       if (error) throw error;
       return data ?? [];
