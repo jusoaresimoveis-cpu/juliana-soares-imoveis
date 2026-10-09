@@ -11,6 +11,24 @@ import { cn } from '@/lib/utils';
  * Um número sozinho ("R$ 8,64") convida à decisão; o mesmo número com a faixa
  * desenhada ao redor ("de R$ 4,05 a — não sabemos") desconvida na mesma olhada,
  * sem precisar de um parágrafo de aviso que ninguém lê.
+ *
+ * Desenha quatro coisas na mesma régua: o ALVO (onde a casa quer chegar), o
+ * TETO (o máximo que ela aceita pagar), o custo medido, e a faixa onde esse
+ * custo realmente pode estar. A largura da barra clara É a incerteza.
+ *
+ * As duas linhas existem porque o julgamento usa as duas, e usa as PONTAS da
+ * faixa contra elas: vermelho quando nem o melhor caso cabe no teto, verde
+ * quando o palpite bate o alvo e nem o pior caso estoura o teto. Desenhar só
+ * uma linha esconderia metade do critério.
+ *
+ * Quando a faixa passa do fim da régua — porque o teto da faixa não existe, ou
+ * porque existe e não cabe — a barra sai pela direita com um degradê, em vez de
+ * terminar num ponto. Barra que termina afirma um limite; o degradê diz que
+ * continua, e a legenda numérica embaixo diz qual dos dois casos é.
+ *
+ * A escala é fixa em 2,5× o TETO. Escala automática pelo maior valor faria a
+ * mesma campanha mudar de aparência quando OUTRA campanha muda — e a pessoa
+ * lendo juraria que algo aconteceu com esta.
  */
 export function Faixa({
   cpl,
