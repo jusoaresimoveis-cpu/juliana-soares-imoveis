@@ -165,37 +165,45 @@ export function cabecalhosApertados(fonteBruta: string): string[] {
   const achados: string[] = [];
 
   for (const m of fonte.matchAll(/min-w-0 flex-1|flex-1 min-w-0/g)) {
-    const abre = fonte.lastIndexOf('<', m.index);
-    if (abre < 0) continue;
-    const tag = /^<([A-Za-z][\w.]*)/.exec(fonte.slice(abre))?.[1];
-    if (!tag) continue;
-
-    const fim = fimDoElemento(fonte, abre, tag);
-    if (fim < 0) continue;
-
-    // O IRMÃO seguinte.
-    const proximaTag = fonte.indexOf('<', fim);
-    if (proximaTag < 0 || fonte[proximaTag + 1] === '/') continue;
-    const tagIrma = /^<([A-Za-z][\w.]*)/.exec(fonte.slice(proximaTag))?.[1];
-    if (!tagIrma) continue;
-
-    // A classe tem de estar DENTRO da tag aberta; senão é de um descendente.
-    const abertura = fimDaTagAberta(fonte, proximaTag);
-    const achada = classeEm(fonte, proximaTag);
-    const classe = achada && abertura > 0 && achada.fim < abertura ? achada.classe : '';
-
-    /*
-     * Dois formatos do mesmo defeito:
-     *
-     *   grupo  — um `<div>` de controles (LeadDetail, PropertyDetail);
-     *   solto  — um `<select>`/`<button>` sem grupo em volta (Equipe), que foi o
-     *            que escapou da primeira versão deste detector.
-     */
-    if ((ehGrupoDeAcoes(classe) || CONTROLES.includes(tagIrma)) && !desceNoCelular(classe)) {
-      achados.push(classe || `<${tagIrma}>`);
-    }
+    examinar(fonte, m.index, achados);
   }
   return achados;
+}
+
+function examinar(fonte: string, indice: number, achados: string[]): void {
+  const abre = fonte.lastIndexOf('<', indice);
+  if (abre < 0) return;
+  const tag = /^<([A-Za-z][\w.]*)/.exec(fonte.slice(abre))?.[1];
+  if (!tag) return;
+
+  const fim = fimDoElemento(fonte, abre, tag);
+  if (fim < 0) return;
+
+  // O IRMÃO seguinte.
+  const proximaTag = fonte.indexOf('<', fim);
+  if (proximaTag < 0 || fonte[proximaTag + 1] === '/') return;
+  const tagIrma = /^<([A-Za-z][\w.]*)/.exec(fonte.slice(proximaTag))?.[1];
+  if (!tagIrma) return;
+
+  examinarIrma(fonte, proximaTag, tagIrma, achados);
+}
+
+function examinarIrma(fonte: string, proximaTag: number, tagIrma: string, achados: string[]): void {
+  // A classe tem de estar DENTRO da tag aberta; senão é de um descendente.
+  const abertura = fimDaTagAberta(fonte, proximaTag);
+  const achada = classeEm(fonte, proximaTag);
+  const classe = achada && abertura > 0 && achada.fim < abertura ? achada.classe : '';
+
+  /*
+   * Dois formatos do mesmo defeito:
+   *
+   *   grupo  — um `<div>` de controles (LeadDetail, PropertyDetail);
+   *   solto  — um `<select>`/`<button>` sem grupo em volta (Equipe), que foi o
+   *            que escapou da primeira versão deste detector.
+   */
+  if ((ehGrupoDeAcoes(classe) || CONTROLES.includes(tagIrma)) && !desceNoCelular(classe)) {
+    achados.push(classe || `<${tagIrma}>`);
+  }
 }
 
 describe('o detector', () => {
