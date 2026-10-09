@@ -20,6 +20,19 @@ import {
 /** A definição vigente de uma função, sem comentário. */
 const funcao = (nome: string) => semComentarios(definicaoDaFuncao(nome).texto);
 
+function abre(c: string | undefined): boolean {
+  return c === '(' || c === '[';
+}
+
+function fecha(c: string | undefined): boolean {
+  return c === ')' || c === ']';
+}
+
+function literalSimples(argumento: string | undefined): string | null {
+  const valor = argumento?.trim() ?? '';
+  return /^'([a-z_]+)'$/.test(valor) ? valor.slice(1, -1) : null;
+}
+
 /**
  * O terceiro argumento de uma chamada, quando ele é literal.
  *
@@ -45,9 +58,9 @@ function terceiroArgumento(texto: string, inicio: number): string | null {
       continue;
     }
     if (c === "'") { aspas = true; atual += c; continue; }
-    if (c === '(' || c === '[') { profundidade++; atual += c; continue; }
+    if (abre(c)) { profundidade++; atual += c; continue; }
     if (c === ')' && profundidade === 0) { args.push(atual); break; }
-    if (c === ')' || c === ']') { profundidade--; atual += c; continue; }
+    if (fecha(c)) { profundidade--; atual += c; continue; }
     if (c === ',' && profundidade === 0) {
       args.push(atual);
       if (args.length === 3) break;
@@ -57,8 +70,7 @@ function terceiroArgumento(texto: string, inicio: number): string | null {
     atual += c;
   }
 
-  const terceiro = args[2]?.trim() ?? '';
-  return /^'([a-z_]+)'$/.test(terceiro) ? terceiro.slice(1, -1) : null;
+  return literalSimples(args[2]);
 }
 
 /*
