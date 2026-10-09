@@ -76,6 +76,15 @@ export function variacao(agora: number, antes: number): number | null {
   return Math.round(((agora - antes) / antes) * 100);
 }
 
+/** "11/07 – 09/08/26", que é como se lê um período de relance. */
+export function formatarJanela({ de, ate }: { de: string; ate: string }): string {
+  const f = (s: string, comAno: boolean) => {
+    const [a, m, d] = s.split('-');
+    return comAno ? `${d}/${m}/${a?.slice(2)}` : `${d}/${m}`;
+  };
+  return `${f(de, false)} – ${f(ate, true)}`;
+}
+
 /** "agora", "12 min", "3 h", "2 d" — como se lê uma lista de recentes. */
 export function desde(iso: string): string {
   const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);

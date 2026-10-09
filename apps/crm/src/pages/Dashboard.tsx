@@ -5,31 +5,20 @@ import {
   CalendarCheck,
   CalendarRange,
   UserRound,
-  MessageCircleReply,
   Undo2,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { cn, greeting } from '@/lib/utils';
-import {
-  DEFAULT_STAGES,
-  LEAD_SOURCE_LABEL_CURTO,
-  motivoDaRetomada,
-  type LeadSource,
-} from '@contracts';
+import { cn } from '@/lib/utils';
+import { motivoDaRetomada } from '@contracts';
 import { usePaginaDoLead, useEtiquetasDoLead } from '@/hooks/useLead';
 import { Link } from 'react-router-dom';
-import { FunilVisual } from '@/components/dashboard/FunilVisual';
 import { Indicadores } from '@/components/dashboard/Indicadores';
-import { SerieDeLeads } from '@/components/dashboard/SerieDeLeads';
-import { CanaisDeAquisicao } from '@/components/dashboard/CanaisDeAquisicao';
 import {
   usePainel,
   janelaDe,
   PERIODOS,
   periodoInicial,
   janelaPersonalizada,
-  dinheiro,
-  custoPorLeadMeta,
   useUltimosLeads,
   useParaRetomar,
   useEsperando,
@@ -40,6 +29,14 @@ import { Avatar } from '@/components/Avatar';
 import { CamposDePeriodo } from '@/components/CamposDePeriodo';
 import { useFotosGuardadas } from '@/hooks/useFotosGuardadas';
 import { SeloDeTemperatura } from '@/components/leads/SeloDeTemperatura';
+import { Atalho } from '@/components/dashboard/Atalho';
+import { Tag } from '@/components/dashboard/Tag';
+import { Saudacao } from '@/components/dashboard/Saudacao';
+import { UltimosLeads } from '@/components/dashboard/UltimosLeads';
+import { CartaoDoFunil } from '@/components/dashboard/CartaoDoFunil';
+import { EsperandoResposta } from '@/components/dashboard/EsperandoResposta';
+import { AnaliseDePerformance } from '@/components/dashboard/AnaliseDePerformance';
+import { formatarJanela } from '@/lib/formatosDoPainel';
 
 export default function Dashboard() {
   const { profile, isAdminOrAbove } = useAuth();
@@ -107,56 +104,12 @@ export default function Dashboard() {
   return (
     <div className="grid grid-cols-12 gap-4">
       {/* saudação */}
-      <section className="col-span-12 pt-1 lg:col-span-4">
-        <h1 className="text-[clamp(1.5rem,2.6vw,2rem)] font-bold leading-tight tracking-[-0.035em]">
-          {greeting()}, <span className="text-pri">{primeiroNome}</span>!
-          <br />
-          Por onde você começa hoje?
-        </h1>
-        {/* A frase diz o que o banco sabe. Antes eram dois números fixos no
-            código — e número inventado na primeira linha do painel ensina a
-            desconfiar de todo o resto. */}
-        <p className="mt-3 max-w-[34ch] text-md leading-relaxed text-tx-2">
-          {carteiraVazia ? (
-            <>
-              Nenhum lead no seu nome neste período. Quem distribui os que chegam é a gerência —
-              assim que um for seu, ele aparece aqui.
-            </>
-          ) : (
-            <>
-          {esperando > 0 ? (
-            <>
-              <strong className="text-tx">
-                {esperando} lead{esperando === 1 ? '' : 's'}
-              </strong>{' '}
-              ainda sem primeiro contato
-            </>
-          ) : (
-            <>Nenhum lead esperando primeiro contato</>
-          )}
-          {' '}e{' '}
-          {/*
-            As visitas da saudação são as que ainda VÃO acontecer, e não as do
-            período. A pergunta aqui é "por onde você começa hoje?" — e visita
-            agendada é sempre futura, então ela nunca cabia numa janela que
-            termina hoje. O painel dizia "0 visitas" no mesmo dia em que a agenda
-            mostrava uma marcada para setembro.
-          */}
-          {(painel.data?.atual.visitas_proximas ?? 0) === 0 ? (
-            <>nenhuma visita marcada.</>
-          ) : (
-            <>
-              <strong className="text-tx">
-                {painel.data?.atual.visitas_proximas} visita
-                {painel.data?.atual.visitas_proximas === 1 ? '' : 's'}
-              </strong>{' '}
-              marcada{painel.data?.atual.visitas_proximas === 1 ? '' : 's'}.
-            </>
-          )}
-            </>
-          )}
-        </p>
-      </section>
+      <Saudacao
+        primeiroNome={primeiroNome}
+        carteiraVazia={carteiraVazia}
+        esperando={esperando}
+        painel={painel}
+      />
 
       {/*
         Atalhos e filtro dividem a coluna da direita, um sobre o outro.
@@ -267,133 +220,10 @@ export default function Dashboard() {
         />
       </div>
 
-      <section className="col-span-12 rounded-lg bg-card p-5 shadow-card lg:col-span-8">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-bold">Últimos leads</h2>
-          <button className="text-sm font-semibold text-tx-3 transition-colors hover:text-pri">
-            Ver todos
-          </button>
-        </div>
-
-        {recentes.isLoading ? (
-          <p className="py-6 text-base text-tx-3">Carregando…</p>
-        ) : (recentes.data ?? []).length === 0 ? (
-          /* Vazio de verdade é informação. Antes havia cinco nomes inventados
-             aqui, e nome inventado na primeira dobra do painel ensina a
-             desconfiar de todo o resto da tela. */
-          <p className="py-6 text-base text-tx-3">
-            Nenhum lead ainda. O primeiro que entrar — por anúncio, WhatsApp ou cadastro — aparece
-            aqui.
-          </p>
-        ) : (
-          <ul>
-            {(recentes.data ?? []).map((lead, i) => {
-              const pagina = paginas.data?.[lead.id];
-              const conta = etiquetas.data?.[lead.id]?.conta;
-              return (
-                <li
-                  key={lead.id}
-                  className={cn(
-                    'grid grid-cols-[34px_1fr_auto] items-center gap-3 py-3',
-                    i < (recentes.data ?? []).length - 1 && 'border-b border-line',
-                  )}
-                >
-                  <Avatar
-                    nome={lead.full_name}
-                    foto={(lead.foto_path && fotos.data?.[lead.foto_path]) || lead.foto_url}
-                    className="h-[34px] w-[34px] rounded-[11px] text-sm"
-                  />
-                  <div className="min-w-0">
-                    {/* `flex-wrap` porque a linha ganhou duas etiquetas: com quatro
-                        delas num nome longo, sem quebra a última sai da tela. */}
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-md font-bold">
-                      <Link to={`/leads/${lead.id}`} className="truncate hover:text-pri">
-                        {lead.full_name}
-                      </Link>
-                      <Tag tom={lead.source === 'meta_ads' ? 'pri' : lead.source === 'google_ads' ? 'ok' : 'warn'}>
-                        {LEAD_SOURCE_LABEL_CURTO[lead.source as LeadSource] ?? lead.source}
-                      </Tag>
-                      {/* O canal e a PÁGINA são coisas diferentes: dois leads de
-                          "WhatsApp" podem ter vindo de páginas diferentes, e é a
-                          página que está em teste. */}
-                      {/* Nome longo de empreendimento não pode empurrar a linha:
-                          corta no CSS e o título completo fica no `title`. */}
-                      {pagina && (
-                        <Tag tom="neutro" titulo={pagina.rotulo}>
-                          {pagina.rotulo}
-                        </Tag>
-                      )}
-                      {/*
-                        De qual CONTA DE ANÚNCIO veio.
-                        Com duas BMs na casa, "Meta Ads" parou de identificar: dois
-                        leads do mesmo canal podem ter saído da conta do gerente ou
-                        da corretora, e é essa diferença que diz de quem é o
-                        resultado. Sem conta conhecida a etiqueta não aparece — o
-                        anúncio ainda não teve gasto importado, e etiqueta
-                        adivinhada é pior do que etiqueta ausente.
-                      */}
-                      {conta && (
-                        <Tag tom="warn" titulo={conta}>
-                          {conta}
-                        </Tag>
-                      )}
-                      {/* Quem atende. "Sem responsável" é informação, não lacuna:
-                          é o lead que está esperando alguém pegar. */}
-                      <Tag
-                        tom={etiquetas.data?.[lead.id]?.responsavel ? 'ok' : 'neutro'}
-                        titulo={etiquetas.data?.[lead.id]?.responsavel ?? 'Ninguém pegou este lead'}
-                      >
-                        {etiquetas.data?.[lead.id]?.responsavel ?? 'Sem responsável'}
-                      </Tag>
-                    </div>
-                    <p className="mt-0.5 truncate text-sm text-tx-3">
-                      {lead.ultima_mensagem ?? lead.etapa ?? '—'}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <time className="block text-xs font-semibold text-tx-3">
-                      {desde(lead.created_at)}
-                    </time>
-                    {lead.nao_lidas > 0 && (
-                      <span className="mt-1 inline-grid h-[18px] min-w-[18px] place-items-center rounded-full bg-pri px-1 text-2xs font-bold text-pri-fg">
-                        {lead.nao_lidas}
-                      </span>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
+      <UltimosLeads recentes={recentes} fotos={fotos} paginas={paginas} etiquetas={etiquetas} />
 
       {/* funil */}
-      <section className="col-span-12 flex flex-col rounded-lg bg-gradient-to-br from-pri-light via-pri to-pri-deep p-5 text-pri-fg shadow-[0_18px_36px_-18px_var(--brilho-2)] lg:col-span-4">
-        <h2 className="text-lg font-bold">Funil</h2>
-        <p className="mb-4 mt-0.5 text-xs opacity-70">Etapas cumulativas · {formatarJanela(janela)}</p>
-
-        <FunilVisual
-          etapas={(painel.data?.funil ?? []).map((e) => ({
-            key: e.key,
-            label: e.label,
-            total: e.total,
-            ganho: DEFAULT_STAGES.find((s) => s.key === e.key)?.isWon,
-          }))}
-        />
-
-        <div className="mt-auto flex items-center justify-between gap-3 border-t border-white/20 pt-3.5 text-xs opacity-80">
-          <span>
-            Conversão total
-            <b className="block text-lg font-extrabold opacity-100">{conversao(painel.data)}</b>
-          </span>
-          <span className="text-right">
-            Custo por lead
-            <b className="block text-lg font-extrabold opacity-100">
-              {painel.data ? dinheiro(custoPorLeadMeta(painel.data.atual)) : '—'}
-            </b>
-          </span>
-        </div>
-      </section>
+      <CartaoDoFunil painel={painel} janela={janela} />
 
       {/* -------------------------------------------------------------- */}
       {/* com quem eu falo agora                                          */}
@@ -413,64 +243,7 @@ export default function Dashboard() {
         dobra todo dia ensina a pular aquele pedaço da tela.
       */}
       {(fila.data ?? []).length > 0 && (
-        <section className="col-span-12 self-start rounded-lg bg-card p-5 shadow-card lg:col-span-6">
-          <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1">
-            <h2 className="flex items-center gap-2 text-lg font-bold">
-              <MessageCircleReply className="h-4 w-4 text-warn" />
-              Esperando resposta
-            </h2>
-            <p className="text-sm text-tx-3">
-              {(fila.data ?? []).length === 1
-                ? 'uma pessoa escreveu e ainda não teve retorno'
-                : `${(fila.data ?? []).length} pessoas escreveram e ainda não tiveram retorno`}
-            </p>
-          </div>
-
-          <ul>
-            {(fila.data ?? []).map((lead, i) => (
-              <li
-                key={lead.id}
-                className={cn(
-                  'grid grid-cols-[34px_1fr_auto] items-center gap-3 py-3',
-                  i < (fila.data ?? []).length - 1 && 'border-b border-line',
-                )}
-              >
-                <Avatar
-                  nome={lead.full_name}
-                  foto={(lead.foto_path && fotos.data?.[lead.foto_path]) || lead.foto_url}
-                  className="h-[34px] w-[34px] rounded-[11px] text-sm"
-                />
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-md font-bold">
-                    <Link to={`/leads/${lead.id}`} className="truncate hover:text-pri">
-                      {lead.full_name}
-                    </Link>
-                    <SeloDeTemperatura valor={lead.temperatura} />
-                    {lead.etapa && <Tag tom="neutro">{lead.etapa}</Tag>}
-                  </div>
-                  <p className="mt-0.5 truncate text-sm text-tx-3">
-                    {lead.ultima_mensagem ?? 'Mensagem sem texto'}
-                  </p>
-                </div>
-                {/*
-                  O tempo é o assunto desta lista, então ele é o que tem cor.
-                  Acima de duas horas vira alerta — é o limite em que uma pessoa
-                  que perguntou preço já procurou outra imobiliária.
-                */}
-                <time
-                  className={cn(
-                    'text-right text-xs font-bold tabular-nums',
-                    Date.now() - new Date(lead.esperando_desde).getTime() > 2 * 3_600_000
-                      ? 'text-dng'
-                      : 'text-tx-3',
-                  )}
-                >
-                  {desde(lead.esperando_desde)}
-                </time>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <EsperandoResposta fila={fila} fotos={fotos} />
       )}
 
       {/* PARA RETOMAR — a coluna da direita: aqui é o cliente que sumiu. */}
@@ -539,143 +312,7 @@ export default function Dashboard() {
       {/* -------------------------------------------------------------- */}
       {/* análise de performance                                          */}
 
-      <section className="col-span-12 rounded-lg bg-card p-5 shadow-card lg:col-span-8">
-        <h2 className="text-lg font-bold">Entrada de leads</h2>
-        <p className="mt-0.5 text-sm text-tx-3">
-          {painel.data?.serie.passo === 'semana' ? 'Por semana' : 'Por dia'} ·{' '}
-          {formatarJanela(janela)}
-        </p>
-
-        {painel.isLoading ? (
-          <p className="py-16 text-center text-base text-tx-3">Carregando…</p>
-        ) : (
-          <SerieDeLeads
-            pontos={painel.data?.serie.pontos ?? []}
-            passo={painel.data?.serie.passo ?? 'dia'}
-          />
-        )}
-      </section>
-
-      <section className="col-span-12 flex flex-col rounded-lg bg-card p-5 shadow-card lg:col-span-4">
-        <h2 className="text-lg font-bold">Canais de aquisição</h2>
-        <p className="mb-3 mt-0.5 text-sm text-tx-3">Participação por origem</p>
-
-        {painel.isLoading ? (
-          <p className="py-16 text-center text-base text-tx-3">Carregando…</p>
-        ) : (
-          <CanaisDeAquisicao origens={painel.data?.origens ?? []} />
-        )}
-      </section>
+      <AnaliseDePerformance painel={painel} janela={janela} />
     </div>
   );
-}
-
-/**
- * Atalho do painel.
- *
- * `para` é obrigatório de propósito. Estes três cartões nasceram sem destino
- * nenhum: pareciam botões, tinham `hover`, e não faziam nada. Um controle que
- * parece clicável e não responde ensina a pessoa a desconfiar do resto da tela
- * — e ela para de tentar antes de descobrir o que funciona.
- *
- * Com o destino no tipo, criar outro atalho morto deixa de compilar.
- *
- * O ROXO é o mesmo do menu lateral e do funil — `pri-light` a `pri-deep`, na
- * mesma direção. Eles eram cartões brancos entre outros cartões brancos, e o
- * painel inteiro é feito de cartão branco: nada dizia que ali se clicava. Cheio
- * de cor, o atalho para de ser mais um bloco de leitura e vira botão.
- *
- * A sombra usa a própria cor da marca, e não preto. Sombra preta embaixo de
- * roxo saturado suja o tom; a mesma cor mais fundo mantém a peça inteira.
- */
-function Atalho({
-  icon: Icon,
-  titulo,
-  titulo2,
-  sub,
-  para,
-}: {
-  icon: typeof Home;
-  /** Primeira metade do rótulo. No celular ela fica sozinha na linha de cima. */
-  titulo: string;
-  /** Segunda metade. Desce no celular e volta a fluir ao lado no computador. */
-  titulo2: string;
-  sub: string;
-  para: string;
-}) {
-  return (
-    <Link
-      to={para}
-      className="flex min-h-[84px] flex-col justify-between gap-2 rounded-lg bg-gradient-to-br from-pri-light via-pri to-pri-deep p-3 text-left text-pri-fg shadow-[0_10px_22px_-12px_var(--brilho)] transition-transform hover:-translate-y-0.5 sm:min-h-[92px] sm:p-3.5"
-    >
-      {/* O véu branco por cima do roxo, e não uma cor sólida: assim o quadrado
-          do ícone acompanha o degradê em vez de brigar com ele. */}
-      <span className="grid h-8 w-8 place-items-center rounded-[10px] bg-pri-fg/20">
-        <Icon className="h-4 w-4" />
-      </span>
-      <span>
-        {/*
-          A quebra é ESCRITA, não deixada para a largura decidir.
-
-          Três botões numa tela de 375 dão ~105px cada, e o rótulo caberia em
-          duas linhas por acaso — até um aparelho mais estreito, uma fonte
-          maior por acessibilidade ou uma tradução mudarem a conta e "Agenda de
-          visitas" virar três linhas, desalinhando o trio. Com as metades
-          declaradas, a quebra é a mesma em qualquer aparelho.
-
-          `sm:inline` devolve a frase inteira numa linha só no computador, onde
-          o botão é medido pelo conteúdo e não há aperto.
-        */}
-        <b className="block text-base font-bold leading-tight">
-          {titulo}
-          <span className="block sm:inline"> {titulo2}</span>
-        </b>
-        {/* O apoio some no celular: em 105px ele viraria três linhas de 12px e
-            o botão deixaria de ser botão para virar parágrafo. */}
-        <small className="mt-0.5 hidden text-sm leading-snug text-pri-fg/75 sm:block">{sub}</small>
-      </span>
-    </Link>
-  );
-}
-
-function Tag({ tom, children, titulo }: { tom: string; children: string; titulo?: string }) {
-  const cores: Record<string, string> = {
-    pri: 'bg-pri-soft text-pri',
-    ok: 'bg-ok-soft text-ok',
-    warn: 'bg-warn-soft text-warn',
-    // Discreta de propósito: ela acompanha o canal, não disputa com ele.
-    neutro: 'bg-card-2 text-tx-2',
-  };
-  return (
-    <span
-      title={titulo}
-      className={cn(
-        'max-w-[18ch] truncate whitespace-nowrap rounded-md px-2 py-0.5 text-xs font-bold',
-        cores[tom] ?? cores['pri'],
-      )}
-    >
-      {children}
-    </span>
-  );
-}
-
-/** "11/07 – 09/08/26", que é como se lê um período de relance. */
-function formatarJanela({ de, ate }: { de: string; ate: string }): string {
-  const f = (s: string, comAno: boolean) => {
-    const [a, m, d] = s.split('-');
-    return comAno ? `${d}/${m}/${a?.slice(2)}` : `${d}/${m}`;
-  };
-  return `${f(de, false)} – ${f(ate, true)}`;
-}
-
-/**
- * Conversão de ponta a ponta: quantos dos leads do período fecharam.
- *
- * Devolve '—' sem lead nenhum. Zero por cento com zero lead não é desempenho
- * ruim, é ausência de dado — e o painel auditado exibia 0% nos dois casos, o
- * que faz o começo de mês parecer fracasso.
- */
-function conversao(p: { atual: { leads: number; vendas: number } } | null | undefined): string {
-  if (!p || p.atual.leads === 0) return '—';
-  return `${((p.atual.vendas / p.atual.leads) * 100).toFixed(1).replace('.', ',')}%`;
 }
