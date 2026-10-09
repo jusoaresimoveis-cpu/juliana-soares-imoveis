@@ -1,9 +1,9 @@
 import { Loader2, Check, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// As peças das abas de pages/Settings.tsx. Equipe.tsx tem as dela, com os
-// mesmos nomes e medidas diferentes (Cartao de 680px, Campo sem `dica`): não
-// são estas.
+// As peças das abas de pages/Settings.tsx. A aba Equipe tem as dela, com os
+// mesmos nomes e medidas diferentes (o Cartao de 680px em Equipe.tsx, o Campo
+// sem `dica` em DialogoNovaConta.tsx): não são estas.
 
 export const INPUT =
   'w-full rounded-xl border border-line-2 bg-card px-3.5 py-2.5 text-base outline-none focus:border-pri';

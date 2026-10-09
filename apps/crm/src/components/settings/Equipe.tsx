@@ -1,9 +1,8 @@
-import { useState, type FormEvent } from 'react';
-import { Loader2, UserPlus, Copy, Check, AlertCircle, X, ShieldCheck, KeyRound } from 'lucide-react';
+import { useState } from 'react';
+import { Loader2, UserPlus, AlertCircle, ShieldCheck, KeyRound } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import {
   useEquipe,
-  useCriarConta,
   useAcoesEquipe,
   useRedefinirSenha,
   type ContaCriada,
@@ -11,6 +10,8 @@ import {
 } from '@/hooks/useEquipe';
 import { APP_ROLES, ROLE_LABEL, ROLE_DESCRIPTION, papelPrincipal, type AppRole } from '@contracts';
 import { cn, initials } from '@/lib/utils';
+import { DialogoNovaConta } from './DialogoNovaConta';
+import { SenhaEmTela } from './SenhaEmTela';
 
 export function Equipe() {
   const { profile, roles } = useAuth();
@@ -262,185 +263,6 @@ export function Equipe() {
   );
 }
 
-function DialogoNovaConta({
-  souAdmin,
-  orgId,
-  onFechar,
-  onCriada,
-}: {
-  souAdmin: boolean;
-  orgId: string | undefined;
-  onFechar: () => void;
-  onCriada: (c: ContaCriada) => void;
-}) {
-  const criar = useCriarConta(orgId);
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [creci, setCreci] = useState('');
-  const [papel, setPapel] = useState<AppRole>('corretor');
-
-  function submit(e: FormEvent) {
-    e.preventDefault();
-    criar.mutate({ nome: nome.trim(), email: email.trim(), papel, creci: creci.trim() }, { onSuccess: onCriada });
-  }
-
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Adicionar pessoa à equipe"
-      className="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4"
-      onClick={(e) => e.target === e.currentTarget && onFechar()}
-    >
-      <form onSubmit={submit} className="w-full max-w-[400px] rounded-[22px] bg-sheet p-6 shadow-sheet">
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <h2 className="text-xl font-bold">Adicionar à equipe</h2>
-          <button
-            type="button"
-            onClick={onFechar}
-            aria-label="Cancelar"
-            className="grid h-7 w-7 place-items-center rounded-full text-tx-3 hover:bg-card-2 hover:text-tx"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <Campo rotulo="Nome completo">
-          <input autoFocus required value={nome} onChange={(e) => setNome(e.target.value)} className={INPUT} />
-        </Campo>
-
-        <Campo rotulo="E-mail de acesso">
-          <input
-            required
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={INPUT}
-          />
-        </Campo>
-
-        <div className="flex gap-3">
-          <Campo rotulo="CRECI (opcional)" className="flex-1">
-            <input value={creci} onChange={(e) => setCreci(e.target.value)} className={INPUT} />
-          </Campo>
-          <Campo rotulo="Papel" className="flex-1">
-            <select value={papel} onChange={(e) => setPapel(e.target.value as AppRole)} className={INPUT}>
-              {APP_ROLES.filter((r) => r !== 'admin' || souAdmin).map((r) => (
-                <option key={r} value={r}>
-                  {ROLE_LABEL[r]}
-                </option>
-              ))}
-            </select>
-          </Campo>
-        </div>
-
-        <p className="mb-3 text-sm text-tx-3">
-          A senha é gerada aqui e aparece uma única vez. Passe para a pessoa — ela troca depois em
-          Configurações.
-        </p>
-
-        {criar.isError && (
-          <p className="mb-3 flex items-start gap-2 rounded-xl bg-dng-soft p-2.5 text-sm text-dng">
-            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            {(criar.error as Error).message}
-          </p>
-        )}
-
-        <div className="flex gap-2.5">
-          <button
-            type="button"
-            onClick={onFechar}
-            className="flex-1 rounded-xl border border-line-2 bg-card py-2.5 text-md font-semibold text-tx-2 hover:text-tx"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={criar.isPending || !nome.trim() || !email.trim()}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-pri py-2.5 text-md font-semibold text-pri-fg hover:bg-pri-deep disabled:opacity-60"
-          >
-            {criar.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            Criar conta
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-/**
- * A senha aparece uma vez só — depois disso nem o banco a conhece em texto puro.
- *
- * Serve à conta recém-criada E à senha redefinida. O painel é o mesmo porque o
- * ato é o mesmo: uma credencial que existe por alguns segundos na tela de quem
- * vai ditá-la. Duplicar isto renderia duas caixas que divergiriam na primeira
- * correção feita numa só.
- */
-function SenhaEmTela({
-  titulo,
-  descricao,
-  senha,
-  onFechar,
-}: {
-  titulo: string;
-  descricao: React.ReactNode;
-  senha: string;
-  onFechar: () => void;
-}) {
-  const [copiado, setCopiado] = useState(false);
-
-  return (
-    <div className="rounded-lg bg-ok-soft p-5">
-      <h2 className="text-lg font-bold text-ok">{titulo}</h2>
-      <p className="mt-0.5 text-base text-tx-2">{descricao}</p>
-
-      <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-card p-3">
-        {/* Monoespaçada e selecionável: o gerente vai ditar isto por telefone,
-            e fonte de largura fixa já dá o espaçamento uniforme que a leitura
-            em voz alta precisa. */}
-        <code className="flex-1 select-all font-mono text-lg font-bold">{senha}</code>
-        <button
-          onClick={() => {
-            void navigator.clipboard.writeText(senha);
-            setCopiado(true);
-          }}
-          className="inline-flex items-center gap-1.5 rounded-full border border-line-2 px-3 py-1.5 text-sm font-semibold text-tx-2 hover:border-pri hover:text-pri"
-        >
-          {copiado ? <Check className="h-3.5 w-3.5 text-ok" /> : <Copy className="h-3.5 w-3.5" />}
-          {copiado ? 'Copiado' : 'Copiar'}
-        </button>
-      </div>
-
-      <button
-        onClick={onFechar}
-        className="mt-3 text-sm font-semibold text-tx-3 underline hover:text-tx"
-      >
-        Já anotei, pode fechar
-      </button>
-    </div>
-  );
-}
-
-const INPUT =
-  'w-full rounded-xl border border-line-2 bg-card px-3.5 py-2.5 text-base outline-none focus:border-pri';
-
 function Cartao({ children }: { children: React.ReactNode }) {
   return <section className="max-w-[680px] rounded-lg bg-card p-5 shadow-card">{children}</section>;
-}
-
-function Campo({
-  rotulo,
-  className,
-  children,
-}: {
-  rotulo: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className={cn('mb-3 flex flex-col gap-1.5', className)}>
-      <span className="text-sm font-semibold text-tx-2">{rotulo}</span>
-      {children}
-    </label>
-  );
 }
