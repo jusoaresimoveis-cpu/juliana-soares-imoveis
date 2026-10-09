@@ -36,11 +36,22 @@ export function canalDaChegada(endereco: URL, paginaAnterior: string): Canal | n
   const meio = (p.get('utm_medium') ?? '').toLowerCase();
   const pago = PAGO.has(meio);
   if (fonte === 'google') return pago ? 'ga' : 'go';
+  return canalPelaUtmDaMeta(fonte, meio, pago, paginaAnterior);
+}
+
+/**
+ * As UTMs da Meta: Instagram, Facebook, Marketplace e o link da bio. Fonte que
+ * não é da Meta segue para a página anterior, a prova mais fraca.
+ */
+function canalPelaUtmDaMeta(fonte: string, meio: string, pago: boolean, paginaAnterior: string): Canal | null {
   if (fonte === 'instagram' || fonte === 'ig') return pago ? 'ma' : meio === 'bio' ? 'bi' : 'ig';
   if (fonte === 'facebook' || fonte === 'fb') return pago ? 'ma' : meio === 'marketplace' ? 'mk' : 'fb';
   if (fonte === 'marketplace') return 'mk';
   if (fonte === 'bio') return 'bi';
+  return canalPelaPaginaAnterior(paginaAnterior);
+}
 
+function canalPelaPaginaAnterior(paginaAnterior: string): Canal | null {
   // O aplicativo do Google, do Instagram e do Facebook no Android se anuncia assim.
   if (paginaAnterior.startsWith('android-app://com.google.')) return 'go';
   if (paginaAnterior.startsWith('android-app://com.instagram.')) return 'ig';
