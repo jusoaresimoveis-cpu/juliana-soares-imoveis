@@ -40,7 +40,6 @@ const TESTES = [
 
 // Acima de MAX_LINES na instalação (linhas ao lado), fora os testes.
 const ACIMA_DO_TETO = [
-  "apps/crm/src/pages/Anuncios.tsx", // 1384
   "apps/crm/src/components/properties/PropertyFormDialog.tsx", // 1047
   "apps/crm/src/pages/LeadDetail.tsx", // 911
   "supabase/testes/esquema.ts", // 868
@@ -163,7 +162,7 @@ export default defineConfig([
   // opções do bloco de cima continuam valendo.
   {
     files: ACIMA_DO_TETO,
-    rules: { "quality/max-lines": "warn" }, // 23
+    rules: { "quality/max-lines": "warn" }, // 22
   },
   {
     files: ["apps/crm/src/components/Erro.tsx"],
