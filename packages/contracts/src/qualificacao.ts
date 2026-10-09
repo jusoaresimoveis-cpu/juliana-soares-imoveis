@@ -274,7 +274,7 @@ export function finalidadeDoTexto(texto: string | null | undefined): Finalidade 
   for (const { frase, finalidade } of FRASES_DE_FINALIDADE) {
     if (t.includes(frase)) achadas.add(finalidade);
   }
-  return achadas.size === 1 ? [...achadas][0]! : null;
+  return achadas.size === 1 ? ([...achadas][0] ?? null) : null;
 }
 
 /** "Investir · De 1 a 3 meses · Entrada e parcelas cabem" — para lista e prévia. */
@@ -353,7 +353,7 @@ export function prazoDoTexto(texto: string | null | undefined): PrazoDeCompra | 
   for (const { frase, prazo } of FRASES_DE_PRAZO) {
     if (t.includes(frase)) achados.add(prazo);
   }
-  return achados.size === 1 ? [...achados][0]! : null;
+  return achados.size === 1 ? ([...achados][0] ?? null) : null;
 }
 
 export function encaixeDoTexto(texto: string | null | undefined): EncaixeFinanceiro | null {
@@ -363,7 +363,7 @@ export function encaixeDoTexto(texto: string | null | undefined): EncaixeFinance
   for (const { frase, encaixe } of FRASES_DE_ENCAIXE) {
     if (t.includes(frase)) achados.add(encaixe);
   }
-  return achados.size === 1 ? [...achados][0]! : null;
+  return achados.size === 1 ? ([...achados][0] ?? null) : null;
 }
 
 /**
