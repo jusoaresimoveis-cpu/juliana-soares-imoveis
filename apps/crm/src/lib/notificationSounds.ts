@@ -38,14 +38,16 @@ function contexto(): AudioContext | null {
   return ctx;
 }
 
+interface NotaParams {
+  freq: number;
+  duracao: number;
+  atraso?: number;
+  tipo?: OscillatorType;
+  pico?: number;
+}
+
 /** Uma nota com envelope, para não estalar no ataque nem cortar seco no fim. */
-function nota(
-  freq: number,
-  duracao: number,
-  atraso = 0,
-  tipo: OscillatorType = 'sine',
-  pico = 0.18,
-) {
+function nota({ freq, duracao, atraso = 0, tipo = 'sine', pico = 0.18 }: NotaParams) {
   const c = contexto();
   if (!c) return;
   const t = c.currentTime + atraso;
@@ -70,26 +72,26 @@ function nota(
 const TOQUES: Record<NotificationSound, () => void> = {
   // Blip curto e ascendente. Evento frequente: tem que ser leve.
   mensagem: () => {
-    nota(784, 0.07, 0.0, 'sine', 0.12);
-    nota(988, 0.11, 0.07, 'sine', 0.13);
+    nota({ freq: 784, duracao: 0.07, atraso: 0.0, tipo: 'sine', pico: 0.12 });
+    nota({ freq: 988, duracao: 0.11, atraso: 0.07, tipo: 'sine', pico: 0.13 });
   },
   // Arpejo maior com brilho no fim. É o som de oportunidade entrando.
   lead: () => {
-    nota(523, 0.12, 0.0, 'sine', 0.16);
-    nota(659, 0.12, 0.1, 'sine', 0.17);
-    nota(784, 0.14, 0.2, 'sine', 0.18);
-    nota(1047, 0.3, 0.31, 'triangle', 0.15);
+    nota({ freq: 523, duracao: 0.12, atraso: 0.0, tipo: 'sine', pico: 0.16 });
+    nota({ freq: 659, duracao: 0.12, atraso: 0.1, tipo: 'sine', pico: 0.17 });
+    nota({ freq: 784, duracao: 0.14, atraso: 0.2, tipo: 'sine', pico: 0.18 });
+    nota({ freq: 1047, duracao: 0.3, atraso: 0.31, tipo: 'triangle', pico: 0.15 });
   },
   // Batida quente, tipo marimba: calma mas presente. "Hora de ligar."
   lembrete: () => {
-    nota(440, 0.16, 0.0, 'triangle', 0.18);
-    nota(587, 0.26, 0.15, 'triangle', 0.18);
+    nota({ freq: 440, duracao: 0.16, atraso: 0.0, tipo: 'triangle', pico: 0.18 });
+    nota({ freq: 587, duracao: 0.26, atraso: 0.15, tipo: 'triangle', pico: 0.18 });
   },
   // Três batidas firmes. Algo pede atenção agora.
   alerta: () => {
-    nota(659, 0.13, 0.0, 'triangle', 0.2);
-    nota(659, 0.13, 0.17, 'triangle', 0.2);
-    nota(523, 0.22, 0.34, 'triangle', 0.2);
+    nota({ freq: 659, duracao: 0.13, atraso: 0.0, tipo: 'triangle', pico: 0.2 });
+    nota({ freq: 659, duracao: 0.13, atraso: 0.17, tipo: 'triangle', pico: 0.2 });
+    nota({ freq: 523, duracao: 0.22, atraso: 0.34, tipo: 'triangle', pico: 0.2 });
   },
 };
 
