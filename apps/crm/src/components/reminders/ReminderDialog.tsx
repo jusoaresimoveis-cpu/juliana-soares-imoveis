@@ -36,7 +36,16 @@ function paraCampo(d: Date, tz: string): string {
 function doCampo(v: string, tz: string): Date | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(v);
   if (!m) return null;
-  return instanteDaParede(Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4]), Number(m[5]), tz);
+  return instanteDaParede(
+    {
+      ano: Number(m[1]),
+      mes: Number(m[2]),
+      dia: Number(m[3]),
+      hora: Number(m[4]),
+      minuto: Number(m[5]),
+    },
+    tz,
+  );
 }
 
 /**

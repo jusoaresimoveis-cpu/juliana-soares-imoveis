@@ -32,14 +32,16 @@ const parede = (d: Date) => {
 
 describe('parede e instante', () => {
   it('a ida e a volta fecham', () => {
-    const i = instanteDaParede(2026, 8, 10, 18, 30, SP);
+    const i = instanteDaParede({ ano: 2026, mes: 8, dia: 10, hora: 18, minuto: 30 }, SP);
     expect(parede(i)).toBe('10/08 18:30');
     expect(i.toISOString()).toBe('2026-08-10T21:30:00.000Z');
   });
 
   it('o dia que estoura o mês normaliza', () => {
     // dia 30 + 3 = 2 de setembro, e não "33 de agosto"
-    expect(parede(instanteDaParede(2026, 8, 33, 9, 0, SP))).toBe('02/09 09:00');
+    expect(
+      parede(instanteDaParede({ ano: 2026, mes: 8, dia: 33, hora: 9, minuto: 0 }, SP)),
+    ).toBe('02/09 09:00');
   });
 
   it('domingo é 0, igual ao Postgres e ao JavaScript', () => {

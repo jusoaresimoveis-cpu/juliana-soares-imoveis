@@ -69,6 +69,21 @@ export function paredeNoFuso(instante: Date, tz: string): ParedeNoFuso {
 }
 
 /**
+ * A parede que se quer converter em instante.
+ *
+ * Sem `dow`: o dia da semana sai da data, não entra nela. E `dia` pode passar
+ * do fim do mês, porque quem chama soma o deslocamento ao dia de hoje; o
+ * `Date.UTC` normaliza (30/08 + 3 = 02/09).
+ */
+export interface HorarioDeParede {
+  ano: number;
+  mes: number; // 1-12
+  dia: number;
+  hora: number;
+  minuto: number;
+}
+
+/**
  * O caminho de volta: parede → instante.
  *
  * Duas passadas porque a primeira corrige o grosso do desvio e a segunda pega a
@@ -77,11 +92,7 @@ export function paredeNoFuso(instante: Date, tz: string): ParedeNoFuso {
  * landing pages — têm.
  */
 export function instanteDaParede(
-  ano: number,
-  mes: number,
-  dia: number,
-  hora: number,
-  minuto: number,
+  { ano, mes, dia, hora, minuto }: HorarioDeParede,
   tz: string,
 ): Date {
   const alvo = Date.UTC(ano, mes - 1, dia, hora, minuto, 0, 0);
@@ -125,12 +136,18 @@ export function resolverPreset(preset: ReminderPreset, agora: Date, tz: string):
     if (deslocamento === 0) deslocamento = 7; // "segunda" numa segunda é a próxima
   }
 
-  const alvo = instanteDaParede(p.ano, p.mes, p.dia + deslocamento, preset.hora, 0, tz);
+  const alvo = instanteDaParede(
+    { ano: p.ano, mes: p.mes, dia: p.dia + deslocamento, hora: preset.hora, minuto: 0 },
+    tz,
+  );
 
   // "Hoje às 18h" pedido às 19h vira amanhã. Criar lembrete já vencido é
   // notificar na mesma hora, que não é o que a pessoa quis dizer.
   if (alvo <= agora && preset.proximoDow === undefined) {
-    return instanteDaParede(p.ano, p.mes, p.dia + deslocamento + 1, preset.hora, 0, tz);
+    return instanteDaParede(
+      { ano: p.ano, mes: p.mes, dia: p.dia + deslocamento + 1, hora: preset.hora, minuto: 0 },
+      tz,
+    );
   }
   return alvo;
 }
@@ -254,10 +271,16 @@ export function parseReminderHint(texto: string, agora: Date, tz: string): DicaD
   const horaFinal = hora ?? 9;
   let dias = deslocamento ?? 0;
 
-  let alvo = instanteDaParede(agoraP.ano, agoraP.mes, agoraP.dia + dias, horaFinal, minuto, tz);
+  let alvo = instanteDaParede(
+    { ano: agoraP.ano, mes: agoraP.mes, dia: agoraP.dia + dias, hora: horaFinal, minuto },
+    tz,
+  );
   if (alvo <= agora && deslocamento === null) {
     dias = 1;
-    alvo = instanteDaParede(agoraP.ano, agoraP.mes, agoraP.dia + 1, horaFinal, minuto, tz);
+    alvo = instanteDaParede(
+      { ano: agoraP.ano, mes: agoraP.mes, dia: agoraP.dia + 1, hora: horaFinal, minuto },
+      tz,
+    );
   }
 
   // Passou mesmo com dia explícito ("hoje às 9h" pedido às 15h): não inventa.
