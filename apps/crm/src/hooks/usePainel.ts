@@ -155,6 +155,24 @@ export interface LeadParaRetomar {
   foto_url: string | null;
 }
 
+/*
+ * Duas peças, e não uma: nos últimos leads o `nao_lidas` fica entre elas, e
+ * espalhadas no lugar elas mantêm a ordem das chaves e das leituras da linha.
+ */
+function etapaEPrevia(conversa: unknown, etapa: unknown) {
+  return {
+    etapa: (etapa as { label?: string } | null)?.label ?? null,
+    ultima_mensagem: (conversa as { last_message_body?: string } | null)?.last_message_body ?? null,
+  };
+}
+
+function fotoDaConversa(conversa: unknown) {
+  return {
+    foto_path: (conversa as { foto_path?: string | null } | null)?.foto_path ?? null,
+    foto_url: (conversa as { foto_url?: string | null } | null)?.foto_url ?? null,
+  };
+}
+
 /**
  * A FILA DE RETOMADA: quem parou de responder e ainda vale um toque.
  *
@@ -206,10 +224,8 @@ export function useParaRetomar(quantos = 8) {
           silencio_desde: l.silencio_desde as string,
           toques_sem_resposta: (l.toques_sem_resposta as number) ?? 0,
           temperatura: (l.temperatura as Temperatura | null) ?? null,
-          etapa: (etapa as { label?: string } | null)?.label ?? null,
-          ultima_mensagem: (conversa as { last_message_body?: string } | null)?.last_message_body ?? null,
-          foto_path: (conversa as { foto_path?: string } | null)?.foto_path ?? null,
-          foto_url: (conversa as { foto_url?: string } | null)?.foto_url ?? null,
+          ...etapaEPrevia(conversa, etapa),
+          ...fotoDaConversa(conversa),
         };
       });
 
@@ -312,11 +328,9 @@ export function useUltimosLeads(quantos = 5) {
            */
           pagina: variante ? `LP ${variante}` : null,
           created_at: l.created_at,
-          etapa: (etapa as { label?: string } | null)?.label ?? null,
-          ultima_mensagem: (conversa as { last_message_body?: string } | null)?.last_message_body ?? null,
+          ...etapaEPrevia(conversa, etapa),
           nao_lidas: (conversa as { unread_count?: number } | null)?.unread_count ?? 0,
-          foto_path: (conversa as { foto_path?: string | null } | null)?.foto_path ?? null,
-          foto_url: (conversa as { foto_url?: string | null } | null)?.foto_url ?? null,
+          ...fotoDaConversa(conversa),
         };
       });
     },
