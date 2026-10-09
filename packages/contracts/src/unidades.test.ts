@@ -149,6 +149,6 @@ describe('lerReais', () => {
   });
 
   it('e escreve com os centavos', () => {
-    expect(reaisComCentavos(84056940).replace(/ /g, ' ')).toBe('R$ 840.569,40');
+    expect(reaisComCentavos(84056940).replace(/\u00a0/g, ' ')).toBe('R$ 840.569,40');
   });
 });

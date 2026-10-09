@@ -536,7 +536,7 @@ describe('o mês da tabela', () => {
 
 describe('o valor na lista de imóveis', () => {
   // O Intl separa o "R$" com espaço inquebrável.
-  const valoresDoImovel = (p: Parameters<typeof valoresNaLista>[0]) => valoresNaLista(p).map((v) => v.replace(/ /g, ' '));
+  const valoresDoImovel = (p: Parameters<typeof valoresNaLista>[0]) => valoresNaLista(p).map((v) => v.replace(/\u00a0/g, ' '));
   const base = { for_sale: true, for_rent: false, rent_cents: null };
 
   it('empreendimento: "A partir de" com as disponíveis', () => {

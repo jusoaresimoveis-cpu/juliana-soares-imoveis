@@ -45,7 +45,7 @@ const BRUTO = definicaoDaFuncao('mkt_inteligencia').texto;
 const SQL = semComentarios(BRUTO);
 
 /** `Intl` separa o símbolo da moeda com espaço NÃO-QUEBRÁVEL (U+00A0). */
-const n = (s: string) => s.replace(/ /g, ' ');
+const n = (s: string) => s.replace(/\u00a0/g, ' ');
 
 function campanha(p: Partial<CampanhaInteligencia> = {}): CampanhaInteligencia {
   return {
