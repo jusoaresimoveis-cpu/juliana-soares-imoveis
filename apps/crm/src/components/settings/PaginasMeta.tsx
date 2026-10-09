@@ -123,7 +123,8 @@ function Linha({
   onAssinar: () => void;
   ocupado: boolean;
 }) {
-  const assinada = !!pagina.subscribed_at;
+  const assinadaEm = pagina.subscribed_at;
+  const assinada = !!assinadaEm;
 
   return (
     <li className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line-2 p-3">
@@ -135,7 +136,7 @@ function Linha({
           <span className="flex items-center gap-1 text-sm text-ok">
             <Check className="h-3 w-3" />
             Assinada em{' '}
-            {new Date(pagina.subscribed_at!).toLocaleDateString('pt-BR', {
+            {new Date(assinadaEm).toLocaleDateString('pt-BR', {
               day: '2-digit',
               month: '2-digit',
               year: '2-digit',

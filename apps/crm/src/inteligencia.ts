@@ -315,10 +315,13 @@ export function acharProblemas(d: Inteligencia): Achado[] {
   }
 
   /* --- 2. Verba pulverizada: o achado principal de conta pequena ---------- */
-  const comOrcamento = ativas.filter((c) => c.orcamento != null && c.orcamento_tipo === 'diario');
+  const comOrcamento = ativas.filter(
+    (c): c is CampanhaInteligencia & { orcamento: number } =>
+      c.orcamento != null && c.orcamento_tipo === 'diario',
+  );
   if (comOrcamento.length >= 3) {
     const soma = comOrcamento.reduce((t, c) => t + (c.orcamento ?? 0), 0);
-    const med = mediana(comOrcamento.map((c) => c.orcamento!));
+    const med = mediana(comOrcamento.map((c) => c.orcamento));
     /*
      * O custo por lead da CONTA, não o da campanha: é o único com volume para
      * sustentar a projeção. Só existe se houve gasto e lead no período.
@@ -398,8 +401,9 @@ export function acharProblemas(d: Inteligencia): Achado[] {
 
   /* --- 6. Atendimento lento trava o julgamento da mídia ------------------- */
   if (d.resposta_casa != null) {
+    const casa = d.resposta_casa;
     const lentas = ativas.filter(
-      (c) => c.resposta_min != null && c.leads > 0 && c.resposta_min > 2 * d.resposta_casa!,
+      (c) => c.resposta_min != null && c.leads > 0 && c.resposta_min > 2 * casa,
     );
     if (lentas.length > 0) {
       a.push({

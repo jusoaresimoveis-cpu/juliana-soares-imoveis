@@ -36,7 +36,7 @@ function paraCampo(d: Date, tz: string): string {
 function doCampo(v: string, tz: string): Date | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(v);
   if (!m) return null;
-  return instanteDaParede(+m[1]!, +m[2]!, +m[3]!, +m[4]!, +m[5]!, tz);
+  return instanteDaParede(Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4]), Number(m[5]), tz);
 }
 
 /**
@@ -60,7 +60,7 @@ export function ReminderDialog({
   const agora = useMemo(() => new Date(), []);
 
   const [quando, setQuando] = useState(() =>
-    paraCampo(dica?.remindAt ?? resolverPreset(REMINDER_PRESETS[0]!, agora, fuso), fuso),
+    paraCampo(dica?.remindAt ?? resolverPreset(REMINDER_PRESETS[0], agora, fuso), fuso),
   );
   const [titulo, setTitulo] = useState(`Retornar para ${lead.full_name.split(' ')[0]}`);
   const [obs, setObs] = useState(dica?.trecho ? `Cliente disse: ${dica.trecho}` : '');

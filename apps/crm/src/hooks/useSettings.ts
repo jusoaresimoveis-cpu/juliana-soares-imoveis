@@ -27,8 +27,8 @@ export function usePreferencias(profileId: string | undefined, orgId: string | u
       // depois não tem. O padrão da tela espelha o do banco.
       return (
         (data as unknown as Preferencias) ?? {
-          profile_id: profileId!,
-          organization_id: orgId!,
+          profile_id: profileId,
+          organization_id: orgId,
           lead_scope: 'meus',
           push_enabled: true,
           muted_types: [],

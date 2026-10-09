@@ -108,7 +108,7 @@ export interface ReminderPreset {
   hora: number;
 }
 
-export const REMINDER_PRESETS: readonly ReminderPreset[] = [
+export const REMINDER_PRESETS: readonly [ReminderPreset, ...ReminderPreset[]] = [
   { key: 'hoje_18h', label: 'Hoje às 18h', dias: 0, hora: 18 },
   { key: 'amanha_9h', label: 'Amanhã às 9h', dias: 1, hora: 9 },
   { key: 'amanha_18h', label: 'Amanhã às 18h', dias: 1, hora: 18 },

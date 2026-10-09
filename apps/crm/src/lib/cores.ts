@@ -47,7 +47,7 @@ export interface Paleta {
 const BRANCO_FG = '0 0% 100%';
 const ESCURO_FG = '250 45% 10%';
 
-export const PALETAS: Paleta[] = [
+export const PALETAS: [Paleta, ...Paleta[]] = [
   {
     /*
      * A cor da marca da Juliana: o bronze do site (`--color-bronze`, #8b6a40),
@@ -186,7 +186,7 @@ export const COR_PADRAO = 'bronze';
 export const CHAVES_DE_COR = PALETAS.map((p) => p.key);
 
 export function paletaDe(key: string | null | undefined): Paleta {
-  return PALETAS.find((p) => p.key === key) ?? PALETAS[0]!;
+  return PALETAS.find((p) => p.key === key) ?? PALETAS[0];
 }
 
 /**
