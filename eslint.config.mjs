@@ -110,12 +110,12 @@ export default defineConfig([
       // Orçamento de tamanho e complexidade. Começo de conversa sobre
       // fatoração, não portão: o que tem violação fica em "warn" e sobe para
       // "error" quando a contagem chegar a zero.
-      complexity: ["warn", 12], // 21
+      complexity: ["warn", 12], // 17
       "max-depth": ["error", 4],
-      "max-statements": ["warn", 20], // 9
-      "max-params": ["warn", 4], // 3
+      "max-statements": ["warn", 20], // 7
+      "max-params": ["error", 4],
       "max-lines-per-function": [
-        "warn", // 2
+        "warn", // 1
         { max: 150, skipBlankLines: true, skipComments: true },
       ],
       "max-nested-callbacks": ["error", 3],
