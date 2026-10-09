@@ -40,58 +40,18 @@ export function pedacos(sql: string): Pedaco[] {
     const c = sql[i];
     const anterior = sql[i - 1] ?? '';
 
-    if (c === '-' && sql[i + 1] === '-') {
-      const fim = sql.indexOf('\n', i);
-      empurra('comentario', fim < 0 ? sql.length : fim);
-    } else if (c === '/' && sql[i + 1] === '*') {
-      // Aninha, como no Postgres: `/* a /* b */ c */` é um comentário só.
-      let profundidade = 0;
-      let j = i;
-      do {
-        if (sql.startsWith('/*', j)) {
-          profundidade += 1;
-          j += 2;
-        } else if (sql.startsWith('*/', j)) {
-          profundidade -= 1;
-          j += 2;
-        } else {
-          j += 1;
-        }
-      } while (profundidade > 0 && j < sql.length);
-      empurra('comentario', j);
+    if (par(sql, i, '-', '-')) {
+      empurra('comentario', fimDaLinha(sql, i));
+    } else if (par(sql, i, '/', '*')) {
+      empurra('comentario', fimDoComentarioDeBloco(sql, i));
     } else if (c === "'") {
-      // `E'...'` aceita barra invertida como escape; o texto comum, não.
-      const comEscape = /[eE]/.test(anterior) && !CONTINUA_IDENTIFICADOR.test(sql[i - 2] ?? '');
-      let j = i + 1;
-      while (j < sql.length) {
-        if (comEscape && sql[j] === '\\') j += 2;
-        else if (sql[j] === "'" && sql[j + 1] === "'") j += 2;
-        else if (sql[j] === "'") {
-          j += 1;
-          break;
-        } else j += 1;
-      }
-      empurra('texto', Math.min(j, sql.length));
+      empurra('texto', fimDoTexto(sql, i, anterior));
     } else if (c === '"') {
-      let j = i + 1;
-      while (j < sql.length) {
-        if (sql[j] === '"' && sql[j + 1] === '"') j += 2;
-        else if (sql[j] === '"') {
-          j += 1;
-          break;
-        } else j += 1;
-      }
-      empurra('identificador', Math.min(j, sql.length));
+      empurra('identificador', fimDoIdentificador(sql, i));
     } else if (c === '$' && !CONTINUA_IDENTIFICADOR.test(anterior)) {
-      // O corpo termina no PRIMEIRO fecho com a mesma etiqueta, sem olhar o que
-      // tem dentro — é assim que o próprio Postgres lê.
-      const etiqueta = ABRE_DOLAR.exec(sql.slice(i, i + 80))?.[0];
-      if (etiqueta) {
-        const fecha = sql.indexOf(etiqueta, i + etiqueta.length);
-        empurra('dolar', fecha < 0 ? sql.length : fecha + etiqueta.length);
-      } else {
-        i += 1;
-      }
+      const fim = fimDoDolar(sql, i);
+      if (fim !== null) empurra('dolar', fim);
+      else i += 1;
     } else if (c === ';') {
       empurra('fim', i + 1);
     } else {
@@ -100,6 +60,71 @@ export function pedacos(sql: string): Pedaco[] {
   }
   if (inicioDoCodigo < sql.length) saida.push({ tipo: 'codigo', texto: sql.slice(inicioDoCodigo) });
   return saida;
+}
+
+function par(sql: string, i: number, a: string, b: string): boolean {
+  return sql[i] === a && sql[i + 1] === b;
+}
+
+function fimDaLinha(sql: string, i: number): number {
+  const fim = sql.indexOf('\n', i);
+  return fim < 0 ? sql.length : fim;
+}
+
+function fimDoComentarioDeBloco(sql: string, i: number): number {
+  // Aninha, como no Postgres: `/* a /* b */ c */` é um comentário só.
+  let profundidade = 0;
+  let j = i;
+  do {
+    if (sql.startsWith('/*', j)) {
+      profundidade += 1;
+      j += 2;
+    } else if (sql.startsWith('*/', j)) {
+      profundidade -= 1;
+      j += 2;
+    } else {
+      j += 1;
+    }
+  } while (profundidade > 0 && j < sql.length);
+  return j;
+}
+
+function fimDoTexto(sql: string, i: number, anterior: string): number {
+  // `E'...'` aceita barra invertida como escape; o texto comum, não.
+  const comEscape = /[eE]/.test(anterior) && !CONTINUA_IDENTIFICADOR.test(sql[i - 2] ?? '');
+  let j = i + 1;
+  while (j < sql.length) {
+    if (comEscape && sql[j] === '\\') j += 2;
+    else if (par(sql, j, "'", "'")) j += 2;
+    else if (sql[j] === "'") {
+      j += 1;
+      break;
+    } else j += 1;
+  }
+  return Math.min(j, sql.length);
+}
+
+function fimDoIdentificador(sql: string, i: number): number {
+  let j = i + 1;
+  while (j < sql.length) {
+    if (par(sql, j, '"', '"')) j += 2;
+    else if (sql[j] === '"') {
+      j += 1;
+      break;
+    } else j += 1;
+  }
+  return Math.min(j, sql.length);
+}
+
+function fimDoDolar(sql: string, i: number): number | null {
+  // O corpo termina no PRIMEIRO fecho com a mesma etiqueta, sem olhar o que
+  // tem dentro — é assim que o próprio Postgres lê.
+  const etiqueta = ABRE_DOLAR.exec(sql.slice(i, i + 80))?.[0];
+  if (etiqueta) {
+    const fecha = sql.indexOf(etiqueta, i + etiqueta.length);
+    return fecha < 0 ? sql.length : fecha + etiqueta.length;
+  }
+  return null;
 }
 
 /** A etiqueta e o interior de um corpo `$tag$ ... $tag$`. */
