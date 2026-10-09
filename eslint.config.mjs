@@ -42,19 +42,13 @@ const TESTES = [
 const ACIMA_DO_TETO = [
   "apps/crm/src/components/properties/PropertyFormDialog.tsx", // 1047
   "apps/crm/src/pages/LeadDetail.tsx", // 911
-  "supabase/testes/esquema.ts", // 868
   "apps/crm/src/pages/Inteligencia.tsx", // 708
   "apps/crm/src/pages/Dashboard.tsx", // 678
-  "apps/crm/src/inteligencia.ts", // 655
   "apps/crm/src/hooks/useProperties.ts", // 640
-  "packages/contracts/src/meta.ts", // 635
-  "apps/crm/src/lib/unidades.ts", // 623
   "apps/crm/src/hooks/usePainel.ts", // 610
   "apps/crm/src/pages/Conversas.tsx", // 586
   "apps/crm/src/pages/PropertyDetail.tsx", // 586
   "apps/crm/src/pages/Settings.tsx", // 527
-  "packages/contracts/src/qualificacao.ts", // 513
-  "packages/contracts/src/caracteristicas.ts", // 480
   "apps/crm/src/components/properties/MediaManager.tsx", // 470
   "apps/crm/src/components/settings/Equipe.tsx", // 447
   "apps/crm/src/pages/Documentos.tsx", // 446
@@ -167,7 +161,7 @@ export default defineConfig([
   // opções do bloco de cima continuam valendo.
   {
     files: ACIMA_DO_TETO,
-    rules: { "quality/max-lines": "warn" }, // 22
+    rules: { "quality/max-lines": "warn" }, // 16
   },
 
   // Exceções de verdade, não dívida.
@@ -191,11 +185,12 @@ export default defineConfig([
   },
 
   {
-    // O mesmo teto para teste, em "warn". Também depois do bloco do "error".
+    // O mesmo teto para teste. Depois do bloco que liga a regra sem
+    // includeTests: no flat config o bloco de baixo vence.
     files: TESTES,
     plugins: { quality },
     rules: {
-      "quality/max-lines": ["warn", { max: MAX_LINES, includeTests: true }], // 5
+      "quality/max-lines": ["error", { max: MAX_LINES, includeTests: true }],
     },
   },
   {

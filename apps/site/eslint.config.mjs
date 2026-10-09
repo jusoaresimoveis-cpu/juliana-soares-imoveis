@@ -75,12 +75,12 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    // O mesmo teto para teste, em "warn". Depois do bloco do "error": no flat
-    // config o bloco de baixo vence.
+    // O mesmo teto para teste. Depois do bloco que liga a regra sem
+    // includeTests: no flat config o bloco de baixo vence.
     files: TESTES,
     plugins: { quality },
     rules: {
-      "quality/max-lines": ["warn", { max: MAX_LINES, includeTests: true }], // 1
+      "quality/max-lines": ["error", { max: MAX_LINES, includeTests: true }],
     },
   },
   {
