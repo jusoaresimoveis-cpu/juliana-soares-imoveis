@@ -41,8 +41,6 @@ const TESTES = [
 // Acima de MAX_LINES na instalação (linhas ao lado), fora os testes.
 const ACIMA_DO_TETO = [
   "apps/crm/src/pages/PropertyDetail.tsx", // 586
-  "apps/crm/src/components/properties/MediaManager.tsx", // 470
-  "apps/crm/src/components/settings/Equipe.tsx", // 447
   "apps/crm/src/components/settings/WhatsApp.tsx", // 374
 ];
 
@@ -149,7 +147,7 @@ export default defineConfig([
   // opções do bloco de cima continuam valendo.
   {
     files: ACIMA_DO_TETO,
-    rules: { "quality/max-lines": "warn" }, // 4
+    rules: { "quality/max-lines": "warn" }, // 2
   },
 
   // Exceções de verdade, não dívida.
