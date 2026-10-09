@@ -80,15 +80,15 @@ export default defineConfig([
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
-      // Orçamento de tamanho e complexidade. Começo de conversa sobre
-      // fatoração, não portão: o que tem violação fica em "warn" e sobe para
-      // "error" quando a contagem chegar a zero.
-      complexity: ["warn", 12], // 17
+      // Orçamento de tamanho e complexidade. Começou em "warn", com a contagem
+      // ao lado; a queima de avisos (09/10/2026) zerou as três que tinham
+      // violação, e todas valem como "error".
+      complexity: ["error", 12],
       "max-depth": ["error", 4],
-      "max-statements": ["warn", 20], // 7
+      "max-statements": ["error", 20],
       "max-params": ["error", 4],
       "max-lines-per-function": [
-        "warn", // 1
+        "error",
         { max: 150, skipBlankLines: true, skipComments: true },
       ],
       "max-nested-callbacks": ["error", 3],

@@ -30,11 +30,12 @@ const eslintConfig = defineConfig([
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
-      // Orçamento de tamanho e complexidade: começo de conversa sobre
-      // fatoração, não portão.
-      complexity: ["warn", 12], // 6
+      // Orçamento de tamanho e complexidade. Começou em "warn", com a contagem
+      // ao lado; a queima de avisos (09/10/2026) zerou o que tinha violação, e
+      // tudo vale como "error".
+      complexity: ["error", 12],
       "max-depth": ["error", 4],
-      "max-statements": ["warn", 20], // 2
+      "max-statements": ["error", 20],
       "max-params": ["error", 4],
       "max-lines-per-function": [
         "error",
