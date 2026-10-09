@@ -128,32 +128,7 @@ export function conferirTabela<U extends UnidadeDaTabela>(
   editadas: Readonly<Record<string, CelulaEditada>>,
   tabela?: { aplicada: string | null | undefined; mes: string },
 ): ConferenciaDaTabela<U> {
-  const erros = new Map<string, string>();
-  const novas: { u: U; status: UnitStatus; price_cents: number | null }[] = [];
-  const outroAparelho: MudouEmOutroAparelho<U>[] = [];
-
-  for (const u of unidades) {
-    const e = editadas[u.id];
-    if (!e) continue;
-    // O que ELA mudou se mede contra o que via: "v" e "r" sem preço mantêm o da tela.
-    const vista = lerCelula(e.texto, e.antes.price_cents);
-    if (!vista.ok) {
-      erros.set(u.id, vista.erro);
-      continue;
-    }
-    if (mesmoEstado(vista, e.antes)) continue;
-    // O que grava se mede contra o banco: o "mantém o preço" é o de agora.
-    const leitura = lerCelula(e.texto, u.price_cents);
-    if (!leitura.ok) {
-      erros.set(u.id, leitura.erro);
-      continue;
-    }
-    // O outro aparelho já fez o mesmo: nada a gravar, nada a conferir.
-    if (mesmoEstado(leitura, u)) continue;
-    const nova = { status: leitura.status, price_cents: leitura.price_cents };
-    if (!mesmoEstado(u, e.antes)) outroAparelho.push({ unidade: u, visto: e.antes, vai: nova });
-    novas.push({ u, ...nova });
-  }
+  const { erros, novas, outroAparelho } = lerEdicoes(unidades, editadas);
 
   const noBanco = new Set(unidades.map((u) => u.id));
   const apagadas = Object.entries(editadas)
@@ -178,35 +153,10 @@ export function conferirTabela<U extends UnidadeDaTabela>(
     return { unidade: n.u, de: n.u.price_cents, para: n.price_cents, variacao: v, destaque };
   };
 
-  const precos: MudancaDePreco<U>[] = [];
-  const vendidas: U[] = [];
-  const reservadas: MudancaDePreco<U>[] = [];
-  const voltaram: MudancaDePreco<U>[] = [];
+  const { precos, vendidas, reservadas, voltaram } = classificarMudancas(novas, mudanca);
 
-  // Toda linha aqui muda alguma coisa no banco; o que não mudou nem entrou.
-  for (const n of novas) {
-    const antes = n.u.status;
-    if (n.status === 'vendido') {
-      if (antes !== 'vendido') vendidas.push(n.u);
-    } else if (n.status === 'reservado' && antes !== 'reservado') {
-      reservadas.push(mudanca(n));
-    } else if (n.status === 'disponivel' && antes !== 'disponivel') {
-      voltaram.push(mudanca(n));
-    } else if (n.u.price_cents !== n.price_cents) {
-      precos.push(mudanca(n));
-    }
-  }
-
-  const antes = resumoDoEmpreendimento(unidades);
-  const depois = resumoDoEmpreendimento(tabelaDepois);
-  const aPartirDeAntes = aPartirDe(antes);
-  const aPartirDeDepois = aPartirDe(depois);
-  const aPartirDeCaiu = aPartirDeAntes !== null && aPartirDeDepois !== null && aPartirDeDepois < aPartirDeAntes;
-
-  const candidatas = tabelaDepois.filter((n) =>
-    depois.menorCents !== null ? n.status === 'disponivel' : n.status === 'reservado',
-  );
-  const unidadeDoAPartirDe = candidatas.find((n) => n.price_cents === aPartirDeDepois && aPartirDeDepois !== null)?.u ?? null;
+  const { antes, depois, aPartirDeAntes, aPartirDeDepois, unidadeDoAPartirDe, aPartirDeCaiu } =
+    aPartirDaConferencia(unidades, tabelaDepois);
 
   const comDestaque = [...precos, ...reservadas, ...voltaram].filter((m) => m.destaque).length;
   const destaques = comDestaque + (aPartirDeCaiu ? 1 : 0);
@@ -232,6 +182,87 @@ export function conferirTabela<U extends UnidadeDaTabela>(
     tabelaNova,
     exigeConferi: destaques > 0 || outroAparelho.length > 0 || tabelaNova,
   };
+}
+
+interface Nova<U> {
+  u: U;
+  status: UnitStatus;
+  price_cents: number | null;
+}
+
+function lerEdicoes<U extends UnidadeDaTabela>(
+  unidades: readonly U[],
+  editadas: Readonly<Record<string, CelulaEditada>>,
+): { erros: Map<string, string>; novas: Nova<U>[]; outroAparelho: MudouEmOutroAparelho<U>[] } {
+  const erros = new Map<string, string>();
+  const novas: Nova<U>[] = [];
+  const outroAparelho: MudouEmOutroAparelho<U>[] = [];
+
+  for (const u of unidades) {
+    const e = editadas[u.id];
+    if (!e) continue;
+    // O que ELA mudou se mede contra o que via: "v" e "r" sem preço mantêm o da tela.
+    const vista = lerCelula(e.texto, e.antes.price_cents);
+    if (!vista.ok) {
+      erros.set(u.id, vista.erro);
+      continue;
+    }
+    if (mesmoEstado(vista, e.antes)) continue;
+    // O que grava se mede contra o banco: o "mantém o preço" é o de agora.
+    const leitura = lerCelula(e.texto, u.price_cents);
+    if (!leitura.ok) {
+      erros.set(u.id, leitura.erro);
+      continue;
+    }
+    // O outro aparelho já fez o mesmo: nada a gravar, nada a conferir.
+    if (mesmoEstado(leitura, u)) continue;
+    const nova = { status: leitura.status, price_cents: leitura.price_cents };
+    if (!mesmoEstado(u, e.antes)) outroAparelho.push({ unidade: u, visto: e.antes, vai: nova });
+    novas.push({ u, ...nova });
+  }
+  return { erros, novas, outroAparelho };
+}
+
+function classificarMudancas<U extends UnidadeDaTabela>(
+  novas: readonly Nova<U>[],
+  mudanca: (n: Nova<U>) => MudancaDePreco<U>,
+): { precos: MudancaDePreco<U>[]; vendidas: U[]; reservadas: MudancaDePreco<U>[]; voltaram: MudancaDePreco<U>[] } {
+  const precos: MudancaDePreco<U>[] = [];
+  const vendidas: U[] = [];
+  const reservadas: MudancaDePreco<U>[] = [];
+  const voltaram: MudancaDePreco<U>[] = [];
+
+  // Toda linha aqui muda alguma coisa no banco; o que não mudou nem entrou.
+  for (const n of novas) {
+    const antes = n.u.status;
+    if (n.status === 'vendido') {
+      if (antes !== 'vendido') vendidas.push(n.u);
+    } else if (n.status === 'reservado' && antes !== 'reservado') {
+      reservadas.push(mudanca(n));
+    } else if (n.status === 'disponivel' && antes !== 'disponivel') {
+      voltaram.push(mudanca(n));
+    } else if (n.u.price_cents !== n.price_cents) {
+      precos.push(mudanca(n));
+    }
+  }
+  return { precos, vendidas, reservadas, voltaram };
+}
+
+function aPartirDaConferencia<U extends UnidadeDaTabela>(
+  unidades: readonly U[],
+  tabelaDepois: readonly { u: U; status: string; price_cents: number | null }[],
+) {
+  const antes = resumoDoEmpreendimento(unidades);
+  const depois = resumoDoEmpreendimento(tabelaDepois);
+  const aPartirDeAntes = aPartirDe(antes);
+  const aPartirDeDepois = aPartirDe(depois);
+  const aPartirDeCaiu = aPartirDeAntes !== null && aPartirDeDepois !== null && aPartirDeDepois < aPartirDeAntes;
+
+  const candidatas = tabelaDepois.filter((n) =>
+    depois.menorCents !== null ? n.status === 'disponivel' : n.status === 'reservado',
+  );
+  const unidadeDoAPartirDe = candidatas.find((n) => n.price_cents === aPartirDeDepois && aPartirDeDepois !== null)?.u ?? null;
+  return { antes, depois, aPartirDeAntes, aPartirDeDepois, unidadeDoAPartirDe, aPartirDeCaiu };
 }
 
 function naOrdemDaGrade<T extends { unidade: UnidadeDaTabela }>(lista: readonly T[]): T[] {
