@@ -13,9 +13,17 @@
     "dev:crm": "npm run dev -w apps/crm",
     "build:site": "npm run build -w apps/site",
     "build:crm": "npm run build -w apps/crm",
-    "lint": "npm run lint --workspaces --if-present",
+    "lint": "eslint . && npm run lint --workspaces --if-present",
+    "lint:fix": "eslint . --fix && npm run lint:fix --workspaces --if-present",
+    "lint:types": "eslint --config eslint.typed.config.mjs . && npm run lint:types --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "test:rls": "npm run test:rls -w apps/crm"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "typescript-eslint": "^8.71.1"
   }
 }
