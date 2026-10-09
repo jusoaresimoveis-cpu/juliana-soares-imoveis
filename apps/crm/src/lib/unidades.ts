@@ -191,6 +191,14 @@ export interface Geracao {
   invalidas: string[];
 }
 
+function plantasPorFinal(plantas: readonly PlantaParaGerar[]): Map<string, PlantaParaGerar[]> {
+  const plantasDoFinal = new Map<string, PlantaParaGerar[]>();
+  for (const p of plantas) {
+    for (const f of p.finals) plantasDoFinal.set(f, [...(plantasDoFinal.get(f) ?? []), p]);
+  }
+  return plantasDoFinal;
+}
+
 /**
  * As unidades a criar: andar por final (`gerarUnidades` faria o mesmo), com a
  * planta achada pelo final. O que já existe é pulado, e não sobrescrito: gerar
@@ -204,10 +212,7 @@ export function prepararGeracao(args: {
   existentes: readonly string[];
 }): Geracao {
   const { primeiroAndar, ultimoAndar, finais, plantas, existentes } = args;
-  const plantasDoFinal = new Map<string, PlantaParaGerar[]>();
-  for (const p of plantas) {
-    for (const f of p.finals) plantasDoFinal.set(f, [...(plantasDoFinal.get(f) ?? []), p]);
-  }
+  const plantasDoFinal = plantasPorFinal(plantas);
 
   const semPlanta = finais.filter((f) => !plantasDoFinal.get(f)?.length);
   const emDuasPlantas = finais
