@@ -162,6 +162,19 @@ function textosLivres(valor: unknown, ja: Set<string>): string[] {
   return saida;
 }
 
+function idsEscolhidos(categoria: CategoriaDoImovel, itens: unknown, ja: Set<string>): string[] {
+  const ids: string[] = [];
+  if (ehCategoriaComLista(categoria) && Array.isArray(itens)) {
+    const escolhidos = new Set(itens.filter((id): id is string => typeof id === 'string'));
+    for (const [id, item] of itensDa(categoria)) {
+      if (!escolhidos.has(id)) continue;
+      ids.push(id);
+      for (const nome of nomesDoItem(item)) ja.add(nome.replace(/ /g, ''));
+    }
+  }
+  return ids;
+}
+
 /**
  * O que veio do banco (ou do formulário) do jeito que o resto do código espera:
  * só categorias conhecidas, ids que existem na lista e na ordem dela, texto
@@ -177,17 +190,9 @@ export function normalizarCaracteristicas(valor: unknown): CaracteristicasDoImov
     if (!marcados || typeof marcados !== 'object' || Array.isArray(marcados)) continue;
     const { itens, outros } = marcados as Record<string, unknown>;
 
-    const ids: string[] = [];
     // O texto livre que repete um item marcado (ou um sinônimo dele) não aparece duas vezes.
     const ja = new Set<string>();
-    if (ehCategoriaComLista(categoria) && Array.isArray(itens)) {
-      const escolhidos = new Set(itens.filter((id): id is string => typeof id === 'string'));
-      for (const [id, item] of itensDa(categoria)) {
-        if (!escolhidos.has(id)) continue;
-        ids.push(id);
-        for (const nome of nomesDoItem(item)) ja.add(nome.replace(/ /g, ''));
-      }
-    }
+    const ids = idsEscolhidos(categoria, itens, ja);
     const textos = textosLivres(outros, ja);
 
     const resultado: MarcadosNaCategoria = {};
