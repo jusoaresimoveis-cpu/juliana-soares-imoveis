@@ -61,10 +61,12 @@ const eslintConfig = defineConfig([
   },
   {
     // MUDANÇA DE CONFIG, não código mais limpo (queima de avisos, 09/10/2026):
-    // o ESLint conta cada &&, ?? e ?. do JSX como complexidade, então num
-    // componente .tsx esses três números medem condicional de tela, não lógica.
-    // Saem só dos .tsx; max-params, max-depth, max-nested-callbacks e o teto
-    // de linhas do arquivo continuam valendo neles. Depois do bloco que liga.
+    // o ESLint conta cada &&, ?? e ?. do JSX como complexidade, e num componente
+    // .tsx esses três números medem sobretudo condicional de tela. O corte é por
+    // ARQUIVO: função de lógica que mora num .tsx (um onSubmit que monta o
+    // payload, por exemplo) também fica sem orçamento; o remédio é ela ir para
+    // um .ts. max-params, max-depth, max-nested-callbacks e o teto de linhas do
+    // arquivo continuam valendo nos .tsx. Depois do bloco que liga.
     files: ["**/*.tsx"],
     rules: {
       complexity: "off",
