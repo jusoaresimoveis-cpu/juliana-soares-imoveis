@@ -60,10 +60,12 @@ export default function Auth() {
   const campoEmail = useRef<HTMLInputElement>(null);
 
   // O cursor já começa no e-mail: é sempre o primeiro campo, e quem entra
-  // todo dia digita sem olhar.
+  // todo dia digita sem olhar. Depende de `loading` porque, aberta direto em
+  // /entrar, a página monta mostrando o carregador da sessão, sem o campo: o
+  // foco tem de vir quando o formulário aparece, não na montagem.
   useEffect(() => {
-    campoEmail.current?.focus();
-  }, []);
+    if (!loading) campoEmail.current?.focus();
+  }, [loading]);
 
   if (loading) return <FullPageLoader />;
 
