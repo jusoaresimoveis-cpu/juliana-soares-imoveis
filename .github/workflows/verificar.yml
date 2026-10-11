@@ -22,7 +22,10 @@ concurrency:
 jobs:
   verificar:
     name: Testes, tipos, lint e build do CRM
-    runs-on: ubuntu-latest
+    # Versão fixa, e não ubuntu-latest: a troca de sistema do runner acontece
+    # aqui, num commit que se pode conferir, e não no dia em que o GitHub
+    # muda o rótulo.
+    runs-on: ubuntu-26.04
     # O `env.ts` do CRM valida as variáveis no import e estoura sem elas, de
     # propósito (o app não sobe meio configurado). Os testes chegam nele por
     # importação indireta; valores de faz-de-conta bastam.
@@ -49,7 +52,7 @@ jobs:
   # ---------------------------------------------------------------------------
   rls:
     name: RLS no Supabase local
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
