@@ -57,7 +57,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - uses: supabase/setup-cli@v1
+      # A v1 rodava em Node 20, que o GitHub está aposentando. A v3 instala a
+      # CLI pelo npm, com o Node 22 configurado acima.
+      - uses: supabase/setup-cli@v3
         with:
           version: latest
       # Só o que o teste usa. O `auth` FICA: é ele que cria `auth.users`.
